@@ -2,8 +2,7 @@ import React from 'react'
 import _ from 'lodash'
 
 import UserDataInput from './UserDataInput.jsx'
-import UserBirthDateInput from './UserBirthDateInput.jsx'
-import UserSSNInput from './UserSSNInput.jsx'
+import IdentificationInput from './Identification.jsx'
 import Gender from './Gender.jsx'
 import Nationality from './Nationality.jsx'
 import NativeLanguage from './NativeLanguage.jsx'
@@ -24,8 +23,7 @@ export default class UserDataForm extends React.Component {
         <p>{translation("userdataform.info")}</p>
         <UserDataInput name="firstName" translation="title.first.name" required={true} state={state} controller={controller} />
         <UserDataInput name="lastName" translation="title.last.name" required={true} state={state} controller={controller} />
-        <UserBirthDateInput state={state} controller={controller} />
-        <UserSSNInput state={state} controller={controller} />
+        <IdentificationInput state={state} controller={controller} />
         <Gender state={state} controller={controller} />
         <NativeLanguage state={state} languages={languages} controller={controller} />
         <Nationality state={state} countries={countries} controller={controller} />

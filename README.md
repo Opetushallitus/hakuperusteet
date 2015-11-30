@@ -95,6 +95,8 @@ During development, after schema changes you must regenerate db-classes with com
 
 ## UI-tests
 
+You must have run `npm install` under `/mockserver` before running the UI tests and `npm run dev-build` in project root.
+
 1. `./sbt "test:run-main fi.vm.sade.hakuperusteet.HakuperusteetTestServer"`
 2. `npm run test-ui`
 3. `npm run admin:test-ui`

@@ -8,10 +8,11 @@ import HttpUtil from '../assets/util/HttpUtil.js'
 import Dispatcher from '../assets/util/Dispatcher'
 import {initChangeListeners} from '../assets/util/ChangeListeners'
 import {initAdminChangeListeners} from './util/ChangeListeners'
-import {parseNewValidationErrors} from '../assets/util/FieldValidator.js'
+import {fieldValidationResults} from '../assets/util/FieldValidator.js'
 import {applicationObjectWithValidationErrors} from './util/ApplicationObjectValidator.js'
 import {paymentWithValidationErrors} from './util/PaymentValidator.js'
 import {hideBusy} from '../assets/util/HtmlUtils.js'
+import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../assets/util/Constants'
 
 const dispatcher = new Dispatcher()
 const events = {
@@ -133,7 +134,7 @@ export function initAppState(props) {
         return {...state, [field]: value}
     }
     function onUpdateUser(state, user) {
-        const referenceUser = withPartialPersonId(decorateWithHasPersonId(user.user))
+        const referenceUser = decorateWithIdSelection(user.user)
         const fromServer = {['fromServer']: {...user, ['user']: referenceUser}, ['partialUser']: referenceUser.partialUser}
         const payments = {['payments']: _.map(user.payments, withNoChanges)}
         const applicationObjects = {['applicationObjects']: _.map(user.applicationObject, withNoChanges)}
@@ -141,9 +142,8 @@ export function initAppState(props) {
         return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer}
     }
     function onFieldValidation(state, {field, value}) {
-        const newValidationErrors = parseNewValidationErrors(state, field, value)
-        const withoutChanges = validateIfNoChanges(state, state.fromServer.user)
-        return {...state, ['validationErrors']: {...newValidationErrors, ...withoutChanges}}
+        const newValidationErrors = fieldValidationResults(state)
+        return {...state, ['validationErrors']: {...newValidationErrors, ...validateIfNoChanges(state, state.fromServer.user)}}
     }
     function fetchFromTarjonta(hakukohde) {
         return Bacon.fromPromise(HttpUtil.get(tarjontaUrl + "/" + hakukohde))
@@ -165,8 +165,8 @@ export function initAppState(props) {
         const currentValidationErrors = obj.validationErrors || {}
         return {...obj, ['validationErrors']: {...currentValidationErrors, ['noChanges']: "required"}}
     }
-    function decorateWithHasPersonId(user) {
-        return user.personId ? {...user, ['hasPersonId']: true} : {...user, ['personId']: "", ['hasPersonId']: false}
+    function decorateWithIdSelection(user) {
+        return user.personId ? {...user, ['birthDate']: "", ['idSelection']: ID_PERSONAL_IDENTITY_CODE} : {...user, ['personId']: "", ['idSelection']: ID_BIRTH_DATE}
     }
     function validateIfNoChanges(user, referenceUser) {
         return {['noChanges']: _.isMatch(user, referenceUser) ? "required" : null}

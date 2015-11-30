@@ -2,8 +2,6 @@ import React from 'react'
 import _ from 'lodash'
 
 import UserDataInput from '../../assets/userdata/UserDataInput.jsx'
-import UserBirthDateInput from '../../assets/userdata/UserBirthDateInput.jsx'
-import UserSSNInput from '../../assets/userdata/UserSSNInput.jsx'
 import Gender from '../../assets/userdata/Gender.jsx'
 import Nationality from '../../assets/userdata/Nationality.jsx'
 import NativeLanguage from '../../assets/userdata/NativeLanguage.jsx'

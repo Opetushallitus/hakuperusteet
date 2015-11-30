@@ -160,6 +160,11 @@
         "sv": "Modersmål"
       }
     },
+    "identification": {
+      "en": "Identifcation",
+      "fi": "Tunnistautuminen",
+      "sv": "Identifikation"
+    },
     "birth": {
       "date": {
         "en": "Date of birth",
@@ -198,10 +203,30 @@
       "fi": "Täytä tiedot täsmälleen samassa muodossa kuin passissasi (esim. isot alkukirjaimet, ei muita isoja kirjaimia).",
       "sv": "Fyll i uppgifterna nedan exakt enligt uppgifterna i ditt pass (första bokstaven med versaler, de övriga med normal text)"
     },
+    "personalIdentityCodeInfo": {
+      "en": "ddmmyy-xxxx, for example 011295-9693",
+      "fi": "ppkkvv-xxxx, esimerkiksi 011295-9693",
+      "sv": "ddmmåå-xxxx, till exempel 011295-9693"
+    },
+    "birthdayInfo": {
+      "en": "ddmmyyyy, day and month with leading zeroes, and full year, for example 25041980",
+      "fi": "ppkkvvvv, päivä ja kuukausi kaksinumeroisina lukuina, sekä vuosiluku, esimerkiksi 25041980",
+      "sv": "ddmmåååå, dag och månad med två siffror och helåret, till exempel 25041980"
+    },
     "personalId": {
       "en": "I have a Finnish personal identification code",
       "fi": "Minulla on suomalainen henkilötunnus",
       "sv": "Jag har en finländsk personbeteckning"
+    },
+    "personalIdentityCodeYes": {
+      "en": "I have a Finnish Personal Identity Code",
+      "fi": "Minulla on suomalainen henkilötunnus",
+      "sv": "Jag har en finsk personbeteckning"
+    },
+    "personalIdentityCodeNo": {
+      "en": "I do not have a Finnish Personal Identity Code, I'm using my birthdate",
+      "fi": "Minulla ei ole suomalaista henkilötunnusta, käytän syntymäaikaani",
+      "sv": "Jag har inte en finsk personbeteckning, jag användar min födelsedag"
     },
     "submit": {
       "en": "Submit",
@@ -235,9 +260,9 @@
         "sv": "Ange födelsedatum i korrekt form"
       },
       "requiredPersonId": {
-        "en": "Insert Personal identification code in correct format (last 5 characters).",
-        "fi": "Täytä henkilötunnus oikeassa muodoss (5 viimeistä merkkiä)",
-        "sv": "Ange personbeteckning i korrekt form (sista 5 tecken)"
+        "en": "Insert Personal identification code in correct format.",
+        "fi": "Täytä henkilötunnus oikeassa muodossa",
+        "sv": "Ange personbeteckning i korrekt form"
       },
       "requiredGender": {
         "en": "Gender is required.",

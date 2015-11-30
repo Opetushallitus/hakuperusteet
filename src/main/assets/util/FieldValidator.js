@@ -1,14 +1,18 @@
 import _ from 'lodash'
 
-const personIdFields = ["personId", "hasPersonId"]
-const selectFields = ["educationCountry", "educationLevel", "nationality", "nativeLanguage"]
+import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../util/Constants'
 
-export function parseNewValidationErrors(state, field, value) {
-  const currentValidationErrors = state.validationErrors || {}
-  if (_.contains(personIdFields, field)) {
-    return {...currentValidationErrors, ["personId"]: validatePersonId(state.hasPersonId, value) }
-  } else {
-    return {...currentValidationErrors, [field]: validateField(field, value) }
+export function fieldValidationResults(state) {
+  return {
+    "firstName": validateNonEmptyTextField(state.firstName).concat(validateNameField(state.firstName)),
+    "lastName": validateNonEmptyTextField(state.lastName).concat(validateNameField(state.lastName)),
+    "birthDate": validateBirthDateDDMMYYYY(state.idSelection, state.birthDate),
+    "personId": validatePersonalIdentityCode(state.idSelection, state.personId),
+    "gender": validateGender(state.gender),
+    "educationCountry": validateSelect(state.educationCountry),
+    "educationLevel": validateSelect(state.educationLevel),
+    "nationality": validateSelect(state.nationality),
+    "nativeLanguage": validateSelect(state.nativeLanguage)
   }
 }
 
@@ -30,27 +34,6 @@ export function validateEducationForm(state) {
   return _.all(userV, function(v) { return v.length == 0})
 }
 
-function validatePersonId(hasPersonId, value) {
-  if (hasPersonId == true) {
-    return (value.length == 5) ? [] : ["required"]
-  } else {
-    return []
-  }
-}
-
-function validateField(field, value) {
-  if (field == "firstName") return validateNonEmptyTextField(value).concat(validateNameField(value))
-  if (field == "lastName") return validateNonEmptyTextField(value).concat(validateNameField(value))
-  if (field == "birthDate") return validateBirthDate(value)
-  if (field == "personId") return validatePersonId(value)
-  if (field == "gender") return validateGender(value)
-  if (_.contains(selectFields, field)) {
-    return validateSelect(value)
-  }
-
-  return []
-}
-
 function validateNonEmptyTextField(value) {
   return (_.isEmpty(value)) ? ["required"] : []
 }
@@ -60,16 +43,25 @@ function validateNameField(value) {
   return latin1Subset.test(value) ? [] : ["invalid"]
 }
 
-function validateBirthDate(value) {
-  const eightNumbersPattern = /^([0-9]{8})$/;
-  if (eightNumbersPattern.test(value)) {
+function validatePersonalIdentityCode(selectedIdField, value) {
+  // Simplified personal ID check from range 00 00 00 S 000 0 - 39 19 99 S 999 Y
+  //                  d    d    m    m    yy      s     xxx     c
+  const pattern = /^([0-3][0-9][0-1][0-9][0-9]{2}[-+Aa][0-9]{3}[0-9A-Ya-y])$/;
+  return (selectedIdField == ID_BIRTH_DATE || pattern.test(value)) ? [] : ["required"]
+}
+
+function validateBirthDateDDMMYYYY(selectedIdField, value) {
+  // Simplified date check from range 00 00 1000 - 39 19 2999
+  //                  d    d    m    m    y    yyy
+  const pattern = /^([0-3][0-9][0-1][0-9][1-2][0-9]{3})$/;
+  if (selectedIdField == ID_PERSONAL_IDENTITY_CODE || pattern.test(value)) {
     return []
   } else {
     return ["invalid"]
   }
 }
 function validateGender(value) {
-  return (value.length == 0) ? ["required"] : []
+  return (_.isEmpty(value)) ? ["required"] : []
 }
 
 function validateSelect(value) {

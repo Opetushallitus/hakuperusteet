@@ -12,14 +12,13 @@ case class UserValidator(countries: Countries, languages: Languages) extends Val
   def parseUserDataWithoutEmailAndIdpentityid(params: Params): ValidationResult[(String,String, String) => User] = {
     (parseNonEmpty("firstName")(params)
       |@| parseNonEmpty("lastName")(params)
-      |@| parseExists("birthDate")(params).flatMap(parseLocalDate)
-      |@| parseOptionalPersonalId(params)
+      |@| parseIdentification(params)
       |@| parseExists("gender")(params).flatMap(validateGender)
       |@| parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage)
       |@| parseExists("nationality")(params).flatMap(validateCountry)
-      ) { (firstName, lastName, birthDate, personId, gender, nativeLanguage, nationality) =>
+      ) { (firstName, lastName, identification, gender, nativeLanguage, nationality) =>
       (email: String, idpEntityId: String, uiLang: String) => User(None, None, email, Some(firstName), Some(lastName),
-        Some(java.sql.Date.valueOf(birthDate)), personId, IDPEntityId.withName(idpEntityId),
+        Some(java.sql.Date.valueOf(identification.birthDate)), identification.personalId, IDPEntityId.withName(idpEntityId),
         Some(gender), Some(nativeLanguage), Some(nationality), uiLang)
     }
   }
@@ -30,15 +29,14 @@ case class UserValidator(countries: Countries, languages: Languages) extends Val
       |@| parseNonEmpty("email")(params)
       |@| parseValidName("firstName")(params)
       |@| parseValidName("lastName")(params)
-      |@| parseExists("birthDate")(params).flatMap(parseLocalDate)
-      |@| parseOptionalPersonalId(params)
+      |@| parseIdentification(params)
       |@| parseIDPEntityId(params)
       |@| parseExists("gender")(params).flatMap(validateGender)
       |@| parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage)
       |@| parseExists("nationality")(params).flatMap(validateCountry)
       |@| parseExists("uiLang")(params)
-      ) { (id, personOid, email, firstName, lastName, birthDate, personId, idpentityid, gender, nativeLanguage, nationality, uiLang) =>
-      User(id, personOid, email, Some(firstName), Some(lastName), Some(java.sql.Date.valueOf(birthDate)), personId, idpentityid, Some(gender), Some(nativeLanguage), Some(nationality), uiLang)
+      ) { (id, personOid, email, firstName, lastName, identification, idpentityid, gender, nativeLanguage, nationality, uiLang) =>
+      User(id, personOid, email, Some(firstName), Some(lastName), Some(java.sql.Date.valueOf(identification.birthDate)), identification.personalId, idpentityid, Some(gender), Some(nativeLanguage), Some(nationality), uiLang)
     }
   }
 

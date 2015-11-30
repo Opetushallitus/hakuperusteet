@@ -6,7 +6,7 @@ import Dispatcher from './util/Dispatcher'
 import {initGoogleAuthentication} from './session/GoogleAuthentication'
 import {isLoginToken, initEmailAuthentication} from './session/EmailAuthentication'
 import {initChangeListeners} from './util/ChangeListeners'
-import {parseNewValidationErrors} from './util/FieldValidator.js'
+import {fieldValidationResults} from './util/FieldValidator.js'
 import {submitUserDataToServer} from './userdata/UserDataForm.js'
 import {submitEducationDataToServer} from './education/EducationForm.js'
 import {resolveLang, setLang} from '../assets-common/translations/translations.js'
@@ -123,7 +123,7 @@ export function initAppState(props) {
   }
 
   function onFieldValidation(state, {field, value}) {
-    const newValidationErrors = parseNewValidationErrors(state, field, value)
+    const newValidationErrors = fieldValidationResults(state)
     return {...state, ['validationErrors']: newValidationErrors}
   }
 
