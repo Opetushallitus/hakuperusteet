@@ -6,6 +6,7 @@ import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
 import fi.vm.sade.hakuperusteet.koodisto._
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
+import fi.vm.sade.hakuperusteet.rsa.RSASigner
 
 trait ServletTestDependencies extends DBSupport {
   val config = Configuration.props
@@ -16,6 +17,7 @@ trait ServletTestDependencies extends DBSupport {
   val educations = Educations(List.empty[SimplifiedCode])
   val oppijanTunnistus = new DummyOppijanTunnistus(config)
   val emailSender = EmailSender.init(config)
+  val signer = new DummyRSASigner(config)
 }
 
 class DummyVerifier() extends GoogleVerifier("", "") {
@@ -24,4 +26,10 @@ class DummyVerifier() extends GoogleVerifier("", "") {
 
 class DummyOppijanTunnistus(c: Config) extends OppijanTunnistus(c) {
   override def createToken(email: String, hakukohdeOid: String, uiLang: String) = "dummyLoginToken"
+}
+
+class DummyRSASigner(c: Config) extends RSASigner(c) {
+  override def signData(dataString: String) = {
+    "dummySignedString"
+  }
 }

@@ -32,7 +32,15 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
         val applicationObjectForThisHakukohde = db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid).getOrElse(halt(409))
         val educationLevel = Some(applicationObjectForThisHakukohde.educationLevel).getOrElse(halt(409))
         Try { tarjonta.getApplicationSystem(applicationObjectForThisHakukohde.hakuOid) } match {
-          case Success(as) => doRedirect(userData, applicationObjectForThisHakukohde, as, educationLevel)
+          case Success(as) => doRedirect(userData, applicationObjectForThisHakukohde, as, educationLevel) match {
+            case Left(statusCode) if statusCode == 409 =>
+              logger.error("Conflicting payment information on redirect (user: {}, hakukohdeOid: {})", userData.personOid, hakukohdeOid)
+              halt(statusCode)
+            case Left(statusCode) =>
+              halt(statusCode)
+            case Right(body) =>
+              write(body)
+          }
           case Failure(f) =>
             logger.error("FormRedirectServlet throws", f)
             halt(500)
@@ -44,11 +52,16 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
 
   }
 
-  def doRedirect(userData: User, applicationObjectForThisHakukohde: ApplicationObject, as: ApplicationSystem, educationLevel : String): String = {
+  def doRedirect(userData: User, applicationObjectForThisHakukohde: ApplicationObject, as: ApplicationSystem, educationLevel : String) : Either[Int, Map[String, Any]] = {
     val formUrl = as.formUrl
     val payments = db.findPayments(userData)
     val shouldPay = countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
     val hasPaid = payments.exists(_.status.equals(PaymentStatus.ok))
-    write(Map("url" -> formUrl, "params" -> RedirectCreator.generateParamMap(signer, userData, applicationObjectForThisHakukohde, shouldPay, hasPaid)))
+
+    if (shouldPay && !hasPaid) {
+      return Left(409)
+    }
+
+    Right(Map("url" -> formUrl, "params" -> RedirectCreator.generateParamMap(signer, userData, applicationObjectForThisHakukohde, shouldPay, hasPaid)))
   }
 }
