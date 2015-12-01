@@ -16,7 +16,7 @@ export function translation(key, lang = resolveLang()) {
 }
 
 export function getTarjontaNameOrFallback(names, lang = resolveLang()){
-    return names[lang] || names.fi || names.sv || names.en || names
+    return names[lang] || names.fi || names.sv || names.en
 }
 
 export function setLang(val) {
