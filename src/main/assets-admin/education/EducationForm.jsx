@@ -28,7 +28,7 @@ export default class EducationForm extends React.Component {
     const baseEducationOptions = allBaseEducations.filter(function(b) { return _.contains(baseEducationsForCurrent, b.id) })
     const levelResult = createSelectOptions(mapAndSortKoodistoByLang(baseEducationOptions, resolveLang()))
 
-    const name = getTarjontaNameOrFallback(tarjonta.name, "fi")
+    const name = getTarjontaNameOrFallback(tarjonta.name)
     const disabled = (validateApplicationObject(ao) && !requiredField(ao, "noChanges")) ? undefined : "disabled"
 
     const countries = _.isUndefined(state.properties) ? [] : state.properties.countries
