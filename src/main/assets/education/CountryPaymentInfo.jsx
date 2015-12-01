@@ -10,7 +10,7 @@ export default class CountryPaymentInfo extends React.Component {
     const state = this.props.state
     const isDiscretionaryEducationLevel = state.educationLevel === '106'
 
-    const paymentRequired = paymentRequiredWithCurrentHakukohdeOid(state)
+    const paymentRequired = paymentRequiredWithCurrentHakukohdeOid(state, state)
     const noPaymentRequired = !paymentRequired
     const alreadyPaid = hasValidPayment(state)
 

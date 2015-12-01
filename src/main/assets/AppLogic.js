@@ -111,8 +111,8 @@ function hasEducationForSelectedHakukohdeOid(state) {
   return !_.isEmpty(state.sessionData.applicationObject) && _.some(state.sessionData.applicationObject, (e) => { return e.hakukohdeOid == state.hakukohdeOid })
 }
 
-export function paymentRequiredWithCurrentHakukohdeOid(state) {
-  const educationForCurrentHakukohdeOid = _.defaults({}, state, _.find(state.sessionData.applicationObject, (e) => { return e.hakukohdeOid == state.hakukohdeOid }))
+export function paymentRequiredWithCurrentHakukohdeOid(state, dataForAo) {
+  const educationForCurrentHakukohdeOid = dataForAo || _.findWhere(state.sessionData.applicationObject, {hakukohdeOid: state.hakukohdeOid})
   if (!educationForCurrentHakukohdeOid.educationCountry) {
     return false
   } else {
@@ -124,8 +124,5 @@ export function paymentRequiredWithCurrentHakukohdeOid(state) {
 }
 
 function paymentRequired(state) {
-  const eeaCountries = (state.properties && state.properties.eeaCountries) ? state.properties.eeaCountries : []
-  const educationCountries = state.sessionData.applicationObject.map((ao) =>  { return ao.educationCountry })
-  const allCountriesInEea = _.all(educationCountries, (c) => { return _.contains(eeaCountries, c) })
-  return !allCountriesInEea
+  return state.sessionData.applicationObject.some((ao) => paymentRequiredWithCurrentHakukohdeOid(state, ao))
 }
