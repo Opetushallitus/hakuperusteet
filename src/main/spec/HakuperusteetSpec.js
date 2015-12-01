@@ -210,7 +210,7 @@ describe('Page with email session - add second application object', () => {
 
     describe('Submit educationForm', () => {
       it('click submit should post educationdata', clickField("input[name='submit']"))
-      it('should show to application objects on hakulist page', assertElementsFound(".redirectToForm", 2))
+      it('should show one application object on hakulist page', assertElementsFound(".redirectToForm", 1))
     })
   })
 })

@@ -11,10 +11,14 @@ import {tarjontaForHakukohdeOid} from "../util/TarjontaUtil.js"
 export default class HakuList extends React.Component {
   render() {
     const state = this.props.state
+    const aoList = !_.isEmpty(state.hakukohdeOid)
+        ? [_.findWhere(state.sessionData.applicationObject, {hakukohdeOid: state.hakukohdeOid})]
+        : [...state.sessionData.applicationObject]
+
     return <div className="hakuList">
       <p>{translation("hakulist.info")}</p>
 
-      {[...state.sessionData.applicationObject].map((x, i) =>
+      {aoList.map((x, i) =>
         <div key={i}>
           <p>{getTarjontaNameOrFallback(tarjontaForHakukohdeOid(state, x.hakukohdeOid).name)}</p>
           <form className="redirectToForm" onSubmit={fetchUrlParamsAndRedirectPost(state.properties.formRedirectUrl + "?hakukohdeOid=" + x.hakukohdeOid)} method="POST">
