@@ -16,7 +16,7 @@ export default class HakuList extends React.Component {
 
       {[...state.sessionData.applicationObject].map((x, i) =>
         <div key={i}>
-          <p>{getTarjontaNameOrFallback(tarjontaForHakukohdeOid(state, x.hakukohdeOid).name,resolveLang())}</p>
+          <p>{getTarjontaNameOrFallback(tarjontaForHakukohdeOid(state, x.hakukohdeOid).name)}</p>
           <form className="redirectToForm" onSubmit={fetchUrlParamsAndRedirectPost(state.properties.formRedirectUrl + "?hakukohdeOid=" + x.hakukohdeOid)} method="POST">
             <input type="submit" name="redirectToForm" value={translation("hakulist.submit")} />
             <AjaxLoader hide={true} />
