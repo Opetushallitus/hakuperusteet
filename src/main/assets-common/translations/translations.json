@@ -374,5 +374,17 @@
       "fi": "Valitse",
       "sv": "Välj"
     }
+  },
+  "logoutPage": {
+    "title": {
+      "fi": "Olet kirjautunut ulos järjestelmästä.",
+      "sv": "Du är utloggad.",
+      "en": "You have logged out."
+    },
+    "content": {
+      "fi": "<p>Kiitos käynnistä!</p><p><a href='https://opintopolku.fi'>Opintopolku.fi</a></p>",
+      "sv": "<p>Tack för besöket!</p><p><a href='https://studieinfo.fi'>Studieinfo.fi</a></p>",
+      "en": "<p>Thank you for your visit!</p><p><a href='https://studyinfo.fi'>Studyinfo.fi</a></p>"
+    }
   }
 }

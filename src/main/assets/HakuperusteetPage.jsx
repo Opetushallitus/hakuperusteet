@@ -15,6 +15,7 @@ import EducationForm from './education/EducationForm.jsx'
 import VetumaStart from './vetuma/VetumaStart.jsx'
 import HakuList from './hakulist/HakuList.jsx'
 import HakuApp from './hakuapp/HakuApp.jsx'
+import LogoutPage from './LogoutPage.jsx'
 
 export default class HakuperusteetPage extends React.Component {
   render() {
@@ -38,7 +39,11 @@ export default class HakuperusteetPage extends React.Component {
       <Footer />
       </div>
     }
-    const content = isHakuAppView(state) ? hakuAppContent() : hakuperusteetContent()
+    const content = state.isLogoutPage && _.isEmpty(state.sessionData)
+        ? <LogoutPage />
+        : isHakuAppView(state)
+          ? hakuAppContent()
+          : hakuperusteetContent()
 
     return <div>
       <Header controller={controller} />

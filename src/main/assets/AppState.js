@@ -66,7 +66,8 @@ export function initAppState(props) {
     [updateFieldS], onUpdateField,
     [logOutS], onLogOut,
     [fieldValidationS], onFieldValidation,
-    [changeLangS], onChangeLang)
+    [changeLangS], onChangeLang,
+    [hashS], onChangeHash)
 
   const formSubmittedS = stateP.sampledBy(dispatcher.stream(events.submitForm), (state, form) => ({state, form}))
 
@@ -104,18 +105,17 @@ export function initAppState(props) {
   }
 
   function onLogOut() {
-    if (_.isEmpty(parseAoId())) {
-      // If no direct AO in link -> redirect to frontpage
-      window.location = '/hakuperusteet/';
-    }
-    else {
-      window.location.reload()
-    }
+    window.location = '/hakuperusteet/#logoutPage'
+    window.location.reload()
   }
 
   function onChangeLang(state, {field, lang}) {
     setLang(lang)
     return {...state, ['lang']: lang}
+  }
+
+  function onChangeHash(state, newHash) {
+    return {...state, isLogoutPage: newHash === '#logoutPage'}
   }
 
   function onSessionDataFromServer(state, sessionData) {
