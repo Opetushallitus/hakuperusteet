@@ -23,29 +23,29 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
   get("/openvetuma/:hakemusoid/with_hakemus") {
     failUnlessAuthenticated
     val hakemusOid = params.get("hakemusoid").map(app => s"&app=$app")
-    createVetumaWithHref(getHref, hakemusOid)
+    createVetumaWithHref(getHref, hakemusOid, params.get("hakemusoid"))
   }
 
   get("/openvetuma") {
     failUnlessAuthenticated
-    createVetumaWithHref(getHref, None)
+    createVetumaWithHref(getHref, None, None)
   }
 
   get("/openvetuma/:hakukohdeoid") {
     failUnlessAuthenticated
     val hakukohdeOid = params.get("hakukohdeoid").map(ao => s"&ao=$ao")
-    createVetumaWithHref(getHref, hakukohdeOid)
+    createVetumaWithHref(getHref, hakukohdeOid, None)
   }
 
   private def getHref = params.get("href").getOrElse(halt(409))
 
-  private def createVetumaWithHref(href: String, params: Option[String]) = {
+  private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String]) = {
     val userData = userDataFromSession
     val language = getUserLang(userData)
     val referenceNumber = referenceNumberFromPersonOid(userData.personOid.getOrElse(halt(500)))
     val orderNro = referenceNumber + db.nextOrderNumber()
     val paymCallId = "PCID" + orderNro
-    val payment = Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, None)
+    val payment = Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, hakemusOid)
     val paymentWithId = db.upsertPayment(payment).getOrElse(halt(500))
     AuditLog.auditPayment(userData, paymentWithId)
     write(Map("url" -> config.getString("vetuma.host"), "params" -> Vetuma(config, paymentWithId, language, href, params.getOrElse("")).toParams))
