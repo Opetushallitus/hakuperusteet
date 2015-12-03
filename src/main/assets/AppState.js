@@ -105,10 +105,8 @@ export function initAppState(props) {
   }
 
   function onLogOut() {
-    const frontPage = '/hakuperusteet/'
-    window.location = frontPage + '#logoutPage'
-    if (window.location.pathname === frontPage)
-      window.location.reload()
+    window.location.hash = 'logoutPage'
+    window.location.reload()
   }
 
   function onChangeLang(state, {field, lang}) {
