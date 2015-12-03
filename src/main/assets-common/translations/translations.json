@@ -308,6 +308,11 @@
         "fi": "Tutkinnon myöntäneen oppilaitoksen maa on pakollinen tieto.",
         "sv": "Landet för den läroanstalt som utfärdat examen är en obligatorisk uppgift. "
       }
+    },
+    "paymentNotification": {
+      "en": "Hakijan tulee maksaa hakumaksu hakiessaan valitulla tutkinnolla. Tallennuksen yhteydessä hakijalle lähetetään sähköpostilla ohjeet maksun suorittamiseksi.",
+      "fi": "Hakijan tulee maksaa hakumaksu hakiessaan valitulla tutkinnolla. Tallennuksen yhteydessä hakijalle lähetetään sähköpostilla ohjeet maksun suorittamiseksi.",
+      "sv": "Hakijan tulee maksaa hakumaksu hakiessaan valitulla tutkinnolla. Tallennuksen yhteydessä hakijalle lähetetään sähköpostilla ohjeet maksun suorittamiseksi."
     }
   },
   "vetuma": {
