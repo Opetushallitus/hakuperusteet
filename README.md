@@ -36,11 +36,7 @@ By default hakuperusteet uses services from Luokka-environment.
 
 You can proceed to the form page by signing in with Google (the blue button).
 
-To start hakuperusteet-admin, run the following commands:
-
-1. `npm install`
-2. `./sbt run:admin`
-3. Access hakuperusteet-admin at [https://localhost:18090/hakuperusteetadmin/](https://localhost:18090/hakuperusteetadmin/)
+To start hakuperusteet-admin, use test configuration below.
 
 ### Run using test configuration
 
@@ -60,6 +56,10 @@ Test servers can be accessed from urls:
 2. Access hakuperusteet-admin at [https://localhost:18091/hakuperusteetadmin/](https://localhost:18091/hakuperusteetadmin/)
 
 By default test setup uses database from Docker. Embedded Postgres can be used with embedded=true env variable. 
+
+Docker database is empty at start, if needed, create test users by running at project root:
+
+`npm run admin:test-ui`
 
 ## Configuration
 
