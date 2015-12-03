@@ -131,6 +131,10 @@ app.get('/oppijan-tunnistus/api/v1/token/:token', function(req, res){
 });
 
 // Vetuma
+app.post('/VETUMAPayment/Query', function(req,res) {
+  var resp = "PAYID=&PAID=&STATUS=ERROR&MAC=FCA43FDD855CAE0575F6DB1C96FC28E5222A20434ECEB2FD529FA54FFA668597&TIMESTMP=20151202145402737&RCVID=Y08297312Y1P1&RETURL=https%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2Fapi%2Fv1%2Fvetuma%2Freturn%2Fok%3Fhref%3Dhttps%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2F%26app%3D6.2.3.4&CANURL=https%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2Fapi%2Fv1%2Fvetuma%2Freturn%2Fcancel%3Fhref%3Dhttps%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2F%26app%3D6.2.3.4&ERRURL=https%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2Fapi%2Fv1%2Fvetuma%2Freturn%2Ferror%3Fhref%3Dhttps%3A%2F%2Ftesti.opintopolku.fi%2Fhakuperusteet%2F%26app%3D6.2.3.4&LG=en&SO=&PAYM_STATUS=UNKNOWN_PAYMENT&PAYM_AMOUNT=&PAYM_CURRENCY="
+  res.write(resp)
+})
 app.post('/VETUMAPayment', function(req, res){
   var p = req.body
   var SO = ""

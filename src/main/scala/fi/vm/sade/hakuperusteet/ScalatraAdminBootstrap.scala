@@ -2,7 +2,7 @@ package fi.vm.sade.hakuperusteet
 
 import javax.servlet.ServletContext
 
-import fi.vm.sade.hakuperusteet.admin.{Synchronization, AdminServlet}
+import fi.vm.sade.hakuperusteet.admin.{Synchronization, AdminServlet, PaymentSynchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.koodisto.Koodisto
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
@@ -10,6 +10,7 @@ import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.swagger.{AdminSwagger, SwaggerServlet}
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{UserValidator, ApplicationObjectValidator}
+import fi.vm.sade.hakuperusteet.vetuma.VetumaGuessMac
 import org.scalatra.LifeCycle
 import org.scalatra.swagger.{Swagger}
 
@@ -26,6 +27,8 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
   Synchronization(config, database, tarjonta, countries, signer).start
+  val paymentSynchronization = new PaymentSynchronization(config, database, new VetumaGuessMac(config, database))
+  paymentSynchronization.start
 
   override def init(context: ServletContext) {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")

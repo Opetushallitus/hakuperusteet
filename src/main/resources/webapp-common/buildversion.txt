@@ -1,0 +1,6 @@
+artifactId=hakuperusteet
+version=0.1.0-SNAPSHOT
+buildNumber=N/A
+branchName=N/A
+vcsRevision=N/A
+buildTtime=20151202-1450

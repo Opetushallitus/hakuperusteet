@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(ApplicationObject.schema, Jettysessionids.schema, Jettysessions.schema, Payment.schema, SchemaVersion.schema, Synchronization.schema, User.schema, UserDetails.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(ApplicationObject.schema, Jettysessionids.schema, Jettysessions.schema, Payment.schema, PaymentEvent.schema, SchemaVersion.schema, Synchronization.schema, User.schema, UserDetails.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -150,18 +150,19 @@ trait Tables {
    *  @param orderNumber Database column order_number SqlType(varchar), Length(255,true)
    *  @param status Database column status SqlType(varchar), Length(255,true)
    *  @param paymCallId Database column paym_call_id SqlType(varchar), Length(255,true)
-   *  @param hakemusOid Database column hakemus_oid SqlType(varchar), Length(255,true), Default(None) */
-  case class PaymentRow(id: Int, henkiloOid: String, tstamp: java.sql.Timestamp, reference: String, orderNumber: String, status: String, paymCallId: String, hakemusOid: Option[String] = None)
+   *  @param hakemusOid Database column hakemus_oid SqlType(varchar), Length(255,true), Default(None)
+   *  @param mac Database column mac SqlType(varchar), Length(255,true), Default(None) */
+  case class PaymentRow(id: Int, henkiloOid: String, tstamp: java.sql.Timestamp, reference: String, orderNumber: String, status: String, paymCallId: String, hakemusOid: Option[String] = None, mac: Option[String] = None)
   /** GetResult implicit for fetching PaymentRow objects using plain SQL queries */
   implicit def GetResultPaymentRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[String]]): GR[PaymentRow] = GR{
     prs => import prs._
-    PaymentRow.tupled((<<[Int], <<[String], <<[java.sql.Timestamp], <<[String], <<[String], <<[String], <<[String], <<?[String]))
+    PaymentRow.tupled((<<[Int], <<[String], <<[java.sql.Timestamp], <<[String], <<[String], <<[String], <<[String], <<?[String], <<?[String]))
   }
   /** Table description of table payment. Objects of this class serve as prototypes for rows in queries. */
   class Payment(_tableTag: Tag) extends Table[PaymentRow](_tableTag, "payment") {
-    def * = (id, henkiloOid, tstamp, reference, orderNumber, status, paymCallId, hakemusOid) <> (PaymentRow.tupled, PaymentRow.unapply)
+    def * = (id, henkiloOid, tstamp, reference, orderNumber, status, paymCallId, hakemusOid, mac) <> (PaymentRow.tupled, PaymentRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(henkiloOid), Rep.Some(tstamp), Rep.Some(reference), Rep.Some(orderNumber), Rep.Some(status), Rep.Some(paymCallId), hakemusOid).shaped.<>({r=>import r._; _1.map(_=> PaymentRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(henkiloOid), Rep.Some(tstamp), Rep.Some(reference), Rep.Some(orderNumber), Rep.Some(status), Rep.Some(paymCallId), hakemusOid, mac).shaped.<>({r=>import r._; _1.map(_=> PaymentRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(serial), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -179,6 +180,8 @@ trait Tables {
     val paymCallId: Rep[String] = column[String]("paym_call_id", O.Length(255,varying=true))
     /** Database column hakemus_oid SqlType(varchar), Length(255,true), Default(None) */
     val hakemusOid: Rep[Option[String]] = column[Option[String]]("hakemus_oid", O.Length(255,varying=true), O.Default(None))
+    /** Database column mac SqlType(varchar), Length(255,true), Default(None) */
+    val mac: Rep[Option[String]] = column[Option[String]]("mac", O.Length(255,varying=true), O.Default(None))
 
     /** Foreign key referencing User (database name payment_henkilo_oid_fkey) */
     lazy val userFk = foreignKey("payment_henkilo_oid_fkey", Rep.Some(henkiloOid), User)(r => r.henkiloOid, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -190,6 +193,44 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Payment */
   lazy val Payment = new TableQuery(tag => new Payment(tag))
+
+  /** Entity class storing rows of table PaymentEvent
+   *  @param id Database column id SqlType(serial), AutoInc, PrimaryKey
+   *  @param paymentId Database column payment_id SqlType(int4)
+   *  @param created Database column created SqlType(timestamp)
+   *  @param timestamp Database column timestamp SqlType(timestamp), Default(None)
+   *  @param paymentStatus Database column payment_status SqlType(varchar), Length(255,true)
+   *  @param checkSucceeded Database column check_succeeded SqlType(bool) */
+  case class PaymentEventRow(id: Int, paymentId: Int, created: java.sql.Timestamp, timestamp: Option[java.sql.Timestamp] = None, paymentStatus: String, checkSucceeded: Boolean)
+  /** GetResult implicit for fetching PaymentEventRow objects using plain SQL queries */
+  implicit def GetResultPaymentEventRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp], e2: GR[Option[java.sql.Timestamp]], e3: GR[String], e4: GR[Boolean]): GR[PaymentEventRow] = GR{
+    prs => import prs._
+    PaymentEventRow.tupled((<<[Int], <<[Int], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<[String], <<[Boolean]))
+  }
+  /** Table description of table payment_event. Objects of this class serve as prototypes for rows in queries. */
+  class PaymentEvent(_tableTag: Tag) extends Table[PaymentEventRow](_tableTag, "payment_event") {
+    def * = (id, paymentId, created, timestamp, paymentStatus, checkSucceeded) <> (PaymentEventRow.tupled, PaymentEventRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(id), Rep.Some(paymentId), Rep.Some(created), timestamp, Rep.Some(paymentStatus), Rep.Some(checkSucceeded)).shaped.<>({r=>import r._; _1.map(_=> PaymentEventRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(serial), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column payment_id SqlType(int4) */
+    val paymentId: Rep[Int] = column[Int]("payment_id")
+    /** Database column created SqlType(timestamp) */
+    val created: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created")
+    /** Database column timestamp SqlType(timestamp), Default(None) */
+    val timestamp: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("timestamp", O.Default(None))
+    /** Database column payment_status SqlType(varchar), Length(255,true) */
+    val paymentStatus: Rep[String] = column[String]("payment_status", O.Length(255,varying=true))
+    /** Database column check_succeeded SqlType(bool) */
+    val checkSucceeded: Rep[Boolean] = column[Boolean]("check_succeeded")
+
+    /** Foreign key referencing Payment (database name payment_event_payment_id_fkey) */
+    lazy val paymentFk = foreignKey("payment_event_payment_id_fkey", paymentId, Payment)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+  }
+  /** Collection-like TableQuery object for table PaymentEvent */
+  lazy val PaymentEvent = new TableQuery(tag => new PaymentEvent(tag))
 
   /** Entity class storing rows of table SchemaVersion
    *  @param versionRank Database column version_rank SqlType(int4)
@@ -301,8 +342,8 @@ trait Tables {
    *  @param henkiloOid Database column henkilo_oid SqlType(varchar), Length(255,true), Default(None)
    *  @param email Database column email SqlType(varchar), Length(255,true)
    *  @param idpentityid Database column idpentityid SqlType(varchar), Length(255,true)
-   *  @param uilang Database column uilang SqlType(varchar), Length(2,true) */
-  case class UserRow(id: Int, henkiloOid: Option[String] = None, email: String, idpentityid: String, uilang: String)
+   *  @param uilang Database column uilang SqlType(varchar), Length(2,true), Default(en) */
+  case class UserRow(id: Int, henkiloOid: Option[String] = None, email: String, idpentityid: String, uilang: String = "en")
   /** GetResult implicit for fetching UserRow objects using plain SQL queries */
   implicit def GetResultUserRow(implicit e0: GR[Int], e1: GR[Option[String]], e2: GR[String]): GR[UserRow] = GR{
     prs => import prs._
@@ -322,8 +363,8 @@ trait Tables {
     val email: Rep[String] = column[String]("email", O.Length(255,varying=true))
     /** Database column idpentityid SqlType(varchar), Length(255,true) */
     val idpentityid: Rep[String] = column[String]("idpentityid", O.Length(255,varying=true))
-    /** Database column uilang SqlType(varchar), Length(2,true) */
-    val uilang: Rep[String] = column[String]("uilang", O.Length(2,varying=true))
+    /** Database column uilang SqlType(varchar), Length(2,true), Default(en) */
+    val uilang: Rep[String] = column[String]("uilang", O.Length(2,varying=true), O.Default("en"))
 
     /** Uniqueness Index over (henkiloOid) (database name henkilo_oid) */
     val index1 = index("henkilo_oid", henkiloOid, unique=true)

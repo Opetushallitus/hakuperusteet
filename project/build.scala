@@ -54,6 +54,7 @@ object HakuperusteetBuild extends Build {
       resolvers += "OPH snapshots" at "https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local",
       resolvers += Classpaths.typesafeReleases,
       libraryDependencies ++= Seq(
+        "com.netaporter" %% "scala-uri" % "0.4.11",
         "com.github.spullara.mustache.java" % "compiler" % "0.9.1",
         "org.parboiled" %% "parboiled" % "2.1.0",
         "org.http4s" %% "http4s-core" % http4sVersion exclude("org.scalaz.stream","scalaz-stream_2.11") exclude("org.parboiled","parboiled_2.11"),

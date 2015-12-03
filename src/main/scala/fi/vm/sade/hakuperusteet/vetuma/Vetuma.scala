@@ -26,7 +26,7 @@ case class Vetuma(sharedSecret: String, ap: String, rcvid: String, timestamp: Da
     s"$rcvid&$appid&$formatTime&$so&$solist&${`type`}&$au&$language&$returnUrl&$cancelUrl&$errorUrl&" +
     s"$ap&$appName&$amount&$ref&$orderNumber&$msgBuyer&$msgSeller&$msgForm&$paymCallId&$sharedSecret&"
 
-  private def mac = DigestUtils.sha256Hex(plainText).toUpperCase
+  def mac = DigestUtils.sha256Hex(plainText).toUpperCase
 
   def toParams = Map("RCVID" -> rcvid, "APPID" -> appid, "TIMESTMP" -> formatTime, "SO" -> so, "SOLIST" -> solist,
     "TYPE" -> `type`, "AU" -> au, "LG" -> language, "RETURL" -> returnUrl, "CANURL" -> cancelUrl, "ERRURL" -> errorUrl,
@@ -35,6 +35,21 @@ case class Vetuma(sharedSecret: String, ap: String, rcvid: String, timestamp: Da
 }
 
 object Vetuma extends LazyLogging {
+  private val QUERY_PARAMS = List("RCVID","APPID","TIMESTMP","SO","SOLIST","TYPE","AU","LG","RETURL","CANURL","ERRURL","AP","MAC","EXTRADATA","TRID","PAYM_CALL_ID")
+  private def isQueryParam = (entry:(String,String)) => {
+    val (key,_) = entry
+    QUERY_PARAMS.indexOf(key) != -1
+  }
+
+  def query(config: Config, paymentWithMac: Payment): Map[String, String] = {
+    apply(config, paymentWithMac,
+      // TODO: Do these matter? Spec says no, page 41 (55)
+      "fi", "", "").toParams.filter(isQueryParam) +
+      // AU should be CHECK when doing payment query
+      ("AU" -> "CHECK") +
+      // Override MAC using the original payment MAC, spec page 41 (55)
+      ("MAC" -> paymentWithMac.mac.get)
+  }
 
   def apply(config: Config, payment: Payment, language: String, href: String, params: String): Vetuma = {
     val q = s"?href=$href$params"

@@ -22,7 +22,7 @@ class HakuperusteetDatabaseSpec extends FlatSpec with LazyLogging with Matchers 
     db.upsertUser(user)
 
     db.findPayments(user).length shouldEqual 0
-    val p = Payment(None, "personOid.1.1.1", new Date(), "refNo", "orderNo", "paymCallId", PaymentStatus.ok, None)
+    val p = Payment(None, "personOid.1.1.1", new Date(), "refNo", "orderNo", "paymCallId", PaymentStatus.ok, None, None)
     db.upsertPayment(p)
     db.findPayments(user).length shouldEqual 1
   }
