@@ -37,7 +37,7 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     val email = "e@mail.com"
     val user = database.findUser(email).orElse(database.upsertPartialUser(PartialUser(None, Some(personOid), email, IDPEntityId.oppijaToken, "en"))).get
 
-    val payment1 = Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error,Some(hakemusOid))
+    val payment1 = Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error,Some(hakemusOid), None)
     database.upsertPayment(payment1)
     val sync = database.insertPaymentSyncRequest(user, payment1).get
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))

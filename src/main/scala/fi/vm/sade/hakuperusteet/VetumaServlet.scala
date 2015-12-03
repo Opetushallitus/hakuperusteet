@@ -45,10 +45,12 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     val referenceNumber = referenceNumberFromPersonOid(userData.personOid.getOrElse(halt(500)))
     val orderNro = referenceNumber + db.nextOrderNumber()
     val paymCallId = "PCID" + orderNro
-    val payment = Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, hakemusOid)
-    val paymentWithId = db.upsertPayment(payment).getOrElse(halt(500))
+    val paymentWithoutMacAndId = Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, hakemusOid, None)
+    val vetuma = Vetuma(config, paymentWithoutMacAndId, language, href, params.getOrElse("")).toParams
+    val mac = vetuma.get("MAC")
+    val paymentWithId = db.upsertPayment(paymentWithoutMacAndId.copy(mac = mac)).getOrElse(halt(500))
     AuditLog.auditPayment(userData, paymentWithId)
-    write(Map("url" -> config.getString("vetuma.host"), "params" -> Vetuma(config, paymentWithId, language, href, params.getOrElse("")).toParams))
+    write(Map("url" -> config.getString("vetuma.host"), "params" -> vetuma))
   }
 
   post("/return/ok") {
