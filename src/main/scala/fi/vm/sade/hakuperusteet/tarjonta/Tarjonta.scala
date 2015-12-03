@@ -10,7 +10,7 @@ import org.json4s.native.Serialization._
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 
 case class ApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, hakuaikaId: String, status: String)
-case class ApplicationSystem(hakuOid: String, formUrl: String, maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika])
+case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika])
 case class HakuAika(hakuaikaId: String, alkuPvm: Long, loppuPvm: Long)
 case class EnrichedApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, julkaistu: Boolean, maksumuuriKaytossa: Boolean, startDate: Date, endDate: Date)
 
@@ -53,4 +53,4 @@ private object Nimi2 {
 }
 
 private case class Result2(result: Haku)
-private case class Haku(oid: String, hakulomakeUri: String, maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika])
+private case class Haku(oid: String, hakulomakeUri: Option[String], maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika])
