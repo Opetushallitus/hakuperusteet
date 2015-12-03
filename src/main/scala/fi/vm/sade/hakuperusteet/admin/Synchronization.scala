@@ -110,11 +110,16 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     val shouldPay = countries.shouldPay(ao.educationCountry, ao.educationLevel)
     val hasPaid = payments.exists(_.status.equals(PaymentStatus.ok))
     val formUrl = as.formUrl
-    val body = generatePostBody(generateParamMap(signer, u, ao, shouldPay, hasPaid, admin = true))
-    logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
-    Try { doPost(formUrl, body) } match {
-      case Success(response) => handlePostSuccess(row, response)
-      case Failure(f) => handleSyncError(row.id, "Synchronization POST throws", f)
+    formUrl match {
+      case Some(formUrl) =>
+        val body = generatePostBody(generateParamMap(signer, u, ao, shouldPay, hasPaid, admin = true))
+        logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
+        Try { doPost(formUrl, body) } match {
+          case Success(response) => handlePostSuccess(row, response)
+          case Failure(f) => handleSyncError(row.id, "Synchronization POST throws", f)
+        }
+      case None =>
+        handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", new RuntimeException("Synchronization failed because of missing form URL (hakulomake URI)"))
     }
   }
 

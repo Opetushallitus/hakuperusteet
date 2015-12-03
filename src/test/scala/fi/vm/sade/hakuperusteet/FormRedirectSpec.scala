@@ -21,7 +21,7 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     Some(new Date(100)), None, IDPEntityId.google, Some("1"), Some("1"), Some("fi"), "fi")
   database.upsertUser(testUser)
   val appObject = ApplicationObject(None, userOid.get, "hakukohdeOid", "hakuOid", "educationLevel", "fi")
-  val appSystem = ApplicationSystem("hakuOid", "formUri", true, List())
+  val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, List())
 
   test("it should halt on payment conflict") {
     val res = formRedirect.doRedirect(testUser, appObject, appSystem, "educationLevel")
