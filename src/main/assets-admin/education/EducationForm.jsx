@@ -40,6 +40,7 @@ export default class EducationForm extends React.Component {
     </div> : <div className="userDataFormRow">
                       { requiredField(ao, "educationLevel") ? <span className="error">{translation("educationForm.errors.requiredEducationLevel")}</span> : null}
                       { requiredField(ao, "educationCountry") ? <span className="error">{translation("educationForm.errors.requiredEducationCountry")}</span> : null}
+                      { ao.paymentRequiredNotification ? <span className="info">{translation("educationForm.paymentNotification")}</span> : null }
     </div>
 
     const formId = "educationForm_" + ao.hakukohdeOid
