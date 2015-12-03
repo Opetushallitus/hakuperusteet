@@ -225,16 +225,20 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     applicationObjectValidator.parseApplicationObject(params).bitraverse(
       errors => renderConflictWithErrors(errors),
       education => {
-        db.upsertApplicationObject(education)
-        val u = db.findUserByOid(education.personOid).get
-        (u) match {
-          case u: User =>
-            AuditLog.auditAdminPostEducation(user.oid, u, education)
-            halt(status = 200, body = write(syncAndWriteResponse(u)))
-          case u: PartialUser =>
-            halt(status = 500, body = "Tried to submit applications to partial user!")
+        val u = db.findUserByOid(education.personOid) match {
+          case Some(u: User) => u
+          case Some(u: PartialUser) =>
+            val msg = s"Tried to submit applications to partial user ${education.personOid}"
+            logger.error(msg)
+            halt(500, msg)
+          case None =>
+            val msg = s"No user ${education.personOid} found"
+            logger.error(msg)
+            halt(404, body = msg)
         }
-
+        AuditLog.auditAdminPostEducation(user.oid, u, education)
+        db.upsertApplicationObject(education)
+        halt(200, body = write(syncAndWriteResponse(u)))
       }
     )
   }
