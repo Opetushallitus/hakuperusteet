@@ -13,6 +13,11 @@ export default class HakuperusteetAdminForm extends React.Component {
         this.changes = props.controller.pushEducationFormChanges
     }
 
+    togglePayments() {
+        var pg = document.getElementById("paymentsGroup");
+        pg.style.display = (pg.style.display == 'none') ? 'block' : 'none';
+    }
+
     render() {
         const state = this.props.state
         const controller = this.props.controller
@@ -38,10 +43,16 @@ export default class HakuperusteetAdminForm extends React.Component {
                     <label htmlFor={this.id}>Tila</label>
                     <span>{paymentsStatus}</span>
                   </div>
-
+                  <div className="paymentsShowLink">
+                      <div className="userDataFormRow">
+                        <input type="submit" value="Näytä maksuloki" onClick={this.togglePayments.bind(this)}/>
+                      </div>
+                  </div>
+                <div id="paymentsGroup" style={{border: '2px solid #ccc', display: 'none'}}>
                 {payments.map((payment,i) => {
                     return <PaymentForm key={i} state={state} controller={controller} payment={payment}/>
                 })}
+                </div>
                 <h3>Hakukohteet</h3>
                 {applicationObjects.map((applicationObject,i) => {
                     return <EducationForm key={i} state={state} controller={controller} applicationObject={applicationObject}/>
