@@ -1,5 +1,6 @@
 import {expect, done} from 'chai'
 import {commandServer, openPage, hakuperusteetLoaded, testFrame, logout, takeScreenshot, S, S2, directLogout} from './testUtil.js'
+import {assertDisabled, assertElementsFound, assertEnabled, assertNotFound, assertOneFound, assertSubmitDisabled, assertSubmitEnabled} from './assertions'
 
 describe('Page without session', () => {
   before(directLogout)
@@ -19,12 +20,12 @@ describe('Page without session', () => {
 describe('Page without session - order email token', () => {
   before(openPage("/hakuperusteet/", hakuperusteetLoaded))
 
-  it('submit should be disabled', assertSubmitDisabled)
+  it('submit should be disabled', assertSubmitDisabled())
   it('insert invalid email', setField("#emailToken", "asd@asd.fi asd2@asd.fi"))
-  it('submit should be disabled', assertSubmitDisabled)
+  it('submit should be disabled', assertSubmitDisabled())
 
   it('insert valid email', setField("#emailToken", "asd@asd.fi"))
-  it('submit should be enabled', assertSubmitEnabled)
+  it('submit should be enabled', assertSubmitEnabled())
 
   describe('Submit email token order', () => {
     it('click submit should post emailToken', clickField("#session input[name='submit']"))
@@ -66,34 +67,32 @@ describe('Page with email session - userdata', () => {
   it('should not show hakuList', assertNotFound(".hakuList"))
 
   describe('Insert data', () => {
-    it('initially submit should be disabled', assertSubmitDisabled)
-    it('initially show all missing errors', assertElementsFound("#userDataForm .error", 6))
+    it('initially submit should be disabled', assertSubmitDisabled())
+    it('initially show all missing errors', assertElementsFound("#userDataForm .error", 7))
 
     it('insert firstName', setField("#firstName", "John"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('insert lastName', setField("#lastName", "Doe"))
-    it('submit should be disabled', assertSubmitDisabled)
-
-    it('insert birthDate', setField("#birthDate", "15051979"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select gender', clickField("#gender-male"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select nativeLanguage', setField("#nativeLanguage", "FI"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select nationality', setField("#nationality", "246"))
-    it('submit should be enabled', assertSubmitEnabled)
-    it('should not show missing errors', assertNotFound("#userDataForm .error"))
+    it('submit should be disabled', assertSubmitDisabled())
 
-    it('select personId', clickField("#hasPersonId"))
-    it('submit should be disabled', assertSubmitDisabled)
-    it('show one error after personId is clicked', assertOneFound("#userDataForm .error"))
+    it('should have person ID field disabled', assertDisabled("#personId"))
+    it('should have birthday field disabled', assertDisabled("#birthDate"))
+    it('select personId input', clickField("#personal-id-yes"))
+    it('should have person ID field enabled', assertEnabled("#personId"))
+    it('should still have birthday field disabled', assertDisabled("#birthDate"))
 
-    it('insert birthDate', setField("#personId", "-9358"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('insert personId', setField("#personId", "011295-9693"))
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#userDataForm .error"))
   })
 
@@ -110,20 +109,20 @@ describe('Page with email session - educationdata', () => {
   it('should not show hakuList', assertNotFound(".hakuList"))
 
   describe('Insert data', () => {
-    it('initially submit should be disabled', assertSubmitDisabled)
+    it('initially submit should be disabled', assertSubmitDisabled())
     it('initially show all missing errors', assertElementsFound("#educationForm .error", 2))
 
     it('select educationLevel', setField("#educationLevel", "116"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
     it('select educationCountry - Finland', setField("#educationCountry", "246"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#educationForm .error"))
     it('noPaymentRequired should be visible', assertOneFound(".noPaymentRequired"))
     it('paymentRequired should be hidden', assertNotFound(".paymentRequired"))
     it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
 
     it('select educationCountry - Solomin Islands', setField("#educationCountry", "090"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#educationForm .error"))
     it('paymentRequired should be visible', assertOneFound(".paymentRequired"))
     it('noPaymentRequired should be hidden', assertNotFound(".noPaymentRequired"))
@@ -136,7 +135,7 @@ describe('Page with email session - educationdata', () => {
 
     it('select educationLevel discretionary', setField("#educationLevel", "116"))
     it('select educationCountry - Solomin Islands', setField("#educationCountry", "090"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#educationForm .error"))
     it('paymentRequired should be visible', assertOneFound(".paymentRequired"))
     it('noPaymentRequired should be hidden', assertNotFound(".noPaymentRequired"))
@@ -188,21 +187,21 @@ describe('Page with email session - add second application object', () => {
   it('should not show hakuList', assertNotFound(".hakuList"))
 
   describe('Insert data', () => {
-    it('initially submit should be disabled', assertSubmitDisabled)
+    it('initially submit should be disabled', assertSubmitDisabled())
     it('initially show all missing errors', assertElementsFound("#educationForm .error", 2))
 
     it('select educationLevel', setField("#educationLevel", "100"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select educationCountry - Finland', setField("#educationCountry", "246"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#educationForm .error"))
     it('noPaymentRequired should be visible', assertOneFound(".noPaymentRequired"))
     it('paymentRequired should be hidden', assertNotFound(".paymentRequired"))
     it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
 
     it('select educationCountry - Solomin Islands', setField("#educationCountry", "090"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#educationForm .error"))
     it('noPaymentRequired should be hidden', assertNotFound(".noPaymentRequired"))
     it('paymentRequired should be hidden', assertNotFound(".paymentRequired"))
@@ -246,26 +245,29 @@ describe('Creating "ulkolomake" with partially generated user', () => {
   it('should show userDataForm', assertOneFound("#userDataForm"))
 
   describe('Insert data', () => {
-    it('initially submit should be disabled', assertSubmitDisabled)
-    it('initially show all missing errors', assertElementsFound("#userDataForm .error", 6))
+    it('initially submit should be disabled', assertSubmitDisabled())
+    it('initially show all missing errors', assertElementsFound("#userDataForm .error", 7))
 
     it('insert firstName', setField("#firstName", "Haku"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('insert lastName', setField("#lastName", "App"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
+    it('select personId input', clickField("#personal-id-no"))
+    it('should have person ID field disabled', assertDisabled("#personId"))
+    it('should have birthday field enabled', assertEnabled("#birthDate"))
     it('insert birthDate', setField("#birthDate", "15051979"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select gender', clickField("#gender-male"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select nativeLanguage', setField("#nativeLanguage", "FI"))
-    it('submit should be disabled', assertSubmitDisabled)
+    it('submit should be disabled', assertSubmitDisabled())
 
     it('select nationality', setField("#nationality", "246"))
-    it('submit should be enabled', assertSubmitEnabled)
+    it('submit should be enabled', assertSubmitEnabled())
     it('should not show missing errors', assertNotFound("#userDataForm .error"))
   })
 
@@ -276,7 +278,7 @@ describe('Creating "ulkolomake" with partially generated user', () => {
     describe('Insert education data', () => {
       it('select educationLevel discretionary', setField("#educationLevel", "100"))
       it('select educationCountry - Solomin Islands', setField("#educationCountry", "090"))
-      it('submit should be enabled', assertSubmitEnabled)
+      it('submit should be enabled', assertSubmitEnabled())
       it('should not show missing errors', assertNotFound("#educationForm .error"))
       it('paymentRequired should be visible', assertOneFound(".paymentRequired"))
       it('noPaymentRequired should be hidden', assertNotFound(".noPaymentRequired"))
@@ -290,17 +292,6 @@ describe('Creating "ulkolomake" with partially generated user', () => {
 
 
 })
-
-function assertSubmitDisabled() { return S2("input[name='submit']").then(expectToBeDisabled).then(done).catch(done) }
-function assertSubmitEnabled() { return S2("input[name='submit']").then(expectToBeEnabled).then(done).catch(done)}
-function assertOneFound(selector) { return () => { return S2(selector).then(expectElementsFound(1)).then(done).catch(done) }}
-function assertElementsFound(selector, count) { return () => { return S2(selector).then(expectElementsFound(count)).then(done).catch(done) }}
-function assertEnabled(selector) { return () => { return S2(selector).then(expectToBeEnabled).then(done).catch(done) }}
-function assertNotFound(selector) { return () => { expect(S(selector).length).to.equal(0) } }
-
-function expectElementsFound(count) { return (e) => { expect(e.length).to.equal(count) }}
-function expectToBeDisabled(e) { expect($(e).attr("disabled")).to.equal("disabled") }
-function expectToBeEnabled(e) { expect($(e).attr("disabled")).to.equal(undefined) }
 
 function setVal(val) { return (e) => { $(e).val(val).focus().blur() }}
 function setField(field, val) { return () => { S2(field).then(setVal(val)).then(done).catch(done) }}

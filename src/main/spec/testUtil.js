@@ -1,5 +1,8 @@
 const waitIntervalMs = 10
 
+window.S = S
+window.S2 = S2
+
 $.expr[':'].textContains = function(a, i, m) {
   return $(a).text().indexOf(m[3]) > -1
 };

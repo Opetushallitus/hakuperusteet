@@ -1,5 +1,6 @@
 import {expect, done} from 'chai'
 import {commandServer, openPage, pageLoaded, S, S2, select, wait, focusAndBlur, click} from './testUtil.js'
+import {assertSubmitDisabled, assertSubmitEnabled, assertEnabled, assertDisabled, assertChecked, assertUnchecked, assertValueEmpty, assertValueEqual} from './assertions'
 
 describe('Admin UI front', () => {
   before(commandServer.resetAdmin)
@@ -10,6 +11,15 @@ describe('Admin UI front', () => {
   })
   describe('Modifying user data', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001000", pageLoaded(form => form.find("input[value='Annilainen']").length == 1)))
+
+    // Pre-check that identification selection is correctly populated
+    it('should have personId option checked', assertChecked("#personal-id-yes"))
+    it('should have birthday option unchecked', assertUnchecked("#personal-id-no"))
+    it('should have personId field enabled', assertEnabled("#personId"))
+    it('should have birthday field disabled', assertDisabled("#birthDate"))
+    it('should have personId set', assertValueEqual("#personId", "261095-910P"))
+    it('should have birthday empty', assertValueEmpty("#birthDate"))
+
     it('should change name', setField("#firstName", "Emmi " + getRandomName()))
     it('should change mother tongue', setField("#nativeLanguage", "AB"))
     it('submit should be enabled', assertSubmitEnabled("#userDataForm"))
@@ -46,16 +56,6 @@ function getRandomName() {
   return text;
 }
 
-function assertSubmitDisabled(form) { return () => S2(form + " input[name='submit']").then(expectToBeDisabled).then(done).catch(done) }
-function assertSubmitEnabled(form) { return () => S2(form + " input[name='submit']").then(expectToBeEnabled).then(done).catch(done)}
-
-function expectToBeDisabled(e) { expect($(e).attr("disabled")).to.equal("disabled") }
-function expectToBeEnabled(e) { expect($(e).attr("disabled")).to.equal(undefined) }
-
-function setVal(val) { return (e) => {
-  $(e).val(val)
-  focusAndBlur($(e))
-}}
 function setField(field, val, altval) {
   return wait.until(() => {
     const e = select(field)

@@ -3,7 +3,6 @@ package fi.vm.sade.hakuperusteet.util
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import fi.vm.sade.hakuperusteet._
 import fi.vm.sade.hakuperusteet.domain.IDPEntityId
 import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
 import fi.vm.sade.utils.validator.{HenkilotunnusValidator, InputNameValidator}
@@ -37,19 +36,37 @@ trait ValidationUtil {
       case e => e.getMessage.failureNel
     }.get
 
-  def parseOptionalPersonalId(params: Params): ValidationResult[Option[String]] =
+  def personalIdToDate(id: String): ValidationResult[LocalDate] = {
+    val daysAndMonths = id.substring(0, 4) // ddmmyy
+    val decadeAndYear = id.substring(4, 6)
+    val century = id.substring(6, 7).toUpperCase match {
+      case "+" => 18
+      case "-" => 19
+      case "A" => 20
+    } // + = 1800, - = 1900, A = 2000
+    parseLocalDate(daysAndMonths + century + decadeAndYear)
+  }
+
+  case class Identification(birthDate: LocalDate, personalId: Option[String])
+
+  def parseIdentification(params: Params): ValidationResult[Identification] =
     (params.get("birthDate"), params.get("personId")) match {
-      case (Some(b), Some(p)) =>
+      case (Some(b), None) =>
         parseLocalDate(b) match {
-          case scalaz.Success(birthDateParsed) =>
-            val pid = birthDateParsed.format(personIdDateFormatter) + p
-            HenkilotunnusValidator.validate(pid) match {
-              case scalaz.Success(a) => Some(pid).successNel
-              case scalaz.Failure(e) => s"invalid pid $pid - [${e.stream.mkString(",")}]".failureNel
-            }
+          case scalaz.Success(birthDateParsed) => Identification(birthDateParsed, None).successNel
           case scalaz.Failure(e) => s"invalid birthDate $b".failureNel
         }
-      case _ => None.successNel
+      case (None, Some(p)) =>
+        HenkilotunnusValidator.validate(p) match {
+          case scalaz.Success(personalIdentityCode) =>
+            personalIdToDate(personalIdentityCode) match {
+              case scalaz.Success(birthDateParsed) => Identification(birthDateParsed, Some(personalIdentityCode)).successNel
+              case scalaz.Failure(e) => s"invalid birthdate in personal identity code".failureNel
+            }
+          case scalaz.Failure(e) => s"invalid personal identity code $p - [${e.stream.mkString(",")}]".failureNel
+        }
+      case (None, None) => s"Requires either birthDate or personId, got neither".failureNel
+      case (Some(_), Some(_)) => s"Requires either birthDate or personId, got both".failureNel
     }
 
   def parseIDPEntityId(params: Params): ValidationResult[IDPEntityId] = parseNonEmpty("idpentityid")(params) flatMap

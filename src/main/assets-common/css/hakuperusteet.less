@@ -5,6 +5,7 @@
 @formLabelWidth: 175px;
 @formLabelPadding: 25px;
 @formLeftColumnWidth: @formLabelWidth + @formLabelPadding;
+@inputAreaWidth: @pageWidth - @formLeftColumnWidth;
 
 body {
   margin: 0;
@@ -164,7 +165,7 @@ p {
 }
 
 .userDataFormRow {
-  min-height: 50px;
+  margin-bottom: 20px;
   .error {
     .FontError(14px);
     display: block;
@@ -193,16 +194,13 @@ p {
   }
   .genderLabel {
     width: 50px;
-    padding-right: 0;
+    padding: 0 10px;
     text-align: left;
   }
   .ssnLabel {
     width: 300px;
     text-align: left;
     padding-right: 0;
-  }
-  #personId {
-    width: 50px;
   }
   #birthDate {
     width: 100px;
@@ -214,6 +212,31 @@ p {
   }
   input[type=submit] {
     margin-left: @formLeftColumnWidth;
+  }
+  ul.personalIdCheck {
+    margin: 0;
+    display: inline-block;
+    list-style: none;
+    padding: 0;
+    vertical-align: top;
+    max-width: @inputAreaWidth;
+    label {
+      text-align: left;
+      padding: 0 10px;
+      width: 230px;
+      vertical-align: text-top;
+    }
+    input[type=text] {
+      width: 100px;
+    }
+    span {
+      vertical-align: text-top;
+      display: inline-block;
+      max-width: 200px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
   }
 }
 
