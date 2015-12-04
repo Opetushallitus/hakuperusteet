@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import fi.vm.sade.hakuperusteet.domain.IDPEntityId
 import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
-import fi.vm.sade.utils.validator.InputNameValidator
+import fi.vm.sade.utils.validator.{HenkilotunnusValidator, InputNameValidator}
 
 import scala.util.Try
 import scalaz._
@@ -57,9 +57,13 @@ trait ValidationUtil {
           case scalaz.Failure(e) => s"invalid birthDate $b".failureNel
         }
       case (None, Some(p)) =>
-        personalIdToDate(p) match {
-          case scalaz.Success(birthDateParsed) => Identification(birthDateParsed, Some(p)).successNel
-          case scalaz.Failure(e) => s"invalid birthDate".failureNel
+        HenkilotunnusValidator.validate(p) match {
+          case scalaz.Success(personalIdentityCode) =>
+            personalIdToDate(personalIdentityCode) match {
+              case scalaz.Success(birthDateParsed) => Identification(birthDateParsed, Some(personalIdentityCode)).successNel
+              case scalaz.Failure(e) => s"invalid birthdate in personal identity code".failureNel
+            }
+          case scalaz.Failure(e) => s"invalid personal identity code $p - [${e.stream.mkString(",")}]".failureNel
         }
       case (None, None) => s"Requires either birthDate or personId, got neither".failureNel
       case (Some(_), Some(_)) => s"Requires either birthDate or personId, got both".failureNel
