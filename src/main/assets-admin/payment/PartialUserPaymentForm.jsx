@@ -24,12 +24,10 @@ export default class PartialUserPaymentForm extends React.Component {
   render() {
     const controller = this.props.controller
     const payment = this.props.payment
-    const statusOptions = [{ id: "started", name: "Started"}, { id: "ok", name: "Ok"}, { id: "cancel", name: "Cancel"}, { id: "error", name: "Error"}]
-    const result = createSelectOptions(statusOptions)
     const formId = "payment_" + payment.id
     const statusId = "paymentStatus_" + payment.id
 
-    return <form id={formId} onSubmit={controller.formSubmits}>
+    return <div>
       <div className="userDataFormRow">
         <label htmlFor={this.id}>Aikaleima</label>
         <span>{payment.timestamp}</span>
@@ -43,7 +41,7 @@ export default class PartialUserPaymentForm extends React.Component {
         <label htmlFor={statusId}>Maksun tila</label>
         <span>{payment.status}</span>
       </div>
-    </form>
+      </div>
   }
 
 }

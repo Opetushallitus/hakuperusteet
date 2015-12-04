@@ -25,7 +25,6 @@ export default class PaymentForm extends React.Component {
     const controller = this.props.controller
     const payment = this.props.payment
     const statusOptions = [{ id: "started", name: "Started"}, { id: "ok", name: "Ok"}, { id: "cancel", name: "Cancel"}, { id: "error", name: "Error"}]
-    const result = createSelectOptions(statusOptions)
     const formId = "payment_" + payment.id
     const statusId = "paymentStatus_" + payment.id
 
@@ -36,7 +35,7 @@ export default class PaymentForm extends React.Component {
                       { requiredField(payment, "status") ? <span className="error">Maksun tila on pakollinen tieto</span> : null}
     </div>
 
-    return <form id={formId} onSubmit={controller.formSubmits}>
+    return <div>
       <div className="userDataFormRow">
         <label htmlFor={this.id}>Aikaleima</label>
         <span>{payment.timestamp}</span>
@@ -48,17 +47,10 @@ export default class PaymentForm extends React.Component {
       {payment.hakemusOid ? <div className="userDataFormRow"><label htmlFor={statusId}>Hakemus OID</label><span>{payment.hakemusOid}</span></div> : null}
       <div className="userDataFormRow">
           <label htmlFor={statusId}>Maksun tila</label>
-          <select id={statusId} name="status" onChange={this.changes.bind(this, payment)}  onBlur={this.changes.bind(this, payment)} value={payment.status}>
-            {result}
-          </select>
-      </div>
-      <div className="userDataFormRow">
-        <input type="submit" name="submit" value="Submit" disabled={disabled} />
-        <AjaxLoader hide={true} />
-        <span className="serverError general hide">{translation("errors.server.unexpected")}</span>
+          <span>{payment.status}</span>
       </div>
       {errors}
-    </form>
+      </div>
   }
 
 }

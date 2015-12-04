@@ -10,7 +10,7 @@ import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
-import fi.vm.sade.hakuperusteet.util.{AuditLog, ValidationUtil}
+import fi.vm.sade.hakuperusteet.util.{PaymentUtil, AuditLog, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, PaymentValidator, UserValidator}
 import fi.vm.sade.utils.cas.CasLogout
 import org.json4s.JsonDSL._
@@ -247,9 +247,15 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     }
   }
 
-  private def fetchPartialUserData(u: PartialUser): PartialUserData = PartialUserData(u, db.findPayments(u))
+  private def fetchPartialUserData(u: PartialUser): PartialUserData = {
+    val payments = db.findPayments(u)
+    PartialUserData(u, PaymentUtil.sortPaymentsByStatus(payments),PaymentUtil.hasPaid(payments))
+  }
 
-  private def fetchUserData(u: User): UserData = UserData(u, db.findApplicationObjects(u), db.findPayments(u))
+  private def fetchUserData(u: User): UserData = {
+    val payments = db.findPayments(u)
+    UserData(u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments),PaymentUtil.hasPaid(payments))
+  }
 
   private def syncAndWriteResponse(u: User) = {
     val data = fetchUserData(u)
