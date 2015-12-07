@@ -7,14 +7,17 @@ import java.sql.{Connection, DriverManager}
 import com.sun.net.httpserver.{HttpServer, HttpExchange, HttpHandler}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain.{Payments, ApplicationObjects, Users}
-import org.eclipse.jetty.webapp.WebAppContext
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ListBuffer
-import scala.sys.process.{Process, ProcessIO}
+import scala.sys.process.Process
 
 class HakuperusteetTestServer extends HakuperusteetServer {
-  override def setSecureCookieParams(context: WebAppContext) {}
+  override def secureSessionCookie = false
+}
+
+class HakuperusteetTestAdminServer extends HakuperusteetAdminServer {
+  override def secureSessionCookie = false
 }
 
 object HakuperusteetTestServer {
@@ -29,7 +32,7 @@ object HakuperusteetTestServer {
     DBSupport.ensureEmbeddedIsStartedIfNeeded()
     startCommandServer()
     val server: HakuperusteetTestServer = new HakuperusteetTestServer()
-    val adminServer: HakuperusteetAdminServer = new HakuperusteetAdminServer()
+    val adminServer: HakuperusteetTestAdminServer = new HakuperusteetTestAdminServer()
     logger.info("Starting HakuperusteetServer (http: " + server.portHttp + " https: " + server.portHttps + ")")
     logger.info("Starting HakuperusteetAdminServer (http: " + adminServer.portHttp + " https: " + adminServer.portHttps + ")")
     new Thread() {

@@ -11,12 +11,15 @@ import org.eclipse.jetty.webapp.WebAppContext
 
 object JettyUtil extends LazyLogging {
 
-  def createServerWithContext(portHttp: Int, portHttps: Option[Int], context: WebAppContext, dbUrl: String, user: String, password: String) = {
+  def createServerWithContext(portHttp: Int, portHttps: Option[Int], context: WebAppContext, dbUrl: String, user: String, password: String, secureSessionCookie: Boolean) = {
     val server = new Server()
     server.setHandler(context)
     server.setConnectors(createConnectors(portHttp, portHttps, server))
     initRequestLog(server)
     configureJDBCSession(context, dbUrl, user, password, server)
+    if(secureSessionCookie) {
+      setSecureCookieParams(context);  
+    }
     server
   }
 
@@ -68,5 +71,11 @@ object JettyUtil extends LazyLogging {
   private def createWorkerName = {
     val serverName = java.net.InetAddress.getLocalHost.getHostName.split("\\.")(0)
     MessageDigest.getInstance("MD5").digest(serverName.getBytes).map("%02x".format(_)).mkString.slice(0, 10)
+  }
+
+  def setSecureCookieParams(context: WebAppContext) {
+    val sessionCookieConfig = context.getServletContext.getSessionCookieConfig
+    sessionCookieConfig.setHttpOnly(true)
+    sessionCookieConfig.setSecure(true)
   }
 }

@@ -13,13 +13,15 @@ import org.slf4j.LoggerFactory
 class HakuperusteetServer {
   def portHttp = props.getInt("hakuperusteet.port.http")
   def portHttps = Option(props.getInt("hakuperusteet.port.https")).find(_ != -1)
+  def secureSessionCookie = true
 
   def runServer() {
     val dbUrl = props.getString("hakuperusteet.db.url")
     val user = props.getString("hakuperusteet.db.user")
     val password = props.getString("hakuperusteet.db.password")
     HakuperusteetDatabase.init(props)
-    val server = JettyUtil.createServerWithContext(portHttp, portHttps, createContext, dbUrl, user, password)
+    val context: WebAppContext = createContext
+    val server = JettyUtil.createServerWithContext(portHttp, portHttps, context, dbUrl, user, password, secureSessionCookie)
     server.start()
     server.join()
     logger.info(s"Using ports $portHttp and $portHttps")
@@ -36,14 +38,7 @@ class HakuperusteetServer {
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
-    setSecureCookieParams(context)
     context
-  }
-
-  def setSecureCookieParams(context: WebAppContext) {
-    val sessionCookieConfig = context.getServletContext.getSessionCookieConfig
-    sessionCookieConfig.setHttpOnly(true)
-    sessionCookieConfig.setSecure(true)
   }
 }
 
