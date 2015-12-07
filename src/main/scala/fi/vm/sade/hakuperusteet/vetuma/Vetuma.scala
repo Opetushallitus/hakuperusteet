@@ -7,7 +7,36 @@ import java.util.Date
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.domain.Payment
+import fi.vm.sade.hakuperusteet.vetuma.Vetuma
 import org.apache.commons.codec.digest.DigestUtils
+
+case class VetumaQuery(sharedSecret: String, ap: String, rcvid: String, timestamp: Date, language: String, returnUrl: String, cancelUrl: String,
+                  errorUrl: String, solist: String, trid: Option[String], appid: String, paymCallId: String) {
+
+  val dtf = new SimpleDateFormat("yyyyMMddHHmmssSSS")
+  val so = ""
+  val `type` = "PAYMENT"
+  val au = "CHECK"
+  val extradata = ""
+
+  private def formatTime = dtf.format(timestamp)
+
+  def plainText =
+    s"$rcvid&$appid&$formatTime&$so&$solist&${`type`}&$au&$language&$returnUrl&$cancelUrl&$errorUrl&" +
+      s"$ap&$paymCallId$optionalTrid&$sharedSecret&"
+
+  private def optionalTrid = trid.map(t => s"&$t").getOrElse("")
+
+  private def optionalTridParam = trid.map(t=> Map("TRID" -> t)).getOrElse(Map())
+
+  def mac = DigestUtils.sha256Hex(plainText).toUpperCase
+
+  def toParams = Map("RCVID" -> rcvid, "APPID" -> appid, "TIMESTMP" -> formatTime, "SO" -> so, "SOLIST" -> solist,
+    "TYPE" -> `type`, "AU" -> au, "LG" -> language, "RETURL" -> returnUrl, "CANURL" -> cancelUrl, "ERRURL" -> errorUrl,
+    "AP" -> ap,
+    "MAC" -> mac,
+    "PAYM_CALL_ID" -> paymCallId) ++ optionalTridParam
+}
 
 case class Vetuma(sharedSecret: String, ap: String, rcvid: String, timestamp: Date, language: String, returnUrl: String, cancelUrl: String,
                      errorUrl: String, appName: String, amount: String, ref: String, orderNumber: String,
@@ -51,16 +80,21 @@ object Vetuma extends LazyLogging {
     }
   }
 
-  def query(config: Config, paymentWithMac: Payment): Map[String, String] = {
-    apply(config, paymentWithMac,
-      // TODO: Do these matter? Spec says no, page 41 (55)
-      "fi", "", "").toParams
-      .filter(isQueryParam)
-      .map(emptyParamsToEmpty) +
-      // AU should be CHECK when doing payment query
-      ("AU" -> "CHECK") +
-      // Override MAC using the original payment MAC, spec page 41 (55)
-      ("MAC" -> paymentWithMac.mac.get)
+  def query(config: Config, paymCallId: String, language: String, hrefOk: String, hrefCancel: String, hrefError: String, timestamp: Date, solist: String, trid: Option[String], appid: String) = {
+    VetumaQuery(
+      config.getString("vetuma.shared.secret"),
+      config.getString("vetuma.shared.ap"),
+      config.getString("vetuma.shared.rcvid"),
+      timestamp,
+      language,
+      hrefOk,
+      hrefCancel,
+      hrefError,
+      solist,
+      trid,
+      appid,
+      paymCallId
+    )
   }
 
   def apply(config: Config, payment: Payment, language: String, href: String, params: String): Vetuma = {

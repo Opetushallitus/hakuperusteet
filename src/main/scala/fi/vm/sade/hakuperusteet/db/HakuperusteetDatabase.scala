@@ -36,7 +36,7 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   def eventToEventRow(e: PaymentEvent) = PaymentEventRow(e.id.getOrElse(useAutoIncrementId), e.paymentId, new Timestamp(e.created.getTime), e.timestamp.map(t => new Timestamp(t.getTime)), e.paymentStatus, e.checkSucceeded)
 
   def findPayment(id: Int): Option[Payment] = Tables.Payment.filter(_.id === id).result.headOption.run.map(paymentRowToPayment)
-  def findUnchekedPayments = sql"select * from payment where not exists (select NULL from payment_event where payment.id = payment_event.payment_id) limit 1".as[Int].run
+  def findUnchekedPayments = sql"select * from payment where not exists (select NULL from payment_event where payment.id = payment_event.payment_id)".as[Int].run
 
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
