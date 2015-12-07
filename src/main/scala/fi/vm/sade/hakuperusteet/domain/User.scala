@@ -22,7 +22,7 @@ case object OppijaToken extends IDPEntityId {
   override def toString: String = "oppijaToken"
 }
 
-trait AbstractUser {
+sealed trait AbstractUser {
   def id: Option[Int]
   def idpentityid: IDPEntityId
   def email: String
