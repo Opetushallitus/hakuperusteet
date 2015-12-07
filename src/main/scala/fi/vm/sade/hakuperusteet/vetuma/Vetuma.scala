@@ -1,13 +1,11 @@
 package fi.vm.sade.hakuperusteet.vetuma
 
-import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.domain.Payment
-import fi.vm.sade.hakuperusteet.vetuma.Vetuma
 import org.apache.commons.codec.digest.DigestUtils
 
 

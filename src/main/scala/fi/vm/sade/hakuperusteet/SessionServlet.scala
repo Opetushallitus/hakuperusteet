@@ -76,7 +76,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
       case Some(u : PartialUser) =>
         val payments = db.findPayments(u).toList
         write(SessionData(user, Some(u), List(), payments))
-      case None => write(SessionData(user, None, List.empty, List.empty))
+      case _ => write(SessionData(user, None, List.empty, List.empty))
     }
   }
 
@@ -102,7 +102,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
         sendEmail(newUser)
         AuditLog.auditPostUserdata(userData)
         halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, userWithId, List.empty, List.empty))))
-      case None =>
+      case _ =>
         val userWithId = db.upsertUser(newUser)
         sendEmail(newUser)
         AuditLog.auditPostUserdata(userData)

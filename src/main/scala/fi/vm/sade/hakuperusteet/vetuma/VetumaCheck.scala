@@ -63,7 +63,7 @@ class VetumaCheck(val config: Config, val appid: String, val so: String) extends
         query.get("PAYM_AMOUNT").flatten,
         query.get("PAYM_CURRENCY").flatten))
     } catch {
-      case e =>
+      case e: Throwable =>
         logger.error(s"Unable to read Vetuma answer for payment with id $paymCallId", e)
         None
     }
