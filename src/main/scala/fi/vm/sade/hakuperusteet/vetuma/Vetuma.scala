@@ -1,6 +1,5 @@
 package fi.vm.sade.hakuperusteet.vetuma
 
-import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -8,6 +7,8 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.domain.Payment
 import org.apache.commons.codec.digest.DigestUtils
+
+
 
 case class Vetuma(sharedSecret: String, ap: String, rcvid: String, timestamp: Date, language: String, returnUrl: String, cancelUrl: String,
                      errorUrl: String, appName: String, amount: String, ref: String, orderNumber: String,
@@ -35,32 +36,21 @@ case class Vetuma(sharedSecret: String, ap: String, rcvid: String, timestamp: Da
 }
 
 object Vetuma extends LazyLogging {
-  private val QUERY_PARAMS = List("RCVID","APPID","TIMESTMP","SO","SOLIST","TYPE","AU","LG","RETURL","CANURL","ERRURL","AP","MAC","EXTRADATA","TRID","PAYM_CALL_ID")
-  private val EMPTY_PARAMS = List("SO","SOLIST","LG","RETURL","CANURL","ERRURL")
-  private def isQueryParam = (entry:(String,String)) => {
-    val (key,_) = entry
-    QUERY_PARAMS.indexOf(key) != -1
-  }
-
-  private def emptyParamsToEmpty = (entry:(String,String)) => {
-    val (key,_) = entry
-    if(EMPTY_PARAMS.indexOf(key) != -1) {
-      (key, "")
-    } else {
-      entry
-    }
-  }
-
-  def query(config: Config, paymentWithMac: Payment): Map[String, String] = {
-    apply(config, paymentWithMac,
-      // TODO: Do these matter? Spec says no, page 41 (55)
-      "fi", "", "").toParams
-      .filter(isQueryParam)
-      .map(emptyParamsToEmpty) +
-      // AU should be CHECK when doing payment query
-      ("AU" -> "CHECK") +
-      // Override MAC using the original payment MAC, spec page 41 (55)
-      ("MAC" -> paymentWithMac.mac.get)
+  def query(config: Config, paymCallId: String, language: String, hrefOk: String, hrefCancel: String, hrefError: String, timestamp: Date, solist: String, trid: Option[String], appid: String) = {
+    VetumaQuery(
+      config.getString("vetuma.shared.secret"),
+      config.getString("vetuma.shared.ap"),
+      config.getString("vetuma.shared.rcvid"),
+      timestamp,
+      language,
+      hrefOk,
+      hrefCancel,
+      hrefError,
+      solist,
+      trid,
+      appid,
+      paymCallId
+    )
   }
 
   def apply(config: Config, payment: Payment, language: String, href: String, params: String): Vetuma = {

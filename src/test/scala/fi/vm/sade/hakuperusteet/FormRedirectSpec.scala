@@ -29,7 +29,7 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   }
 
   test("it should redirect on valid payment") {
-    database.upsertPayment(Payment(None, userOid.get, new Date(1000000), "", "", "", PaymentStatus.ok, None, None))
+    database.upsertPayment(Payment(None, userOid.get, new Date(1000000), "", "", "", PaymentStatus.ok, None))
     val res = formRedirect.doRedirect(testUser, appObject, appSystem, "educationLevel")
     res.isRight shouldBe(true)
   }

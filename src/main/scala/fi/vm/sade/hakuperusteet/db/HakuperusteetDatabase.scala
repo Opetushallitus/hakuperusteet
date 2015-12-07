@@ -33,10 +33,10 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   }
 
   def insertEvent(event: PaymentEvent) = (Tables.PaymentEvent returning Tables.PaymentEvent).insertOrUpdate(eventToEventRow(event)).run
-  def eventToEventRow(e: PaymentEvent) = PaymentEventRow(e.id.getOrElse(useAutoIncrementId), e.paymentId, new Timestamp(e.created.getTime), e.timestamp.map(t => new Timestamp(t.getTime)), e.paymentStatus, e.checkSucceeded)
+  def eventToEventRow(e: PaymentEvent) = PaymentEventRow(e.id.getOrElse(useAutoIncrementId), e.paymentId, new Timestamp(e.created.getTime), e.timestamp.map(t => new Timestamp(t.getTime)), e.paymentStatus, e.checkSucceeded, e.status.map(_.toString))
 
   def findPayment(id: Int): Option[Payment] = Tables.Payment.filter(_.id === id).result.headOption.run.map(paymentRowToPayment)
-  def findUnchekedPayments = sql"select * from payment where not exists (select NULL from payment_event where payment.id = payment_event.payment_id) limit 1".as[Int].run
+  def findUnchekedPayments = sql"select * from payment where not exists (select NULL from payment_event where payment.id = payment_event.payment_id)".as[Int].run
 
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
@@ -148,7 +148,7 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
     PaymentRow(payment.id.getOrElse(useAutoIncrementId), payment.personOid, new Timestamp(payment.timestamp.getTime), payment.reference, payment.orderNumber, payment.status.toString, payment.paymCallId, payment.hakemusOid)
 
   private def paymentRowToPayment(r: PaymentRow) =
-    Payment(Some(r.id), r.henkiloOid, r.tstamp, r.reference, r.orderNumber, r.paymCallId, PaymentStatus.withName(r.status), r.hakemusOid, r.mac)
+    Payment(Some(r.id), r.henkiloOid, r.tstamp, r.reference, r.orderNumber, r.paymCallId, PaymentStatus.withName(r.status), r.hakemusOid)
 
   private def aoRowToAo(r: ApplicationObjectRow) = ApplicationObject(Some(r.id), r.henkiloOid, r.hakukohdeOid, r.hakuOid, r.educationLevel, r.educationCountry)
 
