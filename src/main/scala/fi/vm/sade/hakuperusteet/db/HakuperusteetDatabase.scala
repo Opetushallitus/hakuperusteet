@@ -15,12 +15,14 @@ import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, User, _}
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
+import slick.dbio
 import slick.driver.PostgresDriver
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import fi.vm.sade.hakuperusteet.domain.PaymentEvent
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   import HakuperusteetDatabase._
@@ -28,6 +30,9 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   implicit class RunAndAwait[R](r: slick.dbio.DBIOAction[R, slick.dbio.NoStream, Nothing]) {
     def run: R = Await.result(db.run(r), Duration.Inf)
   }
+
+  def run[R](r: DBIO[R], duration: Duration) = Await.result(db.run(r), duration)
+
   val useAutoIncrementId = 0
 
   def findUser(email: String): Option[AbstractUser] = {
@@ -129,8 +134,8 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   def findApplicationObjectByHakukohdeOid(user: AbstractUser, hakukohdeOid: String) =
     Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).filter(_.hakukohdeOid === hakukohdeOid).result.headOption.run.map(aoRowToAo)
 
-  def upsertApplicationObject(applicationObject: ApplicationObject) =
-    (Tables.ApplicationObject returning Tables.ApplicationObject).insertOrUpdate(aoToAoRow(applicationObject)).run.map(aoRowToAo)
+  def upsertApplicationObject(applicationObject: ApplicationObject): dbio.DBIO[Option[ApplicationObject]] =
+    (Tables.ApplicationObject returning Tables.ApplicationObject).insertOrUpdate(aoToAoRow(applicationObject)) map (_.map(aoRowToAo))
 
   def findPaymentByHenkiloOidAndHakemusOid(henkiloOid: String, hakemusOid: String): Option[Payment] =
     Tables.Payment.filter(_.henkiloOid === henkiloOid).filter(_.hakemusOid === hakemusOid).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)

@@ -1,5 +1,22 @@
 {
   "email": {
+    "paymentInfo": {
+      "fi": {
+        "title": "Opintopolku - Maksuohje",
+        "dear": "Hei",
+        "text": "<p>Sinun tulisi maksaa hakumaksu. Se onnistuu alla olevan linkin kautta.</p>"
+      },
+      "sv": {
+        "title": "Opintopolku - Maksuohje",
+        "dear": "Hej",
+        "text": "<p>Sinun tulisi maksaa hakumaksu. Se onnistuu alla olevan linkin kautta.</p>"
+      },
+      "en": {
+        "title": "Opintopolku - Maksuohje",
+        "dear": "Dear",
+        "text": "<p>Sinun tulisi maksaa hakumaksu. Se onnistuu alla olevan linkin kautta.</p>"
+      }
+    },
     "welcome": {
       "fi": {
         "title": "Opintopolku - Rekisteröinti onnistui",

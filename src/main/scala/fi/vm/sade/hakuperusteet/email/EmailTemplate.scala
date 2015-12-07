@@ -8,6 +8,7 @@ import collection.JavaConversions._
 object EmailTemplate {
   private val welcomeTemplate: Mustache = compileMustache("/email/welcome.mustache")
   private val receiptTemplate: Mustache = compileMustache("/email/receipt.mustache")
+  private val paymentInfoTemplate: Mustache = compileMustache("/email/paymentInfo.mustache")
 
   def renderWelcome(values: WelcomeValues, lang: String) = {
     val sw = new StringWriter()
@@ -18,6 +19,13 @@ object EmailTemplate {
   def renderReceipt(values: ReceiptValues, lang: String) = {
     val sw = new StringWriter()
     receiptTemplate.execute(sw, mapAsJavaMap(Translate.getMap("email.receipt",lang) ++ Map("values" ->  values)))
+    sw.toString
+  }
+
+  def renderPaymentInfo(fullName: String, lang: String) = {
+    val sw = new StringWriter()
+    paymentInfoTemplate.execute(sw, mapAsJavaMap(Translate.getMap("email", "paymentInfo", lang)
+      ++ Map("verification-link-placeholder" -> "{{verification-link}}", "fullName" -> fullName)))
     sw.toString
   }
 
