@@ -91,7 +91,7 @@ class VetumaSpec extends FlatSpec with Matchers {
     server.setExecutor(null); // creates a default executor
     server.start();
 
-    val check = vetumaCheck.doVetumaCheck(paymCallId, timestamp, "fi", hrefOk, hrefCancel, hrefError, Some("1082624993"))
+    val check = vetumaCheck.doVetumaCheck(paymCallId, timestamp, "fi", Some("1082624993"))
     server.stop(0)
 
     val t: Date = new SimpleDateFormat("yyyyMMddHHmmssSSS").parse("20100915121357210")

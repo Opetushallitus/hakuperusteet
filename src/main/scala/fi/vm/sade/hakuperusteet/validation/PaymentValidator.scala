@@ -22,7 +22,7 @@ case class PaymentValidator() extends ValidationUtil {
       |@| parseOptional("hakemusOid")(params)
       |@| parseOptional("mac")(params)
       ) { (id, personOid, reference, orderNumber, paymCallId, status, hakemusOid, mac) =>
-      Payment(id, personOid, _:Date, reference, orderNumber, paymCallId, status, hakemusOid, mac)
+      Payment(id, personOid, _:Date, reference, orderNumber, paymCallId, status, hakemusOid)
     }
   }
 

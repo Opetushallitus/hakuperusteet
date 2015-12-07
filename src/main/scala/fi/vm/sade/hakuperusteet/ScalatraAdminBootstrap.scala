@@ -10,7 +10,6 @@ import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.swagger.{AdminSwagger, SwaggerServlet}
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{UserValidator, ApplicationObjectValidator}
-import fi.vm.sade.hakuperusteet.vetuma.VetumaGuessMac
 import org.scalatra.LifeCycle
 import org.scalatra.swagger.{Swagger}
 
@@ -27,7 +26,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
   Synchronization(config, database, tarjonta, countries, signer).start
-  val paymentSynchronization = new PaymentSynchronization(config, database, new VetumaGuessMac(config, database))
+  val paymentSynchronization = new PaymentSynchronization(config, database)
   paymentSynchronization.start
 
   override def init(context: ServletContext) {
