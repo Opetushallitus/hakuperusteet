@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit._
 import com.typesafe.config.{ConfigFactory, Config}
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.{PaymentEvent, Payment}
+import fi.vm.sade.hakuperusteet.domain.{PaymentStatus, PaymentEvent, Payment}
 import fi.vm.sade.hakuperusteet.vetuma.{VetumaCheck, CheckResponse}
 
 
@@ -38,14 +38,23 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     })
   }
 
+  private def vetumaPaymentStatusToPaymentStatus(paymentStatus: String) = {
+    paymentStatus match {
+      case "OK_VERIFIED" => Some(PaymentStatus.ok)
+      case "CANCELLED_OR_REJECTED" => Some(PaymentStatus.cancel)
+      case "PROBLEM" => Some(PaymentStatus.error)
+      case _ => None
+    }
+  }
+
   private def handleVetumaCheckForPayment(payment: Payment, validVetumaCheck: Option[CheckResponse]) = {
     (validVetumaCheck) match {
       case Some(vetumaCheck) =>
         logger.info(s"Got valid Vetuma check $vetumaCheck")
-        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), vetumaCheck.timestmp, true, vetumaCheck.paymentStatus))
+        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), vetumaCheck.timestmp, true, vetumaCheck.paymentStatus, vetumaPaymentStatusToPaymentStatus(vetumaCheck.paymentStatus)))
       case None =>
         logger.error(s"Unable to do valid Vetuma check for payment $payment")
-        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), None, false, "UNKNOWN_PAYMENT"))
+        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), None, false, "UNKNOWN_PAYMENT", None))
     }
   }
 
