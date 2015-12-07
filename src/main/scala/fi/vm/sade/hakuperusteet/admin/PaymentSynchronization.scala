@@ -31,7 +31,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
         }
 
         } catch {
-          case e => logger.error(s"$e")
+          case e: Throwable => logger.error(s"$e")
         }
       case _ =>
         logger.debug("All payments up to date with Vetuma.")
