@@ -43,7 +43,8 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
       case "OK_VERIFIED" => Some(PaymentStatus.ok)
       case "CANCELLED_OR_REJECTED" => Some(PaymentStatus.cancel)
       case "PROBLEM" => Some(PaymentStatus.error)
-      case _ => None
+      case "UNKNOWN_PAYMENT" => Some(PaymentStatus.unknown)
+      case _ => Some(PaymentStatus.unknown)
     }
   }
 
