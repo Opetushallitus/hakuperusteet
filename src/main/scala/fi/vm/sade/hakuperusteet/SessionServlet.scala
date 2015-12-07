@@ -8,13 +8,14 @@ import fi.vm.sade.hakuperusteet.email.{EmailSender, EmailTemplate, WelcomeValues
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
-import fi.vm.sade.hakuperusteet.util.{Translate, AuditLog, ConflictException, ValidationUtil}
+import fi.vm.sade.hakuperusteet.util.{AuditLog, ConflictException, Translate, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
 
+import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz._
 
@@ -112,7 +113,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
 
   def addNewEducation(session: Session, userData: User, education: ApplicationObject) = {
     logger.info(s"Updating education: $education")
-    db.upsertApplicationObject(education)
+    db.run(db.upsertApplicationObject(education), 10 seconds)
     val educations = db.findApplicationObjects(userData).toList
     val payments = db.findPayments(userData).toList
     AuditLog.auditPostEducation(userData, education)

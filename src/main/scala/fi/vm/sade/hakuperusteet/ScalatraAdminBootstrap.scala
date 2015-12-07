@@ -4,6 +4,7 @@ import javax.servlet.ServletContext
 
 import fi.vm.sade.hakuperusteet.admin.{Synchronization, AdminServlet, PaymentSynchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
+import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.koodisto.Koodisto
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
@@ -32,7 +33,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
-    context mount(new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, userValidator, applicationObjectValidator, database), "/")
+    context mount(new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, userValidator, applicationObjectValidator, database, countries), "/")
     context mount(new SwaggerServlet, "/api-docs/*")
   }
 

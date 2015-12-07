@@ -8,9 +8,11 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.admin.auth.{CasAuthenticationSupport, CasSessionDB}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.email.EmailTemplate
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
+import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
-import fi.vm.sade.hakuperusteet.util.{PaymentUtil, AuditLog, ValidationUtil}
+import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil, Translate, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, PaymentValidator, UserValidator}
 import fi.vm.sade.utils.cas.CasLogout
 import org.json4s.JsonDSL._
@@ -19,12 +21,14 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
 import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
+import slick.driver.PostgresDriver.api._
 
+import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scalaz.{NonEmptyList, _}
 
-class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanTunnistus: OppijanTunnistus, userValidator: UserValidator, applicationObjectValidator: ApplicationObjectValidator, db: HakuperusteetDatabase)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
+class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanTunnistus: OppijanTunnistus, userValidator: UserValidator, applicationObjectValidator: ApplicationObjectValidator, db: HakuperusteetDatabase, countries: Countries)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
   override protected def applicationDescription: String = "Admin API"
   val paymentValidator = PaymentValidator()
   val staticFileContent = Source.fromURL(getClass.getResource(resourcePath)).mkString
@@ -237,13 +241,38 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
             halt(404, body = msg)
         }
         AuditLog.auditAdminPostEducation(user.oid, u, education)
-        db.upsertApplicationObject(education)
-        halt(200, body = write(syncAndWriteResponse(u)))
+        val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
+        db.run((db.upsertApplicationObject(education) >> (oldAO match {
+          case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
+            logger.info(s"sending payment info email to ${u.email}")
+            oppijanTunnistus.sendToken(education.hakukohdeOid, u.email,
+              Translate("email", "paymentInfo", u.lang, "title"),
+              EmailTemplate.renderPaymentInfo(u.fullName, u.lang),
+              u.lang) match {
+              case Success(_) => DBIO.successful(())
+              case Failure(e) => DBIO.failed(new RuntimeException(s"sending payment info email to ${u.email} failed", e))
+            }
+          case _ => DBIO.successful(())
+        })).transactionally.asTry, 5 seconds) match {
+          case Success(()) => halt(200, body = write(syncAndWriteResponse(u)))
+          case Failure(e) =>
+            logger.error("", e)
+            halt(500, body = e.getMessage)
+        }
       }
     )
   }
 
-  error { case e: Throwable => logger.error("uncaught exception", e) }
+  error {
+    case e: Throwable =>
+      logger.error("uncaught exception", e)
+      halt(500)
+  }
+
+  private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
+    (payments.forall(p => p.status != PaymentStatus.ok && p.status != PaymentStatus.started)
+      && !countries.shouldPay(oldAO.educationCountry, oldAO.educationLevel)
+      && countries.shouldPay(newAO.educationCountry, newAO.educationLevel))
 
   private def upsertAndAudit(userData: User) = {
     db.insertUserDetails(userData)
@@ -272,7 +301,6 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
       case Some(oldUserData: User) =>
         val updatedUserData = oldUserData.copy(firstName = newUserData.firstName, lastName = newUserData.lastName, birthDate = newUserData.birthDate, personId = newUserData.personId, gender = newUserData.gender, nativeLanguage = newUserData.nativeLanguage, nationality = newUserData.nationality)
         saveUpdatedUserData(updatedUserData)
-
       case _ => halt(404)
     }
   }

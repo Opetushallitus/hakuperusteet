@@ -29,6 +29,8 @@ sealed trait AbstractUser {
   def fullName: String
   def personOid: Option[String]
   def uiLang: String
+
+  def lang: String = if (List("fi", "sv", "en") contains (uiLang)) uiLang else "en"
 }
 
 case class PartialUser(id: Option[Int], personOid: Option[String], email: String, idpentityid: IDPEntityId, uiLang:String, partialUser: Boolean = true) extends AbstractUser {
