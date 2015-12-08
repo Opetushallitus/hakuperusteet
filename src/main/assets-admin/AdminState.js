@@ -139,7 +139,8 @@ export function initAppState(props) {
         const payments = {['payments']: _.map(user.payments, withNoChanges)}
         const applicationObjects = {['applicationObjects']: _.map(user.applicationObject, withNoChanges)}
         const referenceUserWithNoChanges = withNoChanges(referenceUser)
-        return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer}
+        const hasPaid = {['hasPaid']:user.hasPaid}
+        return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid}
     }
     function onFieldValidation(state, {field, value}) {
         const newValidationErrors = fieldValidationResults(state)

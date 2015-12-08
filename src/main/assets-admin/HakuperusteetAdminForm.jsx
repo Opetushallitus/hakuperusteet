@@ -4,8 +4,7 @@ import _ from 'lodash'
 import EducationForm from './education/EducationForm.jsx'
 import UserDataForm from './userdata/UserDataForm.jsx'
 import PartialUserDataForm from './userdata/PartialUserDataForm.jsx'
-import PaymentForm from './payment/PaymentForm.jsx'
-import PartialUserPaymentForm from './payment/PartialUserPaymentForm.jsx'
+import PaymentGroup from './payment/PaymentGroup.jsx'
 
 export default class HakuperusteetAdminForm extends React.Component {
     constructor(props) {
@@ -18,24 +17,16 @@ export default class HakuperusteetAdminForm extends React.Component {
         const controller = this.props.controller
         const isUserSelected = state.id ? true : false
         const applicationObjects = _.isEmpty(state.applicationObjects) ? [] : state.applicationObjects
-        const payments = _.isEmpty(state.payments) ? [] : state.payments
-        const paymentsTitle = payments.length > 0 ? "Maksut" : "Hakijalla ei ole maksuja"
         if(isUserSelected) {
             if(state.partialUser) {
                 return <section className="main-content oppija">
                     <PartialUserDataForm state={state} controller={controller} />
-                    <h3>{paymentsTitle}</h3>
-                    {payments.map((payment,i) => {
-                      return <PartialUserPaymentForm key={i} state={state} controller={controller} payment={payment}/>
-                      })}
+                    <PaymentGroup state={state} controller={controller}/>
                 </section>
             }
             return <section className="main-content oppija">
                 <UserDataForm state={state} controller={controller} />
-                <h3>{paymentsTitle}</h3>
-                {payments.map((payment,i) => {
-                    return <PaymentForm key={i} state={state} controller={controller} payment={payment}/>
-                })}
+                <PaymentGroup state={state} controller={controller}/>
                 <h3>Hakukohteet</h3>
                 {applicationObjects.map((applicationObject,i) => {
                     return <EducationForm key={i} state={state} controller={controller} applicationObject={applicationObject}/>

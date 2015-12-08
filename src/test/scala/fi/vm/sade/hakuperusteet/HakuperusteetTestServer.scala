@@ -119,7 +119,8 @@ class ResetDatabaseForAdminTests extends ResetDatabase {
   private def populateUsers: Unit = {
     val db = HakuperusteetDatabase.init(Configuration.props)
     val userAndApplication = Users.generateUsers.map(u =>
-      (u, ApplicationObjects.generateApplicationObject(u), Payments.generatePayments(u)))
+      (u, ApplicationObjects.generateApplicationObject(u), Payments.generatePayments(u, List("Maksuton"))))
+
     userAndApplication.foreach { case (user, applicationObjects, payments) =>
       val u = db.findUser(user.email)
       if (u.isEmpty) {
