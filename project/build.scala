@@ -102,6 +102,7 @@ object HakuperusteetBuild extends Build {
 
       mainClass in assembly := Some("fi.vm.sade.hakuperusteet.HakuperusteetServer"),
       test in assembly := {},
+      parallelExecution := false,
       assemblyJarName in assembly := Name.toLowerCase + "-" + Version + "-assembly.jar",
       assemblyMergeStrategy in assembly := {
         case PathList("logback.xml") => MergeStrategy.discard
@@ -127,6 +128,7 @@ object HakuperusteetBuild extends Build {
         com.earldouglas.xwp.XwpPlugin.jetty() ++
         Seq(
           test in assembly := {},
+          parallelExecution := false,
           run <<= runTask(fullClasspath, mainClass, runner in run),
           libraryDependencies ++= Seq(
           ),
