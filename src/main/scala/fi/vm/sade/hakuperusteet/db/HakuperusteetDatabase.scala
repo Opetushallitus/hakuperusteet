@@ -12,6 +12,7 @@ import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.db.generated.Tables._
 import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, User, _}
 import org.flywaydb.core.Flyway
+import org.joda.time.DateTime
 import slick.driver.PostgresDriver
 import slick.driver.PostgresDriver.api._
 
@@ -33,10 +34,20 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   }
 
   def insertEvent(event: PaymentEvent) = (Tables.PaymentEvent returning Tables.PaymentEvent).insertOrUpdate(eventToEventRow(event)).run
-  def eventToEventRow(e: PaymentEvent) = PaymentEventRow(e.id.getOrElse(useAutoIncrementId), e.paymentId, new Timestamp(e.created.getTime), e.timestamp.map(t => new Timestamp(t.getTime)), e.paymentStatus, e.checkSucceeded, e.status.map(_.toString))
+  def eventToEventRow(e: PaymentEvent) = PaymentEventRow(e.id.getOrElse(useAutoIncrementId),
+    e.paymentId, new Timestamp(e.created.getTime), e.timestamp.map(t => new Timestamp(t.getTime)), e.paymentStatus, e.checkSucceeded, e.new_status.map(_.toString), e.old_status.map(_.toString))
 
   def findPayment(id: Int): Option[Payment] = Tables.Payment.filter(_.id === id).result.headOption.run.map(paymentRowToPayment)
-  def findUnchekedPayments = sql"select * from payment where not exists (select NULL from payment_event where payment.id = payment_event.payment_id)".as[Int].run
+
+  private def tooRecent(anHourAgo: DateTime) = (k: (String,Vector[(Int, String, java.sql.Timestamp)])) => {
+    val (_, payments) = k
+    !payments.exists(p => {
+      val (_, _, timestamp) = p
+      new DateTime(timestamp.getTime()).isAfter(anHourAgo)
+    })
+  }
+  def findUnchekedPaymentsGroupedByPersonOid = findUnchekedRecentEnoughPayments.groupBy(_._2).filter(tooRecent(new DateTime().minusHours(1)))
+  def findUnchekedRecentEnoughPayments = sql"select id, henkilo_oid, tstamp from payment where tstamp > CURRENT_TIMESTAMP - INTERVAL '40 days' and not exists (select NULL from payment_event where payment.id = payment_event.payment_id and payment_event.created > CURRENT_TIMESTAMP - INTERVAL '1 days')".as[(Int,String,java.sql.Timestamp)].run
 
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)

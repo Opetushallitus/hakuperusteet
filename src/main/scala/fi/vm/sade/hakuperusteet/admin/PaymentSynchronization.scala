@@ -1,13 +1,14 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.util.Date
-import java.util.concurrent.Executors
+import java.util.concurrent.{TimeUnit, Executors}
 import java.util.concurrent.TimeUnit._
 
 import com.typesafe.config.{ConfigFactory, Config}
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.{PaymentStatus, PaymentEvent, Payment}
+import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
+import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.vetuma.{VetumaCheck, CheckResponse}
 
 
@@ -16,46 +17,44 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   val vetumaQueryHost = s"${config.getString("vetuma.host")}Query"
 
   val scheduler = Executors.newScheduledThreadPool(1)
-
-  def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, config.getDuration("admin.synchronization.interval", SECONDS), SECONDS)
+  def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, TimeUnit.HOURS.toSeconds(1), SECONDS)
 
   def checkPaymentSynchronizations = asSimpleRunnable { () =>
-    db.findUnchekedPayments.foreach(id => db.findPayment(id) match {
-      case Some(payment: Payment) =>
-        try {
-        val u = db.findUserByOid(payment.personOid) match {
-          case Some(u) => handleVetumaCheckForPayment(payment,
-            vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang, None).filter(isValidVetumaCheck))
-          case None =>
-            logger.error(s"No user found for $payment")
-        }
+    db.findUnchekedPaymentsGroupedByPersonOid.foreach(r => {
+      val (personOid, paymentIds) = r
+      val u: AbstractUser = db.findUserByOid(personOid).get
+      val payments = paymentIds.flatMap(p => db.findPayment(p._1))
 
-        } catch {
-          case e: Throwable => logger.error(s"$e")
-        }
-      case _ =>
-        logger.debug("All payments up to date with Vetuma.")
+      val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
+
+      val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)
+      anyErrors match {
+        case Some(pAndC) =>
+          logger.error(s"Checking payments for $u failed with ${pAndC._1}")
+        case None =>
+          updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
+      }
     })
   }
 
-  private def vetumaPaymentStatusToPaymentStatus(paymentStatus: String) = {
-    paymentStatus match {
-      case "OK_VERIFIED" => Some(PaymentStatus.ok)
-      case "CANCELLED_OR_REJECTED" => Some(PaymentStatus.cancel)
-      case "PROBLEM" => Some(PaymentStatus.error)
-      case "UNKNOWN_PAYMENT" => Some(PaymentStatus.unknown)
-      case _ => Some(PaymentStatus.unknown)
-    }
+  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]) = paymentAndChecks.foreach(pAndC => updatePaymentAndCreateEvent(pAndC._1, pAndC._2))
+
+  private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse) = {
+    val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
+    val oldStatus = payment.status
+    db.upsertPayment(payment.copy(status = newStatus))
+    db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
+      Some(newStatus), Some(oldStatus)))
   }
 
-  private def handleVetumaCheckForPayment(payment: Payment, validVetumaCheck: Option[CheckResponse]) = {
-    (validVetumaCheck) match {
-      case Some(vetumaCheck) =>
-        logger.info(s"Got valid Vetuma check $vetumaCheck")
-        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), vetumaCheck.timestmp, true, vetumaCheck.paymentStatus, vetumaPaymentStatusToPaymentStatus(vetumaCheck.paymentStatus)))
-      case None =>
-        logger.error(s"Unable to do valid Vetuma check for payment $payment")
-        db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), None, false, "UNKNOWN_PAYMENT", None))
+
+  private def vetumaPaymentStatusToPaymentStatus(paymentStatus: String): PaymentStatus = {
+    paymentStatus match {
+      case "OK_VERIFIED" => PaymentStatus.ok
+      case "CANCELLED_OR_REJECTED" => PaymentStatus.cancel
+      case "PROBLEM" => PaymentStatus.error
+      case "UNKNOWN_PAYMENT" => PaymentStatus.unknown
+      case _ => PaymentStatus.unknown
     }
   }
 

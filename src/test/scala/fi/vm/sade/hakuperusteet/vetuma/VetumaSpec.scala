@@ -25,7 +25,7 @@ class VetumaSpec extends FlatSpec with Matchers {
     "vetuma.shared.ap" -> "TESTIASIAKAS1", "vetuma.shared.rcvid" -> "TESTIASIAKAS11",
     "vetuma.host" -> s"http://localhost:$port/")).resolve
 
-  it should "should calculate return mac properly" in {
+  it should "calculate return mac properly" in {
     val params = List("TESTIASIAKAS11", "20061218154432445", "P2", "fi", "https://localhost/ShowPayment.asp", "https://localhost/ShowCancel.asp",
       "https://localhost/ShowError.asp", "166449462440200", "1234561", "123", "06122588INWX0000", "SUCCESSFUL")
 

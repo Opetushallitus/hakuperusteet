@@ -27,7 +27,7 @@ class VetumaCheck(val config: Config, val appid: String, val so: String) extends
   val vetumaQueryHost = s"${config.getString("vetuma.host")}Query"
   val vetumaTimestampFormatter = DateTimeFormat.forPattern("yyyyMMddHHmmssSSS") // java time API had bug so did this with jodatime (https://bugs.openjdk.java.net/browse/JDK-8031085) fix comes in Java 9
 
-  def doVetumaCheck(paymCallId: String, timestamp: Date, language: String, trid: Option[String]): Option[CheckResponse] = {
+  def doVetumaCheck(paymCallId: String, timestamp: Date, language: String, trid: Option[String] = None): Option[CheckResponse] = {
     // These dont matter, using same values as in Vetuma example CHECK query
     val hrefOk = "https://localhost/ShowPayment.asp"
     val hrefCancel = "https://localhost/ShowCancel.asp"

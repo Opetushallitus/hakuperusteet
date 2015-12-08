@@ -117,18 +117,19 @@ trait Tables {
    *  @param timestamp Database column timestamp SqlType(timestamp), Default(None)
    *  @param paymentStatus Database column payment_status SqlType(varchar), Length(255,true)
    *  @param checkSucceeded Database column check_succeeded SqlType(bool)
-   *  @param status Database column status SqlType(varchar), Length(255,true), Default(None) */
-  case class PaymentEventRow(id: Int, paymentId: Int, created: java.sql.Timestamp, timestamp: Option[java.sql.Timestamp] = None, paymentStatus: String, checkSucceeded: Boolean, status: Option[String] = None)
+   *  @param newStatus Database column new_status SqlType(varchar), Length(255,true), Default(None)
+   *  @param oldStatus Database column old_status SqlType(varchar), Length(255,true), Default(None) */
+  case class PaymentEventRow(id: Int, paymentId: Int, created: java.sql.Timestamp, timestamp: Option[java.sql.Timestamp] = None, paymentStatus: String, checkSucceeded: Boolean, newStatus: Option[String] = None, oldStatus: Option[String] = None)
   /** GetResult implicit for fetching PaymentEventRow objects using plain SQL queries */
   implicit def GetResultPaymentEventRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp], e2: GR[Option[java.sql.Timestamp]], e3: GR[String], e4: GR[Boolean], e5: GR[Option[String]]): GR[PaymentEventRow] = GR{
     prs => import prs._
-    PaymentEventRow.tupled((<<[Int], <<[Int], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<[String], <<[Boolean], <<?[String]))
+    PaymentEventRow.tupled((<<[Int], <<[Int], <<[java.sql.Timestamp], <<?[java.sql.Timestamp], <<[String], <<[Boolean], <<?[String], <<?[String]))
   }
   /** Table description of table payment_event. Objects of this class serve as prototypes for rows in queries. */
   class PaymentEvent(_tableTag: Tag) extends Table[PaymentEventRow](_tableTag, "payment_event") {
-    def * = (id, paymentId, created, timestamp, paymentStatus, checkSucceeded, status) <> (PaymentEventRow.tupled, PaymentEventRow.unapply)
+    def * = (id, paymentId, created, timestamp, paymentStatus, checkSucceeded, newStatus, oldStatus) <> (PaymentEventRow.tupled, PaymentEventRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(paymentId), Rep.Some(created), timestamp, Rep.Some(paymentStatus), Rep.Some(checkSucceeded), status).shaped.<>({r=>import r._; _1.map(_=> PaymentEventRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(paymentId), Rep.Some(created), timestamp, Rep.Some(paymentStatus), Rep.Some(checkSucceeded), newStatus, oldStatus).shaped.<>({r=>import r._; _1.map(_=> PaymentEventRow.tupled((_1.get, _2.get, _3.get, _4, _5.get, _6.get, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(serial), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -142,8 +143,10 @@ trait Tables {
     val paymentStatus: Rep[String] = column[String]("payment_status", O.Length(255,varying=true))
     /** Database column check_succeeded SqlType(bool) */
     val checkSucceeded: Rep[Boolean] = column[Boolean]("check_succeeded")
-    /** Database column status SqlType(varchar), Length(255,true), Default(None) */
-    val status: Rep[Option[String]] = column[Option[String]]("status", O.Length(255,varying=true), O.Default(None))
+    /** Database column new_status SqlType(varchar), Length(255,true), Default(None) */
+    val newStatus: Rep[Option[String]] = column[Option[String]]("new_status", O.Length(255,varying=true), O.Default(None))
+    /** Database column old_status SqlType(varchar), Length(255,true), Default(None) */
+    val oldStatus: Rep[Option[String]] = column[Option[String]]("old_status", O.Length(255,varying=true), O.Default(None))
 
     /** Foreign key referencing Payment (database name payment_event_payment_id_fkey) */
     lazy val paymentFk = foreignKey("payment_event_payment_id_fkey", paymentId, Payment)(r => r.id, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
