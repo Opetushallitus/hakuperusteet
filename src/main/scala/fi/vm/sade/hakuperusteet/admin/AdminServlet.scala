@@ -188,31 +188,6 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     )
   }
 
-  post("/api/v1/admin/payment") {
-    checkAuthentication()
-    contentType = "application/json"
-    val params = parse(request.body).extract[Params]
-    paymentValidator.parsePaymentWithoutTimestamp(params).bitraverse(
-      errors => renderConflictWithErrors(errors),
-      partialPayment => {
-        val paymentWithoutTimestamp = partialPayment(new Date())
-        val u = db.findUserByOid(paymentWithoutTimestamp.personOid).get
-        (u) match {
-          case u: User =>
-            val oldPayment = db.findPaymentByOrderNumber(u, paymentWithoutTimestamp.orderNumber).get
-            val payment = partialPayment(oldPayment.timestamp)
-            db.upsertPayment(payment)
-            AuditLog.auditAdminPayment(user.oid, u, payment)
-            halt(status = 200, body = write(syncAndWriteResponse(u)))
-          case u: PartialUser =>
-            halt(status = 500, body = "Tried to submit payments to partial user!")
-        }
-
-      }
-    )
-
-  }
-
   error { case e: Throwable => logger.error("uncaught exception", e) }
 
   private def upsertAndAudit(userData: User) = {

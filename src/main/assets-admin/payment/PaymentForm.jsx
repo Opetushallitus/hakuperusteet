@@ -24,16 +24,8 @@ export default class PaymentForm extends React.Component {
   render() {
     const controller = this.props.controller
     const payment = this.props.payment
-    const statusOptions = [{ id: "started", name: "Started"}, { id: "ok", name: "Ok"}, { id: "cancel", name: "Cancel"}, { id: "error", name: "Error"}]
     const formId = "payment_" + payment.id
     const statusId = "paymentStatus_" + payment.id
-
-    const disabled = (validatePayment(payment) && !requiredField(payment, "noChanges")) ? undefined : "disabled"
-    const errors = requiredField(payment, "noChanges") ? <div className="userDataFormRow">
-      <span className="error">Lomakkeella ei ole muuttuneita tietoja</span>
-    </div> : <div className="userDataFormRow">
-                      { requiredField(payment, "status") ? <span className="error">Maksun tila on pakollinen tieto</span> : null}
-    </div>
 
     return <div>
       <div className="userDataFormRow">
@@ -49,7 +41,6 @@ export default class PaymentForm extends React.Component {
           <label htmlFor={statusId}>Maksun tila</label>
           <span>{payment.status}</span>
       </div>
-      {errors}
       </div>
   }
 

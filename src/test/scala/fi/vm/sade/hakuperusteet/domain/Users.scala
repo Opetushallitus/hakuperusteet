@@ -3,6 +3,7 @@ package fi.vm.sade.hakuperusteet.domain
 import java.time.{ZoneId, LocalDate}
 import java.util.Date
 import fi.vm.sade.hakuperusteet.personIdDateFormatter
+import org.slf4j.LoggerFactory
 
 object Users {
 
@@ -22,9 +23,10 @@ object Users {
     ("Anni", NAINEN, "261095-910P"), ("Ossi", MIES, "261095-939M"),
     ("Pentti", MIES, "261095-977V"), ("Ritva",NAINEN, "261095-904H"),
     ("Ilja", MIES, "261095-933E"), ("Pirjo", NAINEN, "261095-962C"),
-    ("Kalevi", MIES, "261095-9854"), ("Marja", NAINEN, "261095-9843"))
+    ("Kalevi", MIES, "261095-9854"), ("Marja", NAINEN, "261095-9843"),
+    ("Jouko", MIES, "301195-9756"))
 
-  private val lastNames = List("Annilainen", "Ossilainen", "Penttiläinen", "Iljanen", "Simonen", "Kalevinen", "Marjanen")
+  private val lastNames = List("Annilainen", "Ossilainen", "Penttiläinen", "Ritvanen", "Iljanen", "Simonen", "Kalevinen", "Marjanen","Maksuton")
 
   private def birthDate = Date.from(LocalDate.from(personIdDateFormatter.parse("261095")).atStartOfDay(ZoneId.systemDefault()).toInstant())
 }
