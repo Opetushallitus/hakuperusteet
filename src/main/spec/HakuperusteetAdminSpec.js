@@ -4,7 +4,7 @@ import {assertSubmitDisabled, assertSubmitEnabled, assertEnabled, assertDisabled
 
 describe('Admin UI front', () => {
   before(commandServer.resetAdmin)
-  before(openPage("/hakuperusteetadmin", pageLoaded(form => form.find(".user").length == 7)))
+  before(openPage("/hakuperusteetadmin", pageLoaded(form => form.find(".user").length == 9)))
   describe('Search functionality', () => {
     it('insert should be able to filter with email', setField("#userSearch", "anni.annilainen@example.com"))
     it('should show only filtered user', wait.until(() => select(".user").length == 1))
@@ -25,13 +25,6 @@ describe('Admin UI front', () => {
     it('submit should be enabled', assertSubmitEnabled("#userDataForm"))
     it('click submit should post changes', clickField("#userDataForm input[name='submit']"))
     it('submit should be disabled after post', assertSubmitDisabled("#userDataForm"))
-  })
-  describe('Modifying payment data', () => {
-    before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001006", pageLoaded(form => form.find("input[value='Marjanen']").length == 1)))
-    it('should payment status', setField("select[name='status']", "started", "cancel"))
-    it('submit should be enabled', assertSubmitEnabled("form[id^='payment']"))
-    it('click submit should post changes', clickField("form[id^='payment'] input[name='submit']"))
-    it('submit should be enabled', assertSubmitDisabled("form[id^='payment']"))
   })
   describe('Modifying application object', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001001", pageLoaded(form => form.find("input[value='Ossilainen']").length == 1)))
