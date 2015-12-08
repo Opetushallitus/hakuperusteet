@@ -16,7 +16,7 @@ import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../assets/util/Constants
 
 const dispatcher = new Dispatcher()
 const events = {
-    updatePaymentForm: 'updatePaymentForm',
+    togglePaymentGroup: 'togglePaymentGroup',
     updateEducationForm: 'updateEducationForm',
     route: 'route',
     search: 'search',
@@ -59,7 +59,7 @@ export function initAppState(props) {
     const updateFieldS = dispatcher.stream(events.updateField).merge(serverUpdatesBus)
     const fieldValidationS = dispatcher.stream(events.fieldValidation)
     const updateEducationFormS = dispatcher.stream(events.updateEducationForm)
-    const updatePaymentFormS = dispatcher.stream(events.updatePaymentForm)
+    const togglePaymentGroupS = dispatcher.stream(events.togglePaymentGroup)
 
     const stateP = Bacon.update(initialState,
         [propertiesS], onStateInit,
@@ -68,7 +68,7 @@ export function initAppState(props) {
         [tarjontaS], onTarjontaValue,
         [updateRouteS],onUpdateUser,
         [updateEducationFormS], onUpdateEducationForm,
-        [updatePaymentFormS], onUpdatePaymentForm,
+        [togglePaymentGroupS], onTogglePaymentGroup,
         [updateFieldS], onUpdateField,
         [fieldValidationS], onFieldValidation)
 
@@ -106,13 +106,8 @@ export function initAppState(props) {
     function onSearchUpdate(state, users) {
         return {...state, ['users']: users, ['isSearching']: false}
     }
-    function onUpdatePaymentForm(state, payment) {
-        function decorateWithErrors(pp) {
-            const pFromServer = _.find(state.fromServer.payments, p => p.id == payment.id)
-            return paymentWithValidationErrors(_.isMatch(pp, pFromServer) ? withNoChanges(pp) : withChanges(pp))
-        }
-        var updatedPayments = _.map(state.payments, (oldP => oldP.id == payment.id ? decorateWithErrors(payment) : oldP))
-        return {...state, ['payments']: updatedPayments}
+    function onTogglePaymentGroup(state, paymentGroup) {
+        return {...state, ['showPaymentGroup']: !state.showPaymentGroup}
     }
     function onUpdateEducationForm(state, newAo) {
         if(newAo == null) {
@@ -140,7 +135,8 @@ export function initAppState(props) {
         const applicationObjects = {['applicationObjects']: _.map(user.applicationObject, withNoChanges)}
         const referenceUserWithNoChanges = withNoChanges(referenceUser)
         const hasPaid = {['hasPaid']:user.hasPaid}
-        return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid}
+        const showPaymentGroup = {['showPaymentGroup']:false}
+        return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroup}
     }
     function onFieldValidation(state, {field, value}) {
         const newValidationErrors = fieldValidationResults(state)

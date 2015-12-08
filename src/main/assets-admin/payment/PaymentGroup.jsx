@@ -9,11 +9,6 @@ export default class PaymentGroup extends React.Component {
     this.id = "paymentsGroup"
   }
 
-  togglePayments() {
-      var pg = document.getElementById("paymentsGroup");
-      pg.style.display = (pg.style.display == 'none') ? 'block' : 'none';
-  }
-
   render() {
     const state = this.props.state
     const controller = this.props.controller
@@ -22,7 +17,6 @@ export default class PaymentGroup extends React.Component {
     const paymentsTitle = payments.length > 0 ? "Maksut" : "Hakijalla ei ole maksuja"
     const paymentsStatus = state.hasPaid ? "Maksettu" : "Kesken"
     const disabled = payments.length > 0 ? undefined : "disabled"
-
     return <div>
           <h3>{paymentsTitle}</h3>
               <div className="userDataFormRow">
@@ -30,9 +24,9 @@ export default class PaymentGroup extends React.Component {
                 <span>{paymentsStatus}</span>
               </div>
               <div className="userDataFormRow">
-                <input type="submit" value="Näytä maksuloki" onClick={this.togglePayments.bind(this)} disabled={disabled}/>
+                <input type="submit" value="Näytä maksuloki" onClick={controller.pushTogglePaymentGroup} disabled={disabled}/>
               </div>
-            <div id="paymentsGroup" style={{border: '2px solid #ccc', display: 'none'}}>
+            <div id="paymentsGroup" className={state.showPaymentGroup?'':'hidden'} >
             {payments.map((payment,i) => {
               return <PaymentForm key={i} state={state} controller={controller} payment={payment}/>
               })}

@@ -18,7 +18,7 @@ object Payments {
     if(noPaymentNames.exists(name => name.equals(user.lastName.get))) {
       List()
     } else {
-      Range(1, 2).map(value =>
+      Range(1, 4).map(value =>
         Payment(None, user.personOid.get,
           Date.from(
             LocalDate.now().minusYears(value).atStartOfDay(ZoneId.systemDefault()).toInstant()),

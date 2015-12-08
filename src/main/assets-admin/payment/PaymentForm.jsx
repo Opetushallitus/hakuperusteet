@@ -14,11 +14,6 @@ export default class PaymentForm extends React.Component {
   constructor(props) {
     super()
     this.id = "payments"
-    this.changes = props.controller.pushPaymentFormChanges
-  }
-
-  componentDidMount() {
-    this.changes(this.props.payment)
   }
 
   render() {
@@ -27,7 +22,7 @@ export default class PaymentForm extends React.Component {
     const formId = "payment_" + payment.id
     const statusId = "paymentStatus_" + payment.id
 
-    return <div>
+    return <div className="paymentLogRow">
       <div className="userDataFormRow">
         <label htmlFor={this.id}>Aikaleima</label>
         <span>{payment.timestamp}</span>

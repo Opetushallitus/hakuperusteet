@@ -9,9 +9,8 @@ export function initAdminChangeListeners(dispatcher, events) {
     dispatcher.push(events.route, path)
   }
 
-  function pushPaymentFormChanges(payment, e) {
-    const eventObj = valueEventToObject(e)
-    dispatcher.push(events.updatePaymentForm, {...payment, ...eventObj})
+  function pushTogglePaymentGroup(paymentGroup) {
+    dispatcher.push(events.togglePaymentGroup, paymentGroup)
   }
 
   function pushEducationFormChanges(ao, e) {
@@ -24,7 +23,7 @@ export function initAdminChangeListeners(dispatcher, events) {
   }
 
   return {
-    pushPaymentFormChanges: pushPaymentFormChanges,
+    pushTogglePaymentGroup: pushTogglePaymentGroup,
     pushSearchChange: pushSearchChange,
     pushEducationFormChanges: pushEducationFormChanges,
     pushRouteChange: pushRouteChange
