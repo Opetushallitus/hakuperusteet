@@ -17,7 +17,7 @@ class UserValidatorSpec extends FlatSpec with Matchers {
     "lastName" -> "Sukunimi",
     "nativeLanguage" -> "fin",
     "nationality" -> "fin",
-    "personId" -> "011295-9693",
+    "personId" -> "011295-923l",
     "birthDate" -> "20101990")
 
   it should "check all missing parameters for partial user" in {
@@ -45,7 +45,7 @@ class UserValidatorSpec extends FlatSpec with Matchers {
     val user: User = result("", IDPEntityId.oppijaToken.toString, "")
 
     user.birthDate.get.asInstanceOf[java.sql.Date].toLocalDate shouldEqual LocalDate.of(1995, 12, 1)
-    user.personId shouldEqual Some("011295-9693")
+    user.personId shouldEqual Some("011295-923L")
   }
 
   it should "fail when passing both personal identity code and birthdate for partial user" in {

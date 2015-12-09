@@ -57,7 +57,7 @@ trait ValidationUtil {
           case scalaz.Failure(e) => s"invalid birthDate $b".failureNel
         }
       case (None, Some(p)) =>
-        HenkilotunnusValidator.validate(p) match {
+        HenkilotunnusValidator.validate(p.toUpperCase) match {
           case scalaz.Success(personalIdentityCode) =>
             personalIdToDate(personalIdentityCode) match {
               case scalaz.Success(birthDateParsed) => Identification(birthDateParsed, Some(personalIdentityCode)).successNel
