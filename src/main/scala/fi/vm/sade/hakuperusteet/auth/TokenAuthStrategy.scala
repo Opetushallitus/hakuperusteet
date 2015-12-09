@@ -24,7 +24,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
     val token = (json \ "token").extract[Option[String]]
     val idpentityid = (json \ "idpentityid").extract[Option[String]]
     (token, idpentityid) match {
-      case (Some(tokenFromRequest), Some(idpentityidFromSession)) if idpentityidFromSession == IDPEntityId.oppijaToken.toString => createSession(tokenFromRequest)
+      case (Some(tokenFromRequest), Some(idpentityidFromSession)) if idpentityidFromSession == OppijaToken.toString => createSession(tokenFromRequest)
       case _ => None
     }
   }
@@ -32,7 +32,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
   def createSession(tokenFromRequest: String) = {
     Try { oppijanTunnistus.validateToken(tokenFromRequest) } match {
       case Success(Some((email, lang, Some(metadata)))) => {
-        val partialUser: PartialUser = PartialUser(None, Some(metadata.personOid), email, IDPEntityId.oppijaToken, lang)
+        val partialUser: PartialUser = PartialUser(None, Some(metadata.personOid), email, OppijaToken, lang)
         upsertIdpEntity(partialUser)
         val existingUser = db.findUser(email)
         val user: AbstractUser = existingUser.orElse(db.upsertPartialUser(partialUser)).get
@@ -42,9 +42,9 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
             db.insertPaymentSyncRequest(user, validPayment.get.copy(hakemusOid = Some(metadata.hakemusOid)))
           }
         }
-        Some(Session(email, tokenFromRequest, IDPEntityId.oppijaToken.toString))
+        Some(Session(email, tokenFromRequest, OppijaToken.toString))
       }
-      case Success(Some((email, lang, None))) => Some(Session(email, tokenFromRequest, IDPEntityId.oppijaToken.toString))
+      case Success(Some((email, lang, None))) => Some(Session(email, tokenFromRequest, OppijaToken.toString))
       case Success(None) => None
       case Failure(f) =>
         logger.error("Oppijantunnistus.validateToken error", f)

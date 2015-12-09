@@ -2,12 +2,26 @@ package fi.vm.sade.hakuperusteet.domain
 
 import java.util.Date
 
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
-
-object IDPEntityId extends Enumeration {
-  type IDPEntityId = Value
-  val google, oppijaToken = Value
+sealed trait IDPEntityId {
+  def toString: String
 }
+
+object IDPEntityId {
+  def withName(name: String): IDPEntityId = name match {
+    case "google" => Google
+    case "oppijaToken" => OppijaToken
+    case x => throw new NoSuchElementException(s"No value found for '${x}'")
+  }
+}
+
+case object Google extends IDPEntityId {
+  override def toString: String = "google"
+}
+
+case object OppijaToken extends IDPEntityId {
+  override def toString: String = "oppijaToken"
+}
+
 trait AbstractUser {
   def id: Option[Int]
   def idpentityid: IDPEntityId

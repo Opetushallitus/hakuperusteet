@@ -4,8 +4,7 @@ import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
-import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Henkilo, IDPEntityId, User}
+import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.util.CasClientUtils
 import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
 import org.http4s.Uri._
@@ -25,7 +24,7 @@ object HenkiloClient {
   }
 }
 
-case class IdpUpsertRequest(personOid: String, email: String, idpEntityId: String = IDPEntityId.oppijaToken.toString)
+case class IdpUpsertRequest(personOid: String, email: String, idpEntityId: String = OppijaToken.toString)
 
 case class IDP(idpEntityId: IDPEntityId, identifier: String)
 
@@ -50,8 +49,8 @@ object IfGoogleAddEmailIDP {
   def apply(user: User) = {
     val u = FindOrCreateUser(user)
     u.copy(idpEntitys = user.idpentityid match {
-      case IDPEntityId.google => IDP(IDPEntityId.oppijaToken, user.email) +: u.idpEntitys
-      case IDPEntityId.oppijaToken => u.idpEntitys
+      case Google => IDP(OppijaToken, user.email) +: u.idpEntitys
+      case OppijaToken => u.idpEntitys
     })
   }
 }

@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 import java.util.{Date, TimeZone}
 
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
+import fi.vm.sade.hakuperusteet.domain.IDPEntityId
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
 import org.json4s.JsonAST.{JInt, JNull, JString}

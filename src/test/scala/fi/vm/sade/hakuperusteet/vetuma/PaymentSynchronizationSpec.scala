@@ -8,7 +8,6 @@ import java.util.concurrent.CyclicBarrier
 import com.netaporter.uri.Uri._
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import com.typesafe.config.{ConfigFactory, Config}
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus._
 import fi.vm.sade.hakuperusteet.{ServletTestDependencies, Configuration}

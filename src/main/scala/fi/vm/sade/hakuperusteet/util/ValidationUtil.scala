@@ -3,8 +3,7 @@ package fi.vm.sade.hakuperusteet.util
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId
-import fi.vm.sade.hakuperusteet.domain.IDPEntityId.IDPEntityId
+import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.utils.validator.{HenkilotunnusValidator, InputNameValidator}
 
 import scala.util.Try

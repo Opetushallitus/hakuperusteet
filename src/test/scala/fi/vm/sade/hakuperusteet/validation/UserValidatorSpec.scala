@@ -2,7 +2,7 @@ package fi.vm.sade.hakuperusteet.validation
 
 import java.time.LocalDate
 
-import fi.vm.sade.hakuperusteet.domain.{IDPEntityId, User}
+import fi.vm.sade.hakuperusteet.domain.{OppijaToken, User}
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Languages, SimplifiedCode, SimplifiedLangValue}
 import org.scalatest.{Assertions, FlatSpec, Matchers}
 
@@ -34,7 +34,7 @@ class UserValidatorSpec extends FlatSpec with Matchers {
 
   it should "pass when using valid parameters and birth date for partial user" in {
     val result = validator.parseUserDataWithoutEmailAndIdpentityid(testUser - "personId").getOrElse(Assertions.fail())
-    val user: User = result("", IDPEntityId.oppijaToken.toString, "")
+    val user: User = result("", OppijaToken.toString, "")
 
     user.birthDate.get.asInstanceOf[java.sql.Date].toLocalDate shouldEqual LocalDate.of(1990, 10, 20)
     user.personId shouldEqual None
@@ -42,7 +42,7 @@ class UserValidatorSpec extends FlatSpec with Matchers {
 
   it should "pass and parse birthdate when using valid input and personal identification code" in {
     val result = validator.parseUserDataWithoutEmailAndIdpentityid(testUser - "birthDate").getOrElse(Assertions.fail())
-    val user: User = result("", IDPEntityId.oppijaToken.toString, "")
+    val user: User = result("", OppijaToken.toString, "")
 
     user.birthDate.get.asInstanceOf[java.sql.Date].toLocalDate shouldEqual LocalDate.of(1995, 12, 1)
     user.personId shouldEqual Some("011295-923L")

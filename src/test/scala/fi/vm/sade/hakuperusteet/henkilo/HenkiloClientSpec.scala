@@ -3,7 +3,7 @@ package fi.vm.sade.hakuperusteet.henkilo
 import java.net.URLEncoder
 import java.util.Date
 
-import fi.vm.sade.hakuperusteet.domain.{Henkilo, IDPEntityId, User}
+import fi.vm.sade.hakuperusteet.domain.{Henkilo, OppijaToken, User}
 import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
 import org.http4s.client.Client
 import org.http4s.dsl._
@@ -37,7 +37,7 @@ class HenkiloClientSpec extends FlatSpec with Matchers {
       CasParams("/authentication-service", "foo", "bar"), mock)
     val henkiloClient = new HenkiloClient(virkailijaUrl, client)
 
-    val emptyUser = User(None, None,"", Some(""), Some(""), Some(new Date()), None, IDPEntityId.oppijaToken, Some(""), Some(""), Some(""), "en")
+    val emptyUser = User(None, None,"", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en")
     val henkilo:Henkilo = henkiloClient.upsertHenkilo(FindOrCreateUser(emptyUser))
 
     henkilo.personOid shouldEqual "1.2.3.4"
