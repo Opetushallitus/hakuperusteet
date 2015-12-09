@@ -234,11 +234,11 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
           case Some(u: PartialUser) =>
             val msg = s"Tried to submit applications to partial user ${education.personOid}"
             logger.error(msg)
-            halt(500, msg)
+            halt(400, msg)
           case None =>
             val msg = s"No user ${education.personOid} found"
             logger.error(msg)
-            halt(404, body = msg)
+            halt(400, body = msg)
         }
         AuditLog.auditAdminPostEducation(user.oid, u, education)
         val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
