@@ -244,13 +244,9 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
         val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
         db.run((db.upsertApplicationObject(education) >> (oldAO match {
           case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
-            logger.info(s"sending payment info email to ${u.email}")
-            oppijanTunnistus.sendToken(education.hakukohdeOid, u.email,
-              Translate("email", "paymentInfo", u.lang, "title"),
-              EmailTemplate.renderPaymentInfo(u.fullName, u.lang),
-              u.lang) match {
+             sendPaymentInfoEmail(u, education.hakukohdeOid) match {
               case Success(_) => DBIO.successful(())
-              case Failure(e) => DBIO.failed(new RuntimeException(s"sending payment info email to ${u.email} failed", e))
+              case Failure(e) => DBIO.failed(e)
             }
           case _ => DBIO.successful(())
         })).transactionally.asTry, 5 seconds) match {
@@ -267,6 +263,17 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     case e: Throwable =>
       logger.error("uncaught exception", e)
       halt(500)
+  }
+
+  private def sendPaymentInfoEmail(user: User, hakukohdeOid: String): Try[Unit] = {
+    logger.info(s"sending payment info email to ${user.email}")
+    oppijanTunnistus.sendToken(hakukohdeOid, user.email,
+      Translate("email", "paymentInfo", user.lang, "title"),
+      EmailTemplate.renderPaymentInfo(user.fullName, user.lang),
+      user.lang) match {
+      case Success(_) => Success(())
+      case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
+    }
   }
 
   private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
