@@ -240,7 +240,6 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
             logger.error(msg)
             halt(400, body = msg)
         }
-        AuditLog.auditAdminPostEducation(user.oid, u, education)
         val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
         db.run((db.upsertApplicationObject(education) >> (oldAO match {
           case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
@@ -250,7 +249,9 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
             }
           case _ => DBIO.successful(())
         })).transactionally.asTry, 5 seconds) match {
-          case Success(()) => halt(200, body = write(syncAndWriteResponse(u)))
+          case Success(()) =>
+            AuditLog.auditAdminPostEducation(user.oid, u, education)
+            halt(200, body = write(syncAndWriteResponse(u)))
           case Failure(e) =>
             logger.error("", e)
             halt(500, body = e.getMessage)
