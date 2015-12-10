@@ -43,7 +43,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
         val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
         val hasPaid = PaymentUtil.hasPaid(newPayments)
         if(hadPaid != hasPaid) {
-          logger.info(s"$u payment status has changed from $hadPaid to $hasPaid. Updating Haku-App.")
+          logger.info(s"$u payment status has changed from $hadPaid to $hasPaid starting synchronization.")
           newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
           (u) match {
             case u: User =>
