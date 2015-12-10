@@ -224,12 +224,14 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
 
   private def fetchPartialUserData(u: PartialUser): PartialUserData = {
     val payments = db.findPayments(u)
-    PartialUserData(u, PaymentUtil.sortPaymentsByStatus(payments),PaymentUtil.hasPaid(payments))
+    PartialUserData(u, PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
   }
+
+  private def decorateWithPaymentHistory(p: Payment) = p.copy(history = Some(db.findStateChangingEventsForPayment(p).sortBy(_.created)))
 
   private def fetchUserData(u: User): UserData = {
     val payments = db.findPayments(u)
-    UserData(u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments),PaymentUtil.hasPaid(payments))
+    UserData(u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
   }
 
   private def syncAndWriteResponse(u: User) = {

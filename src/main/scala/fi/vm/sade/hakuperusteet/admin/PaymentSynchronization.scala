@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import fi.vm.sade.hakuperusteet.vetuma.{VetumaCheck, CheckResponse}
 
 
@@ -31,7 +32,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     })
   }
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
-    val hadPaid = payments.exists(_.status.equals(PaymentStatus.ok))
+    val hadPaid = PaymentUtil.hasPaid(payments) //.exists(_.status.equals(PaymentStatus.ok))
     val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
 
     val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)
@@ -40,7 +41,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
         logger.error(s"Checking payments for $u failed with ${pAndC._1}")
       case None =>
         val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
-        val hasPaid = newPayments.exists(_.status.equals(PaymentStatus.ok))
+        val hasPaid = PaymentUtil.hasPaid(newPayments)
         if(hadPaid != hasPaid) {
           logger.info(s"$u payment status has changed from $hadPaid to $hasPaid. Updating Haku-App.")
           newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
@@ -54,7 +55,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
     val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
-    val p = db.upsertPayment(payment.copy(status = newStatus)).get
+    val p = db.upsertPayment(payment.copy(timestamp = check.timestmp.getOrElse(payment.timestamp), status = newStatus)).get
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p

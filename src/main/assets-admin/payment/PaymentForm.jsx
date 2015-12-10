@@ -21,7 +21,7 @@ export default class PaymentForm extends React.Component {
     const payment = this.props.payment
     const formId = "payment_" + payment.id
     const statusId = "paymentStatus_" + payment.id
-
+    console.log(payment)
     return <div className="paymentLogRow">
       <div className="userDataFormRow">
         <label htmlFor={this.id}>Aikaleima</label>
@@ -36,6 +36,11 @@ export default class PaymentForm extends React.Component {
           <label htmlFor={statusId}>Maksun tila</label>
           <span>{payment.status}</span>
       </div>
+        {payment.history.length > 0 ?
+      <div className="userDataFormRow">
+        <label htmlFor={statusId}>Maksun tilan muutokset</label>
+        <span>{payment.history.map((h,i) => {return <span class="tooltip" data-tip={h.created}>{h.old_status}&nbsp;&rarr;&nbsp;</span>})}<u><strong>{payment.status}</strong></u></span>
+      </div> : null}
       </div>
   }
 
