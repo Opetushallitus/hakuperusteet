@@ -45,7 +45,12 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
         if(hadPaid != hasPaid) {
           logger.info(s"$u payment status has changed from $hadPaid to $hasPaid. Updating Haku-App.")
           newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
-
+          (u) match {
+            case u: User =>
+              db.findApplicationObjects(u).foreach(a => db.insertSyncRequest(u, a))
+            case _ =>
+              logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")
+          }
         }
     }
   }
