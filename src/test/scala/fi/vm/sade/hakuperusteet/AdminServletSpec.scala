@@ -72,7 +72,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   test("400 if user does not exist") {
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina), contentTypeJson) {
       status should equal(400)
-      db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid).isDefined should be (false)
+      db.run(db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds).isDefined should be (false)
     }
   }
 
@@ -80,7 +80,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     db.upsertUser(user)
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina), contentTypeJson) {
       status should equal(200)
-      val ao = db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid)
+      val ao = db.run(db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
       ao.isDefined should be (true)
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
     }
@@ -94,7 +94,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
-      val ao = db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid)
+      val ao = db.run(db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
       ao.isDefined should be (true)
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
       Mockito.verify(oppijanTunnistus).sendToken(
@@ -113,7 +113,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
-      val ao = db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid)
+      val ao = db.run(db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
       ao.isDefined should be (true)
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
       Mockito.verify(oppijanTunnistus, Mockito.never).sendToken(any[String], any[String], any[String], any[String], any[String])
@@ -127,7 +127,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
       .thenReturn(Failure(new RuntimeException("fail")))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(500)
-      val ao = db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid)
+      val ao = db.run(db.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
       ao.isDefined should be (true)
       ao.get.educationCountry should equal(aoCountryFinland.educationCountry)
     }
