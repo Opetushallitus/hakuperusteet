@@ -1,16 +1,19 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.util.Date
-import java.util.concurrent.{TimeUnit, Executors}
-import java.util.concurrent.TimeUnit._
+import java.util.concurrent.{Executors, TimeUnit}
 
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
-import fi.vm.sade.hakuperusteet.vetuma.{VetumaCheck, CheckResponse}
+import fi.vm.sade.hakuperusteet.vetuma.{CheckResponse, VetumaCheck}
+import slick.driver.PostgresDriver.api._
+
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends LazyLogging {
@@ -43,7 +46,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
       newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
       (u) match {
         case u: User =>
-          db.findApplicationObjects(u).foreach(a => db.insertSyncRequest(u, a))
+          db.run(db.findApplicationObjects(u) flatMap (aos => DBIO.sequence(aos map (a => db.insertSyncRequest(u, a)))), 5 seconds)
         case _ =>
           logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")
       }

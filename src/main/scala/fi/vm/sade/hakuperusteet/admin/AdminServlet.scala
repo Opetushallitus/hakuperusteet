@@ -1,7 +1,6 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.net.ConnectException
-import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
@@ -23,6 +22,7 @@ import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
 import slick.driver.PostgresDriver.api._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -204,7 +204,7 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     val personOid = params("personoid")
     val user = db.findUserByOid(personOid)
     user match {
-      case Some(u: User) => write(fetchUserData(u))
+      case Some(u: User) => write(db.run(fetchUserData(u), 5 seconds))
       case Some(u: PartialUser) => write(fetchPartialUserData(u))
       case _ => halt(status = 404, body = s"User ${personOid} not found")
     }
@@ -241,17 +241,21 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
             halt(400, body = msg)
         }
         val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
-        db.run((db.upsertApplicationObject(education) >> (oldAO match {
-          case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
-             sendPaymentInfoEmail(u, education.hakukohdeOid) match {
-              case Success(_) => DBIO.successful(())
-              case Failure(e) => DBIO.failed(e)
-            }
-          case _ => DBIO.successful(())
-        })).transactionally.asTry, 5 seconds) match {
-          case Success(()) =>
+        db.run((for {
+          _ <- db.upsertApplicationObject(education)
+          _ <- oldAO match {
+            case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
+              sendPaymentInfoEmail(u, education.hakukohdeOid) match {
+                case Success(_) => DBIO.successful(())
+                case Failure(e) => DBIO.failed(e)
+              }
+            case _ => DBIO.successful(())
+          }
+          userData <- syncAndWriteResponse(u)
+        } yield userData).transactionally.asTry, 5 seconds) match {
+          case Success(userData: UserData) =>
             AuditLog.auditAdminPostEducation(user.oid, u, education)
-            halt(200, body = write(syncAndWriteResponse(u)))
+            halt(200, body = write(userData))
           case Failure(e) =>
             logger.error("", e)
             halt(500, body = e.getMessage)
@@ -282,13 +286,13 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
       && !countries.shouldPay(oldAO.educationCountry, oldAO.educationLevel)
       && countries.shouldPay(newAO.educationCountry, newAO.educationLevel))
 
-  private def upsertAndAudit(userData: User) = {
+  private def upsertAndAudit(userData: User): UserData = {
     db.insertUserDetails(userData)
     AuditLog.auditAdminPostUserdata(user.oid, userData)
-    syncAndWriteResponse(userData)
+    db.run(syncAndWriteResponse(userData), 5 seconds)
   }
 
-  private def saveUpdatedUserData(updatedUserData: User) = {
+  private def saveUpdatedUserData(updatedUserData: User): UserData = {
     Try(henkiloClient.upsertHenkilo(IfGoogleAddEmailIDP(updatedUserData))) match {
       case Success(_) => upsertAndAudit(updatedUserData)
       case Failure(t) if t.isInstanceOf[ConnectException] =>
@@ -304,7 +308,7 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     }
   }
 
-  private def saveUserData(newUserData: User) = {
+  private def saveUserData(newUserData: User): UserData = {
     db.findUserByOid(newUserData.personOid.getOrElse(halt(500, body = "PersonOid is mandatory"))) match {
       case Some(oldUserData: User) =>
         val updatedUserData = oldUserData.copy(firstName = newUserData.firstName, lastName = newUserData.lastName, birthDate = newUserData.birthDate, personId = newUserData.personId, gender = newUserData.gender, nativeLanguage = newUserData.nativeLanguage, nationality = newUserData.nationality)
@@ -320,18 +324,17 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
 
   private def decorateWithPaymentHistory(p: Payment) = p.copy(history = Some(db.findStateChangingEventsForPayment(p).sortBy(_.created)))
 
-  private def fetchUserData(u: User): UserData = {
-    val payments = db.findPayments(u)
-    UserData(user, u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
-  }
+  private def fetchUserData(u: User): DBIO[UserData] =
+    for {
+      payments <- db.findPaymentsAction(u) map PaymentUtil.sortPaymentsByStatus
+      applicationObjects <- db.findApplicationObjects(u)
+    } yield UserData(user, u, applicationObjects, payments map decorateWithPaymentHistory, PaymentUtil.hasPaid(payments))
 
-  private def syncAndWriteResponse(u: User) = {
-    val data = fetchUserData(u)
-    insertSyncRequests(data)
-    data
-  }
-
-  private def insertSyncRequests(u: UserData) = u.applicationObject.foreach(db.insertSyncRequest(u.user, _))
+  private def syncAndWriteResponse(u: User): DBIO[UserData] =
+    for {
+      userData <- fetchUserData(u)
+      _ <- DBIO.sequence(userData.applicationObject.map(db.insertSyncRequest(userData.user, _)))
+    } yield userData
 
   def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list)))
 }
