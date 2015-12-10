@@ -39,7 +39,7 @@ export default class PaymentForm extends React.Component {
         {payment.history.length > 0 ?
       <div className="userDataFormRow">
         <label htmlFor={statusId}>Maksun tilan muutokset</label>
-        <span>{payment.history.map((h,i) => {return <span class="tooltip" data-tip={h.created}>{h.old_status}&nbsp;&rarr;&nbsp;</span>})}<u><strong>{payment.status}</strong></u></span>
+        <span>{payment.history.map((h,i) => {return <span class="tooltip" data-tip={h.created}>{h.old_status}&nbsp;&rarr;&nbsp;</span>})}<u><strong>{payment.history[payment.history.length -1].new_status}</strong></u></span>
       </div> : null}
       </div>
   }
