@@ -108,7 +108,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 
   private def synchronizeWithData(row: ApplicationObjectSyncRequest, as: ApplicationSystem, u: User, payments: Seq[Payment])(ao: ApplicationObject) {
     val shouldPay = countries.shouldPay(ao.educationCountry, ao.educationLevel)
-    val hasPaid = payments.exists(_.status.equals(PaymentStatus.ok))
+    val hasPaid = PaymentUtil.hasPaid(payments)
     val formUrl = as.formUrl
     formUrl match {
       case Some(formUrl) =>
