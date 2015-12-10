@@ -34,7 +34,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
     val hadPaid = PaymentUtil.hasPaid(payments)
     val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
-    .filter(_._2.isEmpty)
+    .filter(_._2.isDefined)
 
     val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
     val hasPaid = PaymentUtil.hasPaid(newPayments)
