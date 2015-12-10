@@ -34,24 +34,19 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
     val hadPaid = PaymentUtil.hasPaid(payments)
     val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
+    .filter(_._2.isEmpty)
 
-    val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)
-    anyErrors match {
-      case Some(pAndC) =>
-        logger.error(s"Checking payments for $u failed with ${pAndC._1}")
-      case None =>
-        val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
-        val hasPaid = PaymentUtil.hasPaid(newPayments)
-        if(hadPaid != hasPaid) {
-          logger.info(s"$u payment status has changed from $hadPaid to $hasPaid starting synchronization.")
-          newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
-          (u) match {
-            case u: User =>
-              db.findApplicationObjects(u).foreach(a => db.insertSyncRequest(u, a))
-            case _ =>
-              logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")
-          }
-        }
+    val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
+    val hasPaid = PaymentUtil.hasPaid(newPayments)
+    if(hadPaid != hasPaid) {
+      logger.info(s"$u payment status has changed from $hadPaid to $hasPaid starting synchronization.")
+      newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
+      (u) match {
+        case u: User =>
+          db.findApplicationObjects(u).foreach(a => db.insertSyncRequest(u, a))
+        case _ =>
+          logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")
+      }
     }
   }
 
