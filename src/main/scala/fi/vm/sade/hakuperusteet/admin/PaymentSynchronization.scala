@@ -18,7 +18,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   val vetumaQueryHost = s"${config.getString("vetuma.host")}Query"
 
   val scheduler = Executors.newScheduledThreadPool(1)
-  def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, TimeUnit.HOURS.toSeconds(1), SECONDS)
+  def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, TimeUnit.MINUTES.toSeconds(1), SECONDS)
 
   def checkPaymentSynchronizations = asSimpleRunnable { () =>
     db.findUnchekedPaymentsGroupedByPersonOid.foreach(r => {
