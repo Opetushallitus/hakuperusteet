@@ -23,28 +23,41 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     db.findUnchekedPaymentsGroupedByPersonOid.foreach(r => {
       val (personOid, paymentIds) = r
       val u: AbstractUser = db.findUserByOid(personOid).get
-      val payments = paymentIds.flatMap(p => db.findPayment(p._1))
-
-      val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
-
-      val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)
-      anyErrors match {
-        case Some(pAndC) =>
-          logger.error(s"Checking payments for $u failed with ${pAndC._1}")
-        case None =>
-          updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
+      try {
+        handleUserPayments(u, paymentIds.flatMap(p => db.findPayment(p._1)))
+      } catch {
+        case e:Throwable => logger.error(s"Vetuma check failed to $u!", e)
       }
     })
   }
+  private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
+    val hadPaid = payments.exists(_.status.equals(PaymentStatus.ok))
+    val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
 
-  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]) = paymentAndChecks.foreach(pAndC => updatePaymentAndCreateEvent(pAndC._1, pAndC._2))
+    val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)
+    anyErrors match {
+      case Some(pAndC) =>
+        logger.error(s"Checking payments for $u failed with ${pAndC._1}")
+      case None =>
+        val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
+        val hasPaid = newPayments.exists(_.status.equals(PaymentStatus.ok))
+        if(hadPaid != hasPaid) {
+          logger.info(s"$u payment status has changed from $hadPaid to $hasPaid. Updating Haku-App.")
+          newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
 
-  private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse) = {
+        }
+    }
+  }
+
+  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]): Seq[Payment] = paymentAndChecks.map(pAndC => updatePaymentAndCreateEvent(pAndC._1, pAndC._2))
+
+  private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
     val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
-    db.upsertPayment(payment.copy(status = newStatus))
+    val p = db.upsertPayment(payment.copy(status = newStatus)).get
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
+    p
   }
 
 
