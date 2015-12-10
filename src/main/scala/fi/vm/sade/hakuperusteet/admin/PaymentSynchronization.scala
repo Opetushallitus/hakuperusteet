@@ -32,7 +32,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     })
   }
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
-    val hadPaid = PaymentUtil.hasPaid(payments) //.exists(_.status.equals(PaymentStatus.ok))
+    val hadPaid = PaymentUtil.hasPaid(payments)
     val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
 
     val anyErrors = paymentAndCheckOption.find(p => p._2.isEmpty)

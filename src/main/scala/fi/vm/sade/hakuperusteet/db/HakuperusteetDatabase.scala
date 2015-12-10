@@ -48,7 +48,8 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   }
   def findUnchekedPaymentsGroupedByPersonOid = findUnchekedRecentEnoughPayments.groupBy(_._2).filter(tooRecent(new DateTime().minusHours(1)))
   def findUnchekedRecentEnoughPayments = sql"select id, henkilo_oid, tstamp from payment where tstamp > CURRENT_TIMESTAMP - INTERVAL '40 days' and not exists (select NULL from payment_event where payment.id = payment_event.payment_id and payment_event.created > CURRENT_TIMESTAMP - INTERVAL '1 days')".as[(Int,String,java.sql.Timestamp)].run
-  def findStateChangingEventsForPayment(payment: Payment) = (Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get && p.newStatus =!= p.oldStatus)).result.run.map(paymentEventRowToPaymentEvent)
+  def findStateChangingEventsForPayment(payment: Payment) = (Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get).filter(p => p.newStatus =!= p.oldStatus || p.newStatus.isEmpty && p.oldStatus.isDefined || p.newStatus.isDefined && p.oldStatus.isEmpty)).result.run.map(paymentEventRowToPaymentEvent)
+  //
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
 

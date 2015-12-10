@@ -65,7 +65,7 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
     val event1 = PaymentEvent(None, someRecentEnoughPayment1.id.get, new Date, None, false, "PROBLEM", Some(PaymentStatus.error), Some(PaymentStatus.ok))
     val event3 = PaymentEvent(None, someRecentEnoughPayment1.id.get, now.minusHours(15).toDate, None, false, "CANCELLED_OR_REJECTED", Some(PaymentStatus.ok), Some(PaymentStatus.cancel))
 
-    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(25).toDate, None, false, "OK_VERIFIED", None, None)
+    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(25).toDate, None, false, "OK_VERIFIED", None, Some(PaymentStatus.ok))
     database.insertEvent(event1)
     database.insertEvent(event2)
     database.insertEvent(event3)
@@ -82,4 +82,5 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
     val someUnchekedPayments = database.findUnchekedPaymentsGroupedByPersonOid.get(someUser.personOid.get)
     someUnchekedPayments shouldEqual None
   }
+
 }
