@@ -55,7 +55,8 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
     val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
-    val p = db.upsertPayment(payment.copy(timestamp = check.timestmp.getOrElse(payment.timestamp), status = newStatus)).get
+    // TODO: Update original payment, code below! This change is for production dry run.
+    val p = payment // db.upsertPayment(payment.copy(timestamp = check.timestmp.getOrElse(payment.timestamp), status = newStatus)).get
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p
