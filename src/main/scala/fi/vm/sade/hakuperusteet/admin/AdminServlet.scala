@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.admin.auth.{CasAuthenticationSupport, CasSessionDB}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
+import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.toDBIO
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.email.EmailTemplate
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
@@ -228,38 +229,22 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     val params = parse(request.body).extract[Params]
     applicationObjectValidator.parseApplicationObject(params).bitraverse(
       errors => renderConflictWithErrors(errors),
-      education => {
-        val u = db.findUserByOid(education.personOid) match {
-          case Some(u: User) => u
-          case Some(u: PartialUser) =>
-            val msg = s"Tried to submit applications to partial user ${education.personOid}"
-            logger.error(msg)
-            halt(400, msg)
-          case None =>
-            val msg = s"No user ${education.personOid} found"
-            logger.error(msg)
-            halt(400, body = msg)
-        }
-        val oldAO = db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
-        db.run((for {
-          _ <- db.upsertApplicationObject(education)
-          _ <- oldAO match {
-            case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, education)) =>
-              sendPaymentInfoEmail(u, education.hakukohdeOid) match {
-                case Success(_) => DBIO.successful(())
-                case Failure(e) => DBIO.failed(e)
-              }
-            case _ => DBIO.successful(())
-          }
-          userData <- syncAndWriteResponse(u)
-        } yield userData).transactionally.asTry, 5 seconds) match {
-          case Success(userData: UserData) =>
-            AuditLog.auditAdminPostEducation(user.oid, u, education)
-            halt(200, body = write(userData))
-          case Failure(e) =>
-            logger.error("", e)
-            halt(500, body = e.getMessage)
-        }
+      education => db.run((for {
+        u <- findFullUser(education.personOid)
+        oldAO <- db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
+        _ <- db.upsertApplicationObject(education)
+        _ <- toDBIO(sendPaymentInfoEmailIfPaymentNowRequired(u, oldAO, education))
+        userData <- syncAndWriteResponse(u)
+      } yield userData).transactionally.asTry, 5 seconds) match {
+        case Success(userData: UserData) =>
+          AuditLog.auditAdminPostEducation(user.oid, userData.user, education)
+          halt(200, body = write(userData))
+        case Failure(e: IllegalArgumentException) =>
+          logger.error("bad application object update request", e)
+          halt(400, body = e.getMessage)
+        case Failure(e) =>
+          logger.error("", e)
+          halt(500, body = e.getMessage)
       }
     )
   }
@@ -268,6 +253,20 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     case e: Throwable =>
       logger.error("uncaught exception", e)
       halt(500)
+  }
+
+  private def findFullUser(personOid: String): DBIO[User] = db.findUserByOid(personOid) match {
+    case Some(u: User) => DBIO.successful(u)
+    case Some(u: PartialUser) => DBIO.failed(new IllegalArgumentException(s"${personOid} is a partial user"))
+    case None => DBIO.failed(new IllegalArgumentException(s"no user ${personOid} found"))
+  }
+
+  private def sendPaymentInfoEmailIfPaymentNowRequired(u: User,
+                                                       oldAO: Option[ApplicationObject],
+                                                       newAO: ApplicationObject): Try[Unit] = oldAO match {
+    case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, newAO)) =>
+      sendPaymentInfoEmail(u, newAO.hakukohdeOid)
+    case _ => Success(())
   }
 
   private def sendPaymentInfoEmail(user: User, hakukohdeOid: String): Try[Unit] = {

@@ -1,25 +1,18 @@
 package fi.vm.sade.hakuperusteet
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, User, PaymentStatus, Payment}
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, PaymentStatus, User}
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
 import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.redirect.RedirectCreator
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.tarjonta.{ApplicationSystem, Tarjonta}
-import org.json4s._
-import org.json4s.native.JsonMethods._
-import org.json4s.JsonDSL._
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write}
+import org.json4s.native.Serialization.write
 
-import scala.util.{Try, Failure, Success}
-
+import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
 
 class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, signer: RSASigner, countries: Countries, tarjonta: Tarjonta) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
@@ -29,7 +22,7 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
     (userDataFromSession) match {
       case userData: User =>
         val hakukohdeOid = params.get("hakukohdeOid").getOrElse(halt(409))
-        val applicationObjectForThisHakukohde = db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid).getOrElse(halt(409))
+        val applicationObjectForThisHakukohde = db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid), 5 seconds).getOrElse(halt(409))
         val educationLevel = Some(applicationObjectForThisHakukohde.educationLevel).getOrElse(halt(409))
         Try { tarjonta.getApplicationSystem(applicationObjectForThisHakukohde.hakuOid) } match {
           case Success(as) => doRedirect(userData, applicationObjectForThisHakukohde, as, educationLevel) match {

@@ -21,6 +21,7 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import scala.util.Try
 
 case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   import HakuperusteetDatabase._
@@ -129,8 +130,8 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   def findApplicationObjects(user: AbstractUser): dbio.DBIO[Seq[ApplicationObject]] =
     Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).result map (_.map(aoRowToAo))
 
-  def findApplicationObjectByHakukohdeOid(user: AbstractUser, hakukohdeOid: String) =
-    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).filter(_.hakukohdeOid === hakukohdeOid).result.headOption.run.map(aoRowToAo)
+  def findApplicationObjectByHakukohdeOid(user: AbstractUser, hakukohdeOid: String): dbio.DBIO[Option[ApplicationObject]] =
+    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).filter(_.hakukohdeOid === hakukohdeOid).result.headOption map (_.map(aoRowToAo))
 
   def upsertApplicationObject(applicationObject: ApplicationObject): dbio.DBIO[Option[ApplicationObject]] =
     (Tables.ApplicationObject returning Tables.ApplicationObject).insertOrUpdate(aoToAoRow(applicationObject)) map (_.map(aoRowToAo))
@@ -252,6 +253,8 @@ object HakuperusteetDatabase extends LazyLogging {
       inited(config)
     }
   }
+
+  def toDBIO[T](t: Try[T]): DBIO[T] = t map (DBIO.successful) recover { case e => DBIO.failed(e) } get
 
   def close = inited.values.foreach(_.db.close)
 

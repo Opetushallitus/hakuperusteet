@@ -1,32 +1,27 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit._
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.domain.PaymentState.PaymentState
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
-import fi.vm.sade.hakuperusteet.domain.PaymentUpdate
-import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.domain.{PaymentUpdate, _}
 import fi.vm.sade.hakuperusteet.hakuapp.HakuAppClient
 import fi.vm.sade.hakuperusteet.koodisto.Countries
+import fi.vm.sade.hakuperusteet.redirect.RedirectCreator._
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.tarjonta.{ApplicationSystem, Tarjonta}
-import fi.vm.sade.hakuperusteet.redirect.RedirectCreator._
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.apache.http.HttpVersion
-import org.apache.http.client.fluent.{Response, Request}
+import org.apache.http.client.fluent.{Request, Response}
 import org.apache.http.entity.ContentType
 import org.http4s
-import scala.util.control.Exception._
-import org.json4s.JsonDSL._
-import org.json4s._
-import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
 
+import scala.concurrent.duration._
+import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner) extends LazyLogging {
@@ -99,7 +94,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     db.findUserByOid(row.henkiloOid).foreach { (u) =>
       (u) match {
         case u:User =>
-          db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid)
+          db.run(db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid), 5 seconds)
             .foreach(synchronizeWithData(row, as, u, db.findPayments(u)))
         case u: PartialUser =>
           logger.error("PartialUser in user sync loop!")
