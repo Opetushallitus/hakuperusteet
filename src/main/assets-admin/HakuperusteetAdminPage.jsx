@@ -33,7 +33,6 @@ export default class HakuperusteetPage extends React.Component {
                             return <li key={i} className={selected}><a onClick={this.selectUser.bind(this, u.personOid)}>{fullName(u)}</a></li>;
                         })}
         </ul>
-        console.log(state.changesView)
         return <div>
             {state.changesView ?
             <div className="content-area">
