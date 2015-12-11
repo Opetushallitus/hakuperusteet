@@ -233,8 +233,8 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
         u <- findFullUser(education.personOid)
         oldAO <- db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
         _ <- db.upsertApplicationObject(education)
-        _ <- toDBIO(sendPaymentInfoEmailIfPaymentNowRequired(u, oldAO, education))
         userData <- syncAndWriteResponse(u)
+        _ <- toDBIO(sendPaymentInfoEmailIfPaymentNowRequired(u, oldAO, education))
       } yield userData).transactionally.asTry, 5 seconds) match {
         case Success(userData: UserData) =>
           AuditLog.auditAdminPostEducation(user.oid, userData.user, education)
