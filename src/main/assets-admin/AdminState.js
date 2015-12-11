@@ -54,6 +54,12 @@ export function initAppState(props) {
         .filter(uniquePersonOid => uniquePersonOid ? true : false)
         .flatMap(uniquePersonOid => Bacon.fromPromise(HttpUtil.get(`/hakuperusteetadmin/api/v1/admin/${uniquePersonOid}`)))
         .merge(serverUpdatesBus)
+    const viewPaymentChangesRouteS = Bacon.once(document.location.pathname)
+      .map(viewDrasticPaymentStatusChangesUrl)
+      .skipDuplicates(_.isEqual)
+      .filter(isView => isView ? true : false)
+      .flatMap(isView => Bacon.fromPromise(HttpUtil.get(`/hakuperusteetadmin/api/v1/admin/users_with_drastic_payment_changes/`)))
+
     const updateApplicationObjectS = updateRouteS.flatMap(userdata => Bacon.fromArray(userdata.applicationObject ? userdata.applicationObject : []))
     const tarjontaS = updateApplicationObjectS.map(ao => ao.hakukohdeOid).flatMap(fetchFromTarjonta).toEventStream()
     const updateFieldS = dispatcher.stream(events.updateField).merge(serverUpdatesBus)
@@ -70,6 +76,7 @@ export function initAppState(props) {
         [updateEducationFormS], onUpdateEducationForm,
         [togglePaymentGroupS], onTogglePaymentGroup,
         [updateFieldS], onUpdateField,
+        [viewPaymentChangesRouteS], onViewPaymentChanges,
         [fieldValidationS], onFieldValidation)
 
     const formSubmittedS = stateP.sampledBy(dispatcher.stream(events.submitForm), (state, form) => ({state, form}))
@@ -138,6 +145,9 @@ export function initAppState(props) {
         const showPaymentGroup = {['showPaymentGroup']:false}
         return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroup}
     }
+    function onViewPaymentChanges(state, paymentChanges) {
+        return {...state, ['changesView']: paymentChanges}
+    }
     function onFieldValidation(state, {field, value}) {
         const newValidationErrors = fieldValidationResults(state)
         return {...state, ['validationErrors']: {...newValidationErrors, ...validateIfNoChanges(state, state.fromServer.user)}}
@@ -148,6 +158,10 @@ export function initAppState(props) {
     function personOidInUrl(url) {
         var match = url.match(new RegExp("oppija/(.*)"))
         return match ? match[1] : null
+    }
+    function viewDrasticPaymentStatusChangesUrl(url) {
+        var match = url.match(new RegExp("d27db1a1-eef3-48f6-84f7-007655c2413f"))
+        return match ? true : false
     }
     // Helper functions
     function withPartialPersonId(obj) {

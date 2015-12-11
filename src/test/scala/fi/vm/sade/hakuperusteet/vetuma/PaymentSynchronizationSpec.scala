@@ -2,7 +2,7 @@ package fi.vm.sade.hakuperusteet.vetuma
 import java.io.Serializable
 import java.net.InetSocketAddress
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{UUID, Date}
 import java.util.concurrent.CyclicBarrier
 
 import com.netaporter.uri.Uri._
@@ -20,6 +20,33 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
 
   behavior of "PaymentSynchronization"
 
+
+  it should "read payment history in right order" in {
+    {
+      val p = generatePaymentToUser(generateRandomUser).copy(status = PaymentStatus.ok, history = None)
+      database.newestPaymentStatuses(p) shouldEqual PaymentStatus.ok
+      database.oldestPaymentStatuses(p) shouldEqual PaymentStatus.ok
+    }
+    {
+      val p = generatePaymentToUser(generateRandomUser).copy(status = PaymentStatus.ok, history = Some(Seq()))
+      database.newestPaymentStatuses(p) shouldEqual PaymentStatus.ok
+      database.oldestPaymentStatuses(p) shouldEqual PaymentStatus.ok
+    }
+    {
+      val h = PaymentEvent(None, 0, now.toDate, None, true, "", old_status = Some(PaymentStatus.cancel), new_status = Some(PaymentStatus.error))
+      val p = generatePaymentToUser(generateRandomUser).copy(status = PaymentStatus.ok, history = Some(Seq(h)))
+      database.newestPaymentStatuses(p) shouldEqual PaymentStatus.error
+      database.oldestPaymentStatuses(p) shouldEqual PaymentStatus.cancel
+    }
+    {
+      val h_old = PaymentEvent(None, 0, now.minusHours(5).toDate, None, true, "", old_status = Some(PaymentStatus.cancel), new_status = Some(PaymentStatus.error))
+      val h_obso = PaymentEvent(None, 0, now.minusHours(1).toDate, None, true, "", old_status = Some(PaymentStatus.error), new_status = Some(PaymentStatus.started))
+      val h_new = PaymentEvent(None, 0, now.toDate, None, true, "", old_status = Some(PaymentStatus.started), new_status = Some(PaymentStatus.ok))
+      val p = generatePaymentToUser(generateRandomUser).copy(status = PaymentStatus.ok, history = Some(Seq(h_old, h_obso,h_new)))
+      database.newestPaymentStatuses(p) shouldEqual PaymentStatus.ok
+      database.oldestPaymentStatuses(p) shouldEqual PaymentStatus.cancel
+    }
+  }
 
 
   it should "skip checking too recent payments (less than hour)" in {

@@ -30,11 +30,27 @@ export default class HakuperusteetPage extends React.Component {
                             }
                         }).map((u, i) => {
                             const selected = u.id == state.id ? "selected user" : "user"
-                            return <li key={i} className={selected}><a onClick={this.selectUser.bind(this, u)}>{fullName(u)}</a></li>;
+                            return <li key={i} className={selected}><a onClick={this.selectUser.bind(this, u.personOid)}>{fullName(u)}</a></li>;
                         })}
         </ul>
-
+        console.log(state.changesView)
         return <div>
+            {state.changesView ?
+            <div className="content-area">
+                <section className="main-content oppija">
+                    <table>
+                        <thead>
+                        <tr><th>Email</th><th>Linkki käyttäjään</th><th>Maksun tilan muutos</th></tr>
+                        </thead>
+                        <tbody>
+                        {state.changesView.map(row => {
+
+                          return <tr><td>{row.user.email}</td><td><a href="#" onClick={this.selectUser.bind(this, row.user.personOid)}>{row.user.personOid}</a></td><td>{row.old_state ? "Maksettu" :"Kesken"}&rarr;{row.new_state  ? "Maksettu" :"Kesken"}</td></tr>
+                          })}
+                        </tbody>
+                    </table>
+                </section>
+            </div> : null}
             <div className="content-area">
                 <div className={oppijaClassName}>
                     <label htmlFor="userSearch">
@@ -50,9 +66,9 @@ export default class HakuperusteetPage extends React.Component {
         </div>
     }
 
-    selectUser(user) {
+    selectUser(personOid) {
         const controller = this.props.controller
-        history.pushState(null, null, `/hakuperusteetadmin/oppija/${user.personOid}`)
+        history.pushState(null, null, `/hakuperusteetadmin/oppija/${personOid}`)
         controller.pushRouteChange(document.location.pathname)
     }
 }

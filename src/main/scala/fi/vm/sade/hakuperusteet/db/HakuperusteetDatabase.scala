@@ -10,7 +10,9 @@ import fi.vm.sade.hakuperusteet.admin.SynchronizationStatus
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.DB
 import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.db.generated.Tables._
+import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, User, _}
+import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
 import slick.driver.PostgresDriver
@@ -39,6 +41,30 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
 
   def findPayment(id: Int): Option[Payment] = Tables.Payment.filter(_.id === id).result.headOption.run.map(paymentRowToPayment)
 
+  private def decorateWithPaymentHistory(p: Payment, e: Option[Seq[PaymentEvent]]): Payment = p.copy(history = e.map(_.sortBy(_.created)))
+  private def findPaymentsWithEventsByPersonOid(personOid:String): Seq[Payment] = {
+    val payments = findPaymentsByPersonOid(personOid)
+    val eventByPayment: Map[Int, Seq[PaymentEvent]] = findPaymentEventsForPayments(payments.flatten(_.id)).groupBy(_.paymentId)
+    payments.map(p => decorateWithPaymentHistory(p, eventByPayment.get(p.id.get)))
+  }
+  def oldestPaymentStatuses(p: Payment) = p.history.flatMap(_.sorted(Ordering.by((_:PaymentEvent).created)).headOption.flatMap(_.old_status)).getOrElse(p.status)
+  def newestPaymentStatuses(p: Payment) = p.history.flatMap(_.sorted(Ordering.by((_:PaymentEvent).created).reverse).headOption.flatMap(_.new_status)).getOrElse(p.status)
+
+  def findAllUsersAndPaymentsWithDrasticallyChangedPaymentStates: List[(AbstractUser, Vector[Payment])] = {
+    val potentiallyChangedPersonOids = findPotentiallyChangedPersonOidsAfterVetumaCheck
+    potentiallyChangedPersonOids.map(personOid => {
+      val paymentsWithHistory = findPaymentsWithEventsByPersonOid(personOid)
+      val isSomeOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(oldestPaymentStatuses))
+      val isSomeOtherOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(newestPaymentStatuses))
+      if(isSomeOk != isSomeOtherOk) {
+        Some(paymentsWithHistory)
+      } else {
+        None
+      }
+    }).flatten.flatten.groupBy(_.personOid).toList.map(e => (findUserByOid(e._1).get, e._2))
+  }
+  private def findPotentiallyChangedPersonOidsAfterVetumaCheck = sql"select distinct henkilo_oid from payment where exists (select null from payment_event as pe where payment.id = pe.payment_id and (pe.old_status = 'ok' and pe.new_status != 'ok')  or (pe.new_status = 'ok' and pe.old_status != 'ok'))".as[String].run
+  private def findPaymentEventsForPayments(ids: Seq[Int]) = Tables.PaymentEvent.filter(p => p.paymentId inSet ids).result.run.map(paymentEventRowToPaymentEvent)
   private def tooRecent(anHourAgo: DateTime) = (k: (String,Vector[(Int, String, java.sql.Timestamp)])) => {
     val (_, payments) = k
     !payments.exists(p => {
@@ -111,6 +137,9 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
 
   def findPaymentByOrderNumber(user: AbstractUser, orderNumber: String): Option[Payment] =
     Tables.Payment.filter(_.henkiloOid === user.personOid).filter(_.orderNumber === orderNumber).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
+
+  def findPaymentsByPersonOid(personOid: String): Seq[Payment] =
+    Tables.Payment.filter(_.henkiloOid === personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)
 
   def findPayments(user: AbstractUser): Seq[Payment] =
     Tables.Payment.filter(_.henkiloOid === user.personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)

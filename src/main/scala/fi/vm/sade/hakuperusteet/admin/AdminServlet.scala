@@ -143,6 +143,24 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     write(db.allUsers.filter(u => search.isEmpty || u.email.toLowerCase.contains(search) || (u.fullName).toLowerCase.contains(search)))
   }
 
+  get("/d27db1a1-eef3-48f6-84f7-007655c2413f") {
+    checkAuthentication()
+    contentType = "text/html"
+    staticFileContent
+  }
+
+  get("/api/v1/admin/users_with_drastic_payment_changes/") {
+    checkAuthentication()
+    contentType = "application/json"
+    halt(status = 200, body = write(db.findAllUsersAndPaymentsWithDrasticallyChangedPaymentStates.map(entry => {
+      val (user, payments) = entry
+
+      val oldest = PaymentUtil.hasPaidWithTheseStatuses(payments.map(db.oldestPaymentStatuses))
+      val newest = PaymentUtil.hasPaidWithTheseStatuses(payments.map(db.newestPaymentStatuses))
+      Map("user" -> user, "payments" -> payments, "old_state" -> oldest, "new_state" -> newest)
+    })))
+  }
+
   get("/api/v1/admin/:personoid") {
     checkAuthentication()
     contentType = "application/json"
