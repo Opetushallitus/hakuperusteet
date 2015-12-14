@@ -66,10 +66,10 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
     withTooRecentPayments shouldEqual None
   }
 
-  it should "skip checking too old payments (more than 40 days)" in {
+  it should "skip checking too old payments (more than 14 days)" in {
     val someUser = database.upsertPartialUser(generateRandomUser).get
-    val someTooOldPayment = generatePaymentToUser(someUser).copy(timestamp = now.minusDays(41).toDate)
-    val someRecentEnoughPayment = generatePaymentToUser(someUser).copy(timestamp = now.minusDays(39).toDate)
+    val someTooOldPayment = generatePaymentToUser(someUser).copy(timestamp = now.minusDays(15).toDate)
+    val someRecentEnoughPayment = generatePaymentToUser(someUser).copy(timestamp = now.minusDays(13).toDate)
     database.upsertPayment(someTooOldPayment)
     database.upsertPayment(someRecentEnoughPayment)
 
@@ -87,15 +87,26 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
 
   it should "skip checking payment that is already checked today" in {
     val someUser = database.upsertPartialUser(generateRandomUser).get
-    val someRecentEnoughPayment1 = database.upsertPayment(generatePaymentToUser(someUser).copy(status = PaymentStatus.error, timestamp = now.minusDays(15).toDate)).get
-    val someRecentEnoughPayment2 = database.upsertPayment(generatePaymentToUser(someUser).copy(status = PaymentStatus.cancel, timestamp = now.minusDays(15).toDate)).get
+    val personOid = someUser.personOid.get
+    val someRecentEnoughPayment1 = database.upsertPayment(generatePaymentToUser(someUser).copy(status = PaymentStatus.error, timestamp = now.minusDays(6).toDate)).get
+    val someRecentEnoughPayment2 = database.upsertPayment(generatePaymentToUser(someUser).copy(status = PaymentStatus.cancel, timestamp = now.minusDays(6).toDate)).get
+
+
     val event1 = PaymentEvent(None, someRecentEnoughPayment1.id.get, new Date, None, false, "PROBLEM", Some(PaymentStatus.error), Some(PaymentStatus.ok))
     val event3 = PaymentEvent(None, someRecentEnoughPayment1.id.get, now.minusHours(15).toDate, None, false, "CANCELLED_OR_REJECTED", Some(PaymentStatus.ok), Some(PaymentStatus.cancel))
 
-    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(25).toDate, None, false, "OK_VERIFIED", None, Some(PaymentStatus.ok))
+    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(30).toDate, None, false, "OK_VERIFIED", None, Some(PaymentStatus.ok))
     database.insertEvent(event1)
     database.insertEvent(event2)
     database.insertEvent(event3)
+
+    val payments = database.findPayments(someUser)
+    (payments.size) shouldEqual 2
+
+    val uncheckedPayments = database.findUnchekedRecentEnoughPayments
+    val withThisUser = uncheckedPayments.filter(a => a._2 == someUser.personOid.get)
+    withThisUser.size shouldEqual 1
+
     val someUnchekedPayments = database.findUnchekedPaymentsGroupedByPersonOid.get(someUser.personOid.get)
 
     someUnchekedPayments should not equal None
