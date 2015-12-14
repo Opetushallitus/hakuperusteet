@@ -3,16 +3,18 @@ package fi.vm.sade.hakuperusteet
 import java.util.Date
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import fi.vm.sade.hakuperusteet
 import fi.vm.sade.hakuperusteet.admin.AdminServlet
 import fi.vm.sade.hakuperusteet.admin.auth.CasBasicAuthStrategy
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.swagger.AdminSwagger
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
 import org.json4s.native.Serialization.{write, _}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.{Matchers, Mockito}
+import org.mockito.{AdditionalMatchers, Matchers, Mockito}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatra.test.scalatest.ScalatraSuite
@@ -29,6 +31,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val logoutRequest = scala.io.Source.fromInputStream( stream ).mkString
   override val oppijanTunnistus = Mockito.mock(classOf[OppijanTunnistus])
   val db = Mockito.spy(database)
+  val tarjonta = Mockito.mock(classOf[Tarjonta])
 
   val contentTypeJson: Map[String, String] = Map("Content-Type" -> "application/json")
   val user = User(None, Some("1.2.246.562.24.00000000000"), "test@example.com", Some("firstName"),
@@ -36,10 +39,17 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val bachelors = "102"
   val argentina = "032"
   val finland = "246"
+  val aoInTarjonta = hakuperusteet.tarjonta.ApplicationObject("1.2.246.562.20.00000000000", "1.2.246.562.5.00000000000",
+    new hakuperusteet.tarjonta.Nimi2(None, Some("hakukohteen nimi"), None),
+    new hakuperusteet.tarjonta.Nimi2(Some("providerName"), Some("providerName"), Some("providerName")),
+    List(),
+    new hakuperusteet.tarjonta.Nimi2(Some("description"), Some("description"), Some("description")),
+    "hakuaika",
+    "status")
   val aoCountryArgentina = ApplicationObject(None, user.personOid.get, "1.2.246.562.20.00000000000", "1.2.246.562.5.00000000000", bachelors, argentina)
   val aoCountryFinland = aoCountryArgentina.copy(educationCountry = finland)
   val okPayment = Payment(None, user.personOid.get, new Date(), "reference", "orderNumber", "paymentCallId", PaymentStatus.ok, None)
-  val s = new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, UserValidator(countries,languages), ApplicationObjectValidator(countries,educations), db, countries) {
+  val s = new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, UserValidator(countries,languages), ApplicationObjectValidator(countries,educations), db, countries, tarjonta) {
     override protected def registerAuthStrategies = {
       scentry.register("CAS", app => new CasBasicAuthStrategy(app, cfg) {
         override def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {
@@ -89,6 +99,8 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   test("send email if payment is required after update") {
     db.upsertUser(user)
     val ao = db.run(db.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    Mockito.when(tarjonta.getApplicationObject(aoCountryArgentina.hakukohdeOid))
+      .thenReturn(aoInTarjonta)
     Mockito.when(oppijanTunnistus.sendToken(any[String], any[String], any[String], any[String], any[String]))
       .thenReturn(Success(()))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
@@ -100,8 +112,10 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
       Mockito.verify(oppijanTunnistus).sendToken(
         Matchers.eq[String](aoCountryArgentina.hakukohdeOid),
         Matchers.eq[String](user.email),
-        Matchers.contains("Opintopolku"),
-        Matchers.contains("{{verification-link}}"),
+        Matchers.contains("Opintopolku - täydennyspyyntö"),
+        AdditionalMatchers.and(
+          Matchers.contains("{{verification-link}}"),
+          Matchers.contains("hakukohteen nimi")),
         Matchers.eq[String](user.lang))
     }
   }

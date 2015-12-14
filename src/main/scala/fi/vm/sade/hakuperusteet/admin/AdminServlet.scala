@@ -1,6 +1,7 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.net.ConnectException
+import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
@@ -12,6 +13,7 @@ import fi.vm.sade.hakuperusteet.email.EmailTemplate
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil, Translate, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, PaymentValidator, UserValidator}
 import fi.vm.sade.utils.cas.CasLogout
@@ -29,7 +31,14 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scalaz.{NonEmptyList, _}
 
-class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanTunnistus: OppijanTunnistus, userValidator: UserValidator, applicationObjectValidator: ApplicationObjectValidator, db: HakuperusteetDatabase, countries: Countries)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
+class AdminServlet(val resourcePath: String,
+                   protected val cfg: Config,
+                   oppijanTunnistus: OppijanTunnistus,
+                   userValidator: UserValidator,
+                   applicationObjectValidator: ApplicationObjectValidator,
+                   db: HakuperusteetDatabase,
+                   countries: Countries,
+                   tarjonta: Tarjonta)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
   override protected def applicationDescription: String = "Admin API"
   val paymentValidator = PaymentValidator()
   val staticFileContent = Source.fromURL(getClass.getResource(resourcePath)).mkString
@@ -271,14 +280,20 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
 
   private def sendPaymentInfoEmail(user: User, hakukohdeOid: String): Try[Unit] = {
     logger.info(s"sending payment info email to ${user.email}")
-    oppijanTunnistus.sendToken(hakukohdeOid, user.email,
-      Translate("email", "paymentInfo", user.lang, "title"),
-      EmailTemplate.renderPaymentInfo(user.fullName, user.lang),
-      user.lang) match {
-      case Success(_) => Success(())
-      case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
-    }
+    (Try(tarjonta.getApplicationObject(hakukohdeOid)) match {
+      case Success(ao) => Success(ao.name.get(user.lang))
+      case Failure(e) => Failure(new RuntimeException(s"fetching application object ${hakukohdeOid} from tarjonta failed", e))
+    }) flatMap (hakukohdeName =>
+      oppijanTunnistus.sendToken(hakukohdeOid, user.email,
+        Translate("email", "paymentInfo", user.lang, "title"),
+        EmailTemplate.renderPaymentInfo(hakukohdeName, nDaysInFuture(14), user.lang),
+        user.lang) match {
+        case Success(_) => Success(())
+        case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
+      })
   }
+
+  private def nDaysInFuture(n: Int) = new Date(new Date().getTime + n * 24 * 60 * 60 * 1000)
 
   private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
     (payments.forall(p => p.status != PaymentStatus.ok && p.status != PaymentStatus.started)
