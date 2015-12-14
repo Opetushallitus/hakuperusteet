@@ -33,7 +33,7 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
   }
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
     val hadPaid = PaymentUtil.hasPaid(payments)
-    val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang).filter(isValidVetumaCheck)))
+    val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang)))
     .filter(_._2.isDefined)
 
     val newPayments = updatePaymentsAndCreateEvents(paymentAndCheckOption.map(pAndC => (pAndC._1, pAndC._2.get)))
@@ -50,13 +50,21 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     }
   }
 
-  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]): Seq[Payment] = paymentAndChecks.map(pAndC => updatePaymentAndCreateEvent(pAndC._1, pAndC._2))
+  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]): Seq[Payment] = paymentAndChecks.map(pAndC => {
+    val (payment, check) = pAndC
+    if(isValidVetumaCheck(check)) {
+      updatePaymentAndCreateEvent(payment, check)
+    } else {
+      logger.error(s"Vetuma check returned ERROR status to $payment")
+      payment
+    }
+  })
 
   private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
     val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
     // TODO: Update original payment, code below! This change is for production dry run.
-    val p = payment // db.upsertPayment(payment.copy(timestamp = check.timestmp.getOrElse(payment.timestamp), status = newStatus)).get
+    val p = payment // db.upsertPayment(payment.copy(status = newStatus)).get
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p
