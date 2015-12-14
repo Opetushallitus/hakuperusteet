@@ -43,7 +43,13 @@ object Tarjonta {
 
 private case class Result(result: Hakukohde)
 private case class Nimi(kieli_en: Option[String], kieli_fi: Option[String], kieli_sv: Option[String])
-case class Nimi2(en: Option[String], fi: Option[String], sv: Option[String])
+case class Nimi2(en: Option[String], fi: Option[String], sv: Option[String]) {
+  def get(lang: String): String = lang match {
+    case "fi" => fi.orElse(sv).orElse(en).get
+    case "sv" => sv.orElse(fi).orElse(en).get
+    case "en" => en.orElse(fi).orElse(sv).get
+  }
+}
 private case class Hakukohde(oid: String, tarjoajaNimet: Nimi2, hakukohteenNimet: Nimi, hakukelpoisuusvaatimusUris: List[String], lisatiedot: Nimi, hakuOid: String, hakuaikaId: String, tila: String)
 
 private object Nimi2 {
