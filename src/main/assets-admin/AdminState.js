@@ -130,17 +130,29 @@ export function initAppState(props) {
         function decorateWithErrors(a) {
             return applicationObjectWithValidationErrors(_.isMatch(a, aoFromServer(a.id)) ? withNoChanges(a) : withChanges(a))
         }
-        function updatePaymentRequiredNotification(ao) {
-            return {...ao,
-                    ['paymentRequiredNotification']:
-                    (_.every(state.payments, p => p.status !== "ok" && p.status !== "started")
-                     && !paymentRequiredWithCurrentHakukohdeOid(state, aoFromServer(ao.id))
-                     && paymentRequiredWithCurrentHakukohdeOid(state, ao))}
+        function paymentWasNotPreviouslyRequired(id) {
+            return !paymentRequiredWithCurrentHakukohdeOid(state, aoFromServer(id))
         }
-        var updatedAos = _.map(state.applicationObjects,
-                               (oldAo => oldAo.id == newAo.id ?
-                                updatePaymentRequiredNotification(decorateWithErrors(newAo)) :
-                                oldAo))
+        function paymentIsCurrentlyRequired(ao) {
+            return paymentRequiredWithCurrentHakukohdeOid(state, ao)
+        }
+        function allPaymentsFailed(payments) {
+            return _.every(payments, p => _.contains(["cancel", "error", "unknown"], p.status))
+        }
+        function updatePaymentRequiredNotification(ao) {
+            ao['paymentRequiredNotification'] = (allPaymentsFailed(state.payments)
+                                                 && paymentWasNotPreviouslyRequired(ao.id)
+                                                 && paymentIsCurrentlyRequired(ao))
+            return ao
+        }
+        function updateAo(oldAo) {
+            if (oldAo.id === newAo.id) {
+                return updatePaymentRequiredNotification(decorateWithErrors(newAo))
+            } else {
+                return oldAo
+            }
+        }
+        var updatedAos = _.map(state.applicationObjects, updateAo)
         return {...state, ['applicationObjects']: updatedAos}
     }
     function onTarjontaValue(state, tarjonta) {
