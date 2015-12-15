@@ -47,7 +47,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       .version(HttpVersion.HTTP_1_1)
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
       .execute().returnResponse()) match {
-      case Success(r) if r.getStatusLine.getStatusCode < 300 => Success(())
+      case Success(r) if 200 == r.getStatusLine.getStatusCode => Success(())
       case Success(_) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}"))
       case Failure(e) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}", e))
     }
