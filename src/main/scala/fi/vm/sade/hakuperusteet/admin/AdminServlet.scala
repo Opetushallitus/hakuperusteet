@@ -252,7 +252,7 @@ class AdminServlet(val resourcePath: String,
           logger.error("bad application object update request", e)
           halt(400, body = e.getMessage)
         case Failure(e) =>
-          logger.error("", e)
+          logger.error("application object update transaction failed", e)
           halt(500, body = e.getMessage)
       }
     )
