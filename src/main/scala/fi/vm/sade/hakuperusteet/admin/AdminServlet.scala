@@ -295,10 +295,17 @@ class AdminServlet(val resourcePath: String,
 
   private def nDaysInFuture(n: Int) = new Date(new Date().getTime + n * 24 * 60 * 60 * 1000)
 
+  private def allPaymentsFailed(payments: Seq[Payment]): Boolean =
+    payments.forall(p => Set(PaymentStatus.cancel, PaymentStatus.error, PaymentStatus.unknown).contains(p.status))
+
+  private def paymentWasNotPreviouslyRequired(oldAO: ApplicationObject) =
+    !countries.shouldPay(oldAO.educationCountry, oldAO.educationLevel)
+
+  private def paymentIsCurrentlyRequired(newAO: ApplicationObject) =
+    countries.shouldPay(newAO.educationCountry, newAO.educationLevel)
+
   private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
-    (payments.forall(p => p.status != PaymentStatus.ok && p.status != PaymentStatus.started)
-      && !countries.shouldPay(oldAO.educationCountry, oldAO.educationLevel)
-      && countries.shouldPay(newAO.educationCountry, newAO.educationLevel))
+    (allPaymentsFailed(payments) && paymentWasNotPreviouslyRequired(oldAO) && paymentIsCurrentlyRequired(newAO))
 
   private def upsertAndAudit(userData: User): UserData = {
     db.insertUserDetails(userData)
