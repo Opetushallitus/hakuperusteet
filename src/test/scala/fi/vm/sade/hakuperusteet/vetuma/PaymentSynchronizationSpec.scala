@@ -85,6 +85,9 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
     timestamp.getTime shouldEqual someRecentEnoughPayment.timestamp.getTime
   }
 
+  // TODO: Add README about correctly setting timezone to docker
+  val BECAUSE_EVERYBODYS_DOCKER_IS_IN_WRONG_TIMEZONE = 3
+
   it should "skip checking payment that is already checked today" in {
     val someUser = database.upsertPartialUser(generateRandomUser).get
     val personOid = someUser.personOid.get
@@ -95,7 +98,7 @@ class PaymentSynchronizationSpec extends FlatSpec with Matchers with ServletTest
     val event1 = PaymentEvent(None, someRecentEnoughPayment1.id.get, new Date, None, false, "PROBLEM", Some(PaymentStatus.error), Some(PaymentStatus.ok))
     val event3 = PaymentEvent(None, someRecentEnoughPayment1.id.get, now.minusHours(15).toDate, None, false, "CANCELLED_OR_REJECTED", Some(PaymentStatus.ok), Some(PaymentStatus.cancel))
 
-    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(30).toDate, None, false, "OK_VERIFIED", None, Some(PaymentStatus.ok))
+    val event2 = PaymentEvent(None, someRecentEnoughPayment2.id.get, now.minusHours(25 + BECAUSE_EVERYBODYS_DOCKER_IS_IN_WRONG_TIMEZONE).toDate, None, false, "OK_VERIFIED", None, Some(PaymentStatus.ok))
     database.insertEvent(event1)
     database.insertEvent(event2)
     database.insertEvent(event3)
