@@ -285,7 +285,7 @@ class AdminServlet(val resourcePath: String,
     getApplicationObjectName(hakukohdeOid, user.lang) flatMap (applicationObjectName =>
       oppijanTunnistus.sendToken(hakukohdeOid, user.email,
         Translate("email", "paymentInfo", user.lang, "title"),
-        EmailTemplate.renderPaymentInfo(applicationObjectName, nDaysInFuture(14), user.lang),
+        EmailTemplate.renderPaymentInfo(applicationObjectName, nDaysInFuture(10), user.lang),
         user.lang) match {
         case Success(_) => Success(())
         case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
