@@ -176,16 +176,18 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
       errors => renderConflictWithErrors(errors),
       partialPayment => {
         val paymentWithoutTimestamp = partialPayment(new Date())
+
         val u = db.findUserByOid(paymentWithoutTimestamp.personOid).get
+        val oldPayment = db.findPaymentByOrderNumber(u, paymentWithoutTimestamp.orderNumber).get
+        val payment = partialPayment(oldPayment.timestamp)
+        db.upsertPayment(payment)
+        AuditLog.auditAdminPayment(user.oid, u, payment)
         (u) match {
           case u: User =>
-            val oldPayment = db.findPaymentByOrderNumber(u, paymentWithoutTimestamp.orderNumber).get
-            val payment = partialPayment(oldPayment.timestamp)
-            db.upsertPayment(payment)
-            AuditLog.auditAdminPayment(user.oid, u, payment)
             halt(status = 200, body = write(syncAndWriteResponse(u)))
           case u: PartialUser =>
-            halt(status = 500, body = "Tried to submit payments to partial user!")
+            db.insertPaymentSyncRequest(u, payment)
+            halt(status = 200, body = write(fetchPartialUserData(u)))
         }
 
       }
