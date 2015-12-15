@@ -182,11 +182,11 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
         val payment = partialPayment(oldPayment.timestamp)
         db.upsertPayment(payment)
         AuditLog.auditAdminPayment(user.oid, u, payment)
+        db.insertPaymentSyncRequest(u, payment)
         (u) match {
           case u: User =>
             halt(status = 200, body = write(syncAndWriteResponse(u)))
           case u: PartialUser =>
-            db.insertPaymentSyncRequest(u, payment)
             halt(status = 200, body = write(fetchPartialUserData(u)))
         }
 
