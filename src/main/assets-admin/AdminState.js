@@ -16,6 +16,7 @@ import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../assets/util/Constants
 
 const dispatcher = new Dispatcher()
 const events = {
+    updatePaymentForm: 'updatePaymentForm',
     togglePaymentGroup: 'togglePaymentGroup',
     updateEducationForm: 'updateEducationForm',
     route: 'route',
@@ -65,6 +66,7 @@ export function initAppState(props) {
     const updateFieldS = dispatcher.stream(events.updateField).merge(serverUpdatesBus)
     const fieldValidationS = dispatcher.stream(events.fieldValidation)
     const updateEducationFormS = dispatcher.stream(events.updateEducationForm)
+    const updatePaymentFormS = dispatcher.stream(events.updatePaymentForm)
     const togglePaymentGroupS = dispatcher.stream(events.togglePaymentGroup)
 
     const stateP = Bacon.update(initialState,
@@ -76,6 +78,7 @@ export function initAppState(props) {
         [updateEducationFormS], onUpdateEducationForm,
         [togglePaymentGroupS], onTogglePaymentGroup,
         [updateFieldS], onUpdateField,
+        [updatePaymentFormS], onUpdatePaymentForm,
         [viewPaymentChangesRouteS], onViewPaymentChanges,
         [fieldValidationS], onFieldValidation)
 
@@ -143,7 +146,15 @@ export function initAppState(props) {
         const referenceUserWithNoChanges = withNoChanges(referenceUser)
         const hasPaid = {['hasPaid']:user.hasPaid}
         const showPaymentGroup = {['showPaymentGroup']:false}
-        return {...state, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroup}
+        return {...state, ['sessionData']: user.session, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroup}
+    }
+    function onUpdatePaymentForm(state, payment) {
+        function decorateWithErrors(pp) {
+            const pFromServer = _.find(state.fromServer.payments, p => p.id == payment.id)
+            return paymentWithValidationErrors(_.isMatch(pp, pFromServer) ? withNoChanges(pp) : withChanges(pp))
+        }
+        var updatedPayments = _.map(state.payments, (oldP => oldP.id == payment.id ? decorateWithErrors(payment) : oldP))
+        return {...state, ['payments']: updatedPayments}
     }
     function onViewPaymentChanges(state, paymentChanges) {
         return {...state, ['changesView']: paymentChanges}
@@ -182,5 +193,6 @@ export function initAppState(props) {
     function validateIfNoChanges(user, referenceUser) {
         return {['noChanges']: _.isMatch(user, referenceUser) ? "required" : null}
     }
+
     return stateP
 }

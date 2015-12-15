@@ -33,6 +33,13 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   val host = cfg.getString("hakuperusteet.cas.url")
   val henkiloClient = HenkiloClient.init(cfg)
 
+  def checkOphUser() = {
+    checkAuthentication()
+    if(!user.roles.contains("APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA")) {
+      logger.error(s"User ${user.username} is unauthorized!")
+      halt(401)
+    }
+  }
   def checkAuthentication() = {
     authenticate
     failUnlessAuthenticated
@@ -150,7 +157,7 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   }
 
   get("/api/v1/admin/users_with_drastic_payment_changes/") {
-    checkAuthentication()
+    checkOphUser()
     contentType = "application/json"
     halt(status = 200, body = write(db.findAllUsersAndPaymentsWithDrasticallyChangedPaymentStates.map(entry => {
       val (user, payments) = entry
@@ -159,6 +166,30 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
       val newest = PaymentUtil.hasPaidWithTheseStatuses(payments.map(db.newestPaymentStatuses))
       Map("user" -> user, "payments" -> payments, "old_state" -> oldest, "new_state" -> newest)
     })))
+  }
+
+  post("/api/v1/admin/payment") {
+    checkOphUser()
+    contentType = "application/json"
+    val params = parse(request.body).extract[Params]
+    paymentValidator.parsePaymentWithoutTimestamp(params).bitraverse(
+      errors => renderConflictWithErrors(errors),
+      partialPayment => {
+        val paymentWithoutTimestamp = partialPayment(new Date())
+        val u = db.findUserByOid(paymentWithoutTimestamp.personOid).get
+        (u) match {
+          case u: User =>
+            val oldPayment = db.findPaymentByOrderNumber(u, paymentWithoutTimestamp.orderNumber).get
+            val payment = partialPayment(oldPayment.timestamp)
+            db.upsertPayment(payment)
+            AuditLog.auditAdminPayment(user.oid, u, payment)
+            halt(status = 200, body = write(syncAndWriteResponse(u)))
+          case u: PartialUser =>
+            halt(status = 500, body = "Tried to submit payments to partial user!")
+        }
+
+      }
+    )
   }
 
   get("/api/v1/admin/:personoid") {
@@ -242,14 +273,14 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
 
   private def fetchPartialUserData(u: PartialUser): PartialUserData = {
     val payments = db.findPayments(u)
-    PartialUserData(u, PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
+    PartialUserData(user, u, PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
   }
 
   private def decorateWithPaymentHistory(p: Payment) = p.copy(history = Some(db.findStateChangingEventsForPayment(p).sortBy(_.created)))
 
   private def fetchUserData(u: User): UserData = {
     val payments = db.findPayments(u)
-    UserData(u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
+    UserData(user, u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
   }
 
   private def syncAndWriteResponse(u: User) = {

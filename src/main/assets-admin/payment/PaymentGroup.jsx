@@ -14,24 +14,32 @@ export default class PaymentGroup extends React.Component {
     const controller = this.props.controller
     const applicationObjects = _.isEmpty(state.applicationObjects) ? [] : state.applicationObjects
     const payments = _.isEmpty(state.payments) ? [] : state.payments
-    const paymentsTitle = payments.length > 0 ? "Maksut" : "Hakijalla ei ole maksuja"
     const paymentsStatus = state.hasPaid ? "Maksettu" : "Kesken"
     const disabled = payments.length > 0 ? undefined : "disabled"
-    return <div>
-          <h3>{paymentsTitle}</h3>
+    return payments.length > 0 ? <div>
+          <h3>Maksut</h3>
               <div className="userDataFormRow">
                 <label htmlFor={this.id}>Tila</label>
                 <span>{paymentsStatus}</span>
               </div>
-              <div className="userDataFormRow">
-                <input type="submit" value="Näytä maksuloki" onClick={controller.pushTogglePaymentGroup} disabled={disabled}/>
-              </div>
+          <div className="userDataFormRow">
+            <label>Viitenumero</label>
+            <span>{payments[0].reference}</span>
+          </div>
+            <div className="userDataFormRow">
+              <input type="submit" value="Näytä maksuloki" onClick={controller.pushTogglePaymentGroup} disabled={disabled}/>
+            </div>
             <div id="paymentsGroup" className={state.showPaymentGroup?'':'hidden'} >
             {payments.map((payment,i) => {
               return <PaymentForm key={i} state={state} controller={controller} payment={payment}/>
               })}
             </div>
-    </div>
+        </div>
+        :
+        <div>
+          <h3>Hakijalla ei ole maksuja</h3>
+        </div>
+
 
   }
 
