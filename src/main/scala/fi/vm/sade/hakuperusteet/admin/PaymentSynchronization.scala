@@ -60,11 +60,19 @@ class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends 
     }
   })
 
+  private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus): Payment = {
+    if(PaymentStatus.ok == newStatus) {
+      db.upsertPayment(payment.copy(status = newStatus)).get
+    } else {
+      payment
+    }
+  }
+
   private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
-    val newStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
+    val newStatus: PaymentStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
     // TODO: Update original payment, code below! This change is for production dry run.
-    val p = payment // db.upsertPayment(payment.copy(status = newStatus)).get
+    val p = updateOriginalPaymentIfStatusIsOk(payment,newStatus)
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p
