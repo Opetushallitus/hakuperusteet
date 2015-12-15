@@ -19,11 +19,11 @@ import slick.driver.PostgresDriver
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
-case class HakuperusteetDatabase(db: DB) extends LazyLogging {
+case class HakuperusteetDatabase(db: DB)(implicit val executionContext: ExecutionContext) extends LazyLogging {
   import HakuperusteetDatabase._
 
   implicit class RunAndAwait[R](r: slick.dbio.DBIOAction[R, slick.dbio.NoStream, Nothing]) {
@@ -238,6 +238,7 @@ object HakuperusteetDatabase extends LazyLogging {
   val inited = scala.collection.mutable.HashMap.empty[Config, HakuperusteetDatabase]
 
   def init(config: Config): HakuperusteetDatabase = {
+    implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
     this.synchronized {
       val url = config.getString("hakuperusteet.db.url")
       val user = config.getString("hakuperusteet.db.user")

@@ -13,10 +13,12 @@ import fi.vm.sade.hakuperusteet.vetuma.{CheckResponse, VetumaCheck}
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 
-class PaymentSynchronization(config: Config, db: HakuperusteetDatabase) extends LazyLogging {
+class PaymentSynchronization(config: Config,
+                             db: HakuperusteetDatabase)
+                            (implicit val executionContext: ExecutionContext) extends LazyLogging {
   val vetumaCheck = new VetumaCheck(config, "PAYMENT-APP2", "P")
   val vetumaQueryHost = s"${config.getString("vetuma.host")}Query"
 

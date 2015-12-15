@@ -13,8 +13,11 @@ import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserVali
 import org.scalatra.LifeCycle
 import org.scalatra.swagger.Swagger
 
+import scala.concurrent.ExecutionContext
+
 class ScalatraAdminBootstrap extends LifeCycle {
   implicit val swagger: Swagger = new AdminSwagger
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
   val database = HakuperusteetDatabase.init(config)
   val countries = Koodisto.initCountries(config)

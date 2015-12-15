@@ -26,6 +26,7 @@ import scala.util.{Failure, Success}
 @RunWith(classOf[JUnitRunner])
 class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDependencies with BeforeAndAfterEach {
   implicit val swagger = new AdminSwagger
+  implicit val executionContext = scala.concurrent.ExecutionContext.global
   implicit val formats = fi.vm.sade.hakuperusteet.formatsUI
   val stream = getClass.getResourceAsStream("/logoutRequest.xml")
   val logoutRequest = scala.io.Source.fromInputStream( stream ).mkString

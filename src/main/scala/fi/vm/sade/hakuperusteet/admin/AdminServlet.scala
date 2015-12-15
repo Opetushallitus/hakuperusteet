@@ -25,7 +25,7 @@ import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
 import slick.driver.PostgresDriver.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -38,7 +38,9 @@ class AdminServlet(val resourcePath: String,
                    applicationObjectValidator: ApplicationObjectValidator,
                    db: HakuperusteetDatabase,
                    countries: Countries,
-                   tarjonta: Tarjonta)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
+                   tarjonta: Tarjonta)
+                  (implicit val swagger: Swagger,
+                   implicit val executionContext: ExecutionContext) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
   override protected def applicationDescription: String = "Admin API"
   val paymentValidator = PaymentValidator()
   val staticFileContent = Source.fromURL(getClass.getResource(resourcePath)).mkString

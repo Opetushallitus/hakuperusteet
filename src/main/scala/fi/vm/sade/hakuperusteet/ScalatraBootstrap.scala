@@ -12,7 +12,10 @@ import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{UserValidator, ApplicationObjectValidator}
 import org.scalatra.LifeCycle
 
+import scala.concurrent.ExecutionContext
+
 class ScalatraBootstrap extends LifeCycle {
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
   val database = HakuperusteetDatabase.init(config)
   val verifier = GoogleVerifier.init(config)
