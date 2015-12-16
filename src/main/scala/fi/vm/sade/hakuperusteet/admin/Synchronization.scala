@@ -57,7 +57,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         logger.info(s"Synching row id ${row.id} with Haku-App, matching fake operation: " + createCurl(hakuAppClient.url(row.hakemusOid), write(PaymentUpdate(state))))
         hakuAppClient.updateHakemusWithPaymentState(row.hakemusOid, state) } match {
         case Success(r) => handleHakuAppPostSuccess(row, state, r)
-        case Failure(f) => handleSyncError(row.id, "Synchronization to Haku-App throws", Some(f))
+        case Failure(f) => handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f))
       }
       case None => {
         // TODO: What to do when payment has no state that requires update?
@@ -92,7 +92,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   protected def synchronizeUserRow(row: ApplicationObjectSyncRequest) =
     Try { tarjonta.getApplicationSystem(row.hakuOid) } match {
       case Success(as) => continueWithTarjontaData(row, as)
-      case Failure(f) => handleSyncError(row.id, "Synchronization Tarjonta application system throws", Some(f))
+      case Failure(f) => handleSyncError(row.id, s"Synchronization Tarjonta application system throws $row", Some(f))
     }
 
   private def continueWithTarjontaData(row: ApplicationObjectSyncRequest, as: ApplicationSystem) =
