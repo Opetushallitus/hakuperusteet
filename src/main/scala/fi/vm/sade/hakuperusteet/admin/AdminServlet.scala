@@ -49,14 +49,16 @@ class AdminServlet(val resourcePath: String,
   val host = cfg.getString("hakuperusteet.cas.url")
   val henkiloClient = HenkiloClient.init(cfg)
 
-  def checkOphUser() = {
-    checkAuthentication()
+  def checkOphUser(): CasSession = {
+    val casSession = checkAuthentication()
     if(!user.roles.contains("APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA")) {
       logger.error(s"User ${user.username} is unauthorized!")
       halt(401)
     }
+    casSession
   }
-  def checkAuthentication() = {
+
+  def checkAuthentication(): CasSession = {
     authenticate
     failUnlessAuthenticated
 
@@ -64,6 +66,7 @@ class AdminServlet(val resourcePath: String,
       logger.error(s"User ${user.username} is unauthorized!")
       halt(401)
     }
+    user // return the implicit session for use in ExecutionContexts
   }
 
   get("/") {
@@ -185,9 +188,8 @@ class AdminServlet(val resourcePath: String,
   }
 
   post("/api/v1/admin/payment") {
-    checkOphUser()
+    val casSession = checkOphUser()
     contentType = "application/json"
-    val casSession = user
     val params = parse(request.body).extract[Params]
     paymentValidator.parsePaymentWithoutTimestamp(params).bitraverse(
       errors => renderConflictWithErrors(errors),
@@ -212,9 +214,8 @@ class AdminServlet(val resourcePath: String,
   }
 
   get("/api/v1/admin/:personoid") {
-    checkAuthentication()
+    val casSession = checkAuthentication()
     contentType = "application/json"
-    val casSession = user
     val personOid = params("personoid")
     db.findUserByOid(personOid) match {
       case Some(u: User) => write(db.run(fetchUserData(casSession, u), 5 seconds))
@@ -224,9 +225,8 @@ class AdminServlet(val resourcePath: String,
   }
 
   post("/api/v1/admin/user") {
-    checkAuthentication()
+    val casSession = checkAuthentication()
     contentType = "application/json"
-    val casSession = user
     val params = parse(request.body).extract[Params]
     userValidator.parseUserData(params).bitraverse(
       errors => renderConflictWithErrors(errors),
@@ -237,9 +237,8 @@ class AdminServlet(val resourcePath: String,
   }
 
   post("/api/v1/admin/applicationobject") {
-    checkAuthentication()
+    val casSession = checkAuthentication()
     contentType = "application/json"
-    val casSession = user
     val params = parse(request.body).extract[Params]
     applicationObjectValidator.parseApplicationObject(params).bitraverse(
       errors => renderConflictWithErrors(errors),
