@@ -65,8 +65,8 @@ class PaymentSynchronization(config: Config,
     }
   })
 
-  private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus): Payment = {
-    if(PaymentStatus.ok == newStatus) {
+  private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus, oldStatus:PaymentStatus): Payment = {
+    if(PaymentStatus.ok == newStatus && oldStatus != newStatus) {
       db.upsertPayment(payment.copy(status = newStatus))
       payment.copy(status = newStatus)
     } else {
@@ -78,7 +78,7 @@ class PaymentSynchronization(config: Config,
     val newStatus: PaymentStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
     val oldStatus = payment.status
     // TODO: Update original payment, code below! This change is for production dry run.
-    val p = updateOriginalPaymentIfStatusIsOk(payment,newStatus)
+    val p = updateOriginalPaymentIfStatusIsOk(payment,newStatus, oldStatus)
     db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p
