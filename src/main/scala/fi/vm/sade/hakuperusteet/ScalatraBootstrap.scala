@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext
 class ScalatraBootstrap extends LifeCycle {
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
-  val database = HakuperusteetDatabase.init(config)
+  val database = HakuperusteetDatabase(config)
   val verifier = GoogleVerifier.init(config)
   val signer = RSASigner.init(config)
   val countries = Koodisto.initCountries(config)

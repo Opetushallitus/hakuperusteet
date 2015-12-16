@@ -14,7 +14,7 @@ import org.joda.time.DateTime
 
 trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
   val config = Configuration.props
-  val database = HakuperusteetDatabase.init(config)
+  val database = HakuperusteetDatabase(config)
   val verifier = new DummyVerifier
   val countries = Countries(List(SimplifiedCode("032",List(SimplifiedLangValue("fi","Argentiina"))), SimplifiedCode("246", List(SimplifiedLangValue("fi", "Suomi")))),
     List("246"))

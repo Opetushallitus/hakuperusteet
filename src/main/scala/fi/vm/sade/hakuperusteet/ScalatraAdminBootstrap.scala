@@ -19,7 +19,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   implicit val swagger: Swagger = new AdminSwagger
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
-  val database = HakuperusteetDatabase.init(config)
+  val database = HakuperusteetDatabase(config)
   val countries = Koodisto.initCountries(config)
   val languages = Koodisto.initLanguages(config)
   val educations = Koodisto.initBaseEducation(config)
