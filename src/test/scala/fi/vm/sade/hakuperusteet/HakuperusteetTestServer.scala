@@ -4,12 +4,13 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.sql.{Connection, DriverManager}
 
-import com.sun.net.httpserver.{HttpServer, HttpExchange, HttpHandler}
+import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.{Payments, ApplicationObjects, Users}
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObjects, Payments, Users}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration._
 import scala.sys.process.Process
 
 class HakuperusteetTestServer extends HakuperusteetServer {
@@ -125,7 +126,7 @@ class ResetDatabaseForAdminTests extends ResetDatabase {
       val u = db.findUser(user.email)
       if (u.isEmpty) {
         db.upsertUser(user)
-        applicationObjects.foreach(db.upsertApplicationObject)
+        applicationObjects.foreach(ao => db.run(db.upsertApplicationObject(ao), 10 seconds))
         payments.foreach(db.upsertPayment)
       }
     }

@@ -11,6 +11,8 @@ import org.json4s.native.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
 
+import scala.util.{Try, Success, Failure}
+
 case class OppijanTunnistusVerification(email: Option[String], valid: Boolean, metadata: Option[Map[String,String]], lang: Option[String])
 case class HakuAppMetadata(hakemusOid: String, personOid: String)
 
@@ -35,6 +37,20 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       .version(HttpVersion.HTTP_1_1)
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
       .execute().returnContent().asString()
+  }
+
+  def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String): Try[Unit] = {
+    val callbackUrl = s"${c.getString("host.url.base")}ao/${hakukohdeOid}/#/token/"
+    val data = Map("email" -> email, "url" -> callbackUrl, "lang" -> lang, "subject" -> subject, "template" -> template)
+    Try(Request.Post(c.getString("oppijantunnistus.create.url"))
+      .useExpectContinue()
+      .version(HttpVersion.HTTP_1_1)
+      .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
+      .execute().returnResponse()) match {
+      case Success(r) if 200 == r.getStatusLine.getStatusCode => Success(())
+      case Success(_) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}"))
+      case Failure(e) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}", e))
+    }
   }
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {

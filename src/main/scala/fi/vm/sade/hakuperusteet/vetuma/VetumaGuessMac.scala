@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
+import scala.concurrent.duration._
 
 
 class VetumaGuessMac(config: Config, db: HakuperusteetDatabase) extends LazyLogging {
@@ -15,7 +16,7 @@ class VetumaGuessMac(config: Config, db: HakuperusteetDatabase) extends LazyLogg
         if(payment.hakemusOid.isDefined) {
           handleHakuAppUserPayment(payment, user)
         } else {
-          handleAppObjectUserPayment(payment, user, db.findApplicationObjects(user))
+          handleAppObjectUserPayment(payment, user, db.run(db.findApplicationObjects(user), 5 seconds))
         }
       case _ =>
         logger.error(s"Unable to find User for payment $payment")

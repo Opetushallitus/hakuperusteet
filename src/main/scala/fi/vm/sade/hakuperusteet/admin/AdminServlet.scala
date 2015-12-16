@@ -7,10 +7,14 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.admin.auth.{CasAuthenticationSupport, CasSessionDB}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
+import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.toDBIO
 import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.email.EmailTemplate
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
+import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
-import fi.vm.sade.hakuperusteet.util.{PaymentUtil, AuditLog, ValidationUtil}
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
+import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil, Translate, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, PaymentValidator, UserValidator}
 import fi.vm.sade.utils.cas.CasLogout
 import org.json4s.JsonDSL._
@@ -19,12 +23,24 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
 import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
+import slick.driver.PostgresDriver.api._
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scalaz.{NonEmptyList, _}
 
-class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanTunnistus: OppijanTunnistus, userValidator: UserValidator, applicationObjectValidator: ApplicationObjectValidator, db: HakuperusteetDatabase)(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
+class AdminServlet(val resourcePath: String,
+                   protected val cfg: Config,
+                   oppijanTunnistus: OppijanTunnistus,
+                   userValidator: UserValidator,
+                   applicationObjectValidator: ApplicationObjectValidator,
+                   db: HakuperusteetDatabase,
+                   countries: Countries,
+                   tarjonta: Tarjonta)
+                  (implicit val swagger: Swagger,
+                   implicit val executionContext: ExecutionContext) extends ScalatraServlet with SwaggerRedirect with CasAuthenticationSupport with LazyLogging with ValidationUtil with SwaggerSupport {
   override protected def applicationDescription: String = "Admin API"
   val paymentValidator = PaymentValidator()
   val staticFileContent = Source.fromURL(getClass.getResource(resourcePath)).mkString
@@ -171,6 +187,7 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   post("/api/v1/admin/payment") {
     checkOphUser()
     contentType = "application/json"
+    val casSession = user
     val params = parse(request.body).extract[Params]
     paymentValidator.parsePaymentWithoutTimestamp(params).bitraverse(
       errors => renderConflictWithErrors(errors),
@@ -181,11 +198,11 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
         val oldPayment = db.findPaymentByOrderNumber(u, paymentWithoutTimestamp.orderNumber).get
         val payment = partialPayment(oldPayment.timestamp)
         db.upsertPayment(payment)
-        AuditLog.auditAdminPayment(user.oid, u, payment)
+        AuditLog.auditAdminPayment(casSession.oid, u, payment)
         db.insertPaymentSyncRequest(u, payment)
         (u) match {
           case u: User =>
-            halt(status = 200, body = write(syncAndWriteResponse(u)))
+            halt(status = 200, body = write(syncAndWriteResponse(casSession, u)))
           case u: PartialUser =>
             halt(status = 200, body = write(fetchPartialUserData(u)))
         }
@@ -197,10 +214,10 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   get("/api/v1/admin/:personoid") {
     checkAuthentication()
     contentType = "application/json"
+    val casSession = user
     val personOid = params("personoid")
-    val user = db.findUserByOid(personOid)
-    user match {
-      case Some(u: User) => write(fetchUserData(u))
+    db.findUserByOid(personOid) match {
+      case Some(u: User) => write(db.run(fetchUserData(casSession, u), 5 seconds))
       case Some(u: PartialUser) => write(fetchPartialUserData(u))
       case _ => halt(status = 404, body = s"User ${personOid} not found")
     }
@@ -209,11 +226,12 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   post("/api/v1/admin/user") {
     checkAuthentication()
     contentType = "application/json"
+    val casSession = user
     val params = parse(request.body).extract[Params]
     userValidator.parseUserData(params).bitraverse(
       errors => renderConflictWithErrors(errors),
       newUserData => {
-        halt(status = 200, body = write(saveUserData(newUserData)))
+        halt(status = 200, body = write(saveUserData(casSession, newUserData)))
       }
     )
   }
@@ -221,35 +239,91 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
   post("/api/v1/admin/applicationobject") {
     checkAuthentication()
     contentType = "application/json"
+    val casSession = user
     val params = parse(request.body).extract[Params]
     applicationObjectValidator.parseApplicationObject(params).bitraverse(
       errors => renderConflictWithErrors(errors),
-      education => {
-        db.upsertApplicationObject(education)
-        val u = db.findUserByOid(education.personOid).get
-        (u) match {
-          case u: User =>
-            AuditLog.auditAdminPostEducation(user.oid, u, education)
-            halt(status = 200, body = write(syncAndWriteResponse(u)))
-          case u: PartialUser =>
-            halt(status = 500, body = "Tried to submit applications to partial user!")
-        }
-
+      education => db.run((for {
+        u <- findFullUser(education.personOid)
+        oldAO <- db.findApplicationObjectByHakukohdeOid(u, education.hakukohdeOid)
+        _ <- db.upsertApplicationObject(education)
+        userData <- syncAndWriteResponse(casSession, u)
+        _ <- toDBIO(sendPaymentInfoEmailIfPaymentNowRequired(u, oldAO, education))
+      } yield userData).transactionally.asTry, 5 seconds) match {
+        case Success(userData: UserData) =>
+          AuditLog.auditAdminPostEducation(casSession.oid, userData.user, education)
+          halt(200, body = write(userData))
+        case Failure(e: IllegalArgumentException) =>
+          logger.error("bad application object update request", e)
+          halt(400, body = e.getMessage)
+        case Failure(e) =>
+          logger.error("application object update transaction failed", e)
+          halt(500, body = e.getMessage)
       }
     )
   }
 
-  error { case e: Throwable => logger.error("uncaught exception", e) }
-
-  private def upsertAndAudit(userData: User) = {
-    db.insertUserDetails(userData)
-    AuditLog.auditAdminPostUserdata(user.oid, userData)
-    syncAndWriteResponse(userData)
+  error {
+    case e: Throwable =>
+      logger.error("uncaught exception", e)
+      halt(500)
   }
 
-  private def saveUpdatedUserData(updatedUserData: User) = {
+  private def findFullUser(personOid: String): DBIO[User] = db.findUserByOid(personOid) match {
+    case Some(u: User) => DBIO.successful(u)
+    case Some(u: PartialUser) => DBIO.failed(new IllegalArgumentException(s"${personOid} is a partial user"))
+    case None => DBIO.failed(new IllegalArgumentException(s"no user ${personOid} found"))
+  }
+
+  private def sendPaymentInfoEmailIfPaymentNowRequired(u: User,
+                                                       oldAO: Option[ApplicationObject],
+                                                       newAO: ApplicationObject): Try[Unit] = oldAO match {
+    case Some(ao) if (paymentNowRequired(db.findPayments(u), ao, newAO)) =>
+      sendPaymentInfoEmail(u, newAO.hakukohdeOid)
+    case _ => Success(())
+  }
+
+  private def sendPaymentInfoEmail(user: User, hakukohdeOid: String): Try[Unit] = {
+    logger.info(s"sending payment info email to ${user.email}")
+    getApplicationObjectName(hakukohdeOid, user.lang) flatMap (applicationObjectName =>
+      oppijanTunnistus.sendToken(hakukohdeOid, user.email,
+        Translate("email", "paymentInfo", user.lang, "title"),
+        EmailTemplate.renderPaymentInfo(applicationObjectName, nDaysInFuture(10), user.lang),
+        user.lang) match {
+        case Success(_) => Success(())
+        case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
+      })
+  }
+
+  private def getApplicationObjectName(hakukohdeOid: String, lang: String): Try[String] =
+    Try(tarjonta.getApplicationObject(hakukohdeOid)) match {
+      case Success(ao) => Success(ao.name.get(lang))
+      case Failure(e) => Failure(new RuntimeException(s"fetching application object ${hakukohdeOid} from tarjonta failed", e))
+    }
+
+  private def nDaysInFuture(n: Int) = new Date(new Date().getTime + n * 24 * 60 * 60 * 1000)
+
+  private def allPaymentsFailed(payments: Seq[Payment]): Boolean =
+    payments.forall(p => Set(PaymentStatus.cancel, PaymentStatus.error, PaymentStatus.unknown).contains(p.status))
+
+  private def paymentWasNotPreviouslyRequired(oldAO: ApplicationObject) =
+    !countries.shouldPay(oldAO.educationCountry, oldAO.educationLevel)
+
+  private def paymentIsCurrentlyRequired(newAO: ApplicationObject) =
+    countries.shouldPay(newAO.educationCountry, newAO.educationLevel)
+
+  private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
+    (allPaymentsFailed(payments) && paymentWasNotPreviouslyRequired(oldAO) && paymentIsCurrentlyRequired(newAO))
+
+  private def upsertAndAudit(casSession: CasSession, userData: User): UserData = {
+    db.insertUserDetails(userData)
+    AuditLog.auditAdminPostUserdata(user.oid, userData)
+    db.run(syncAndWriteResponse(casSession, userData), 5 seconds)
+  }
+
+  private def saveUpdatedUserData(casSession: CasSession, updatedUserData: User): UserData = {
     Try(henkiloClient.upsertHenkilo(IfGoogleAddEmailIDP(updatedUserData))) match {
-      case Success(_) => upsertAndAudit(updatedUserData)
+      case Success(_) => upsertAndAudit(casSession, updatedUserData)
       case Failure(t) if t.isInstanceOf[ConnectException] =>
         logger.error(s"admin-Henkilopalvelu connection error for email ${updatedUserData.email}", t)
         halt(500, body = "admin-Henkilopalvelu connection error")
@@ -263,12 +337,11 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
     }
   }
 
-  private def saveUserData(newUserData: User) = {
+  private def saveUserData(casSession: CasSession, newUserData: User): UserData = {
     db.findUserByOid(newUserData.personOid.getOrElse(halt(500, body = "PersonOid is mandatory"))) match {
       case Some(oldUserData: User) =>
         val updatedUserData = oldUserData.copy(firstName = newUserData.firstName, lastName = newUserData.lastName, birthDate = newUserData.birthDate, personId = newUserData.personId, gender = newUserData.gender, nativeLanguage = newUserData.nativeLanguage, nationality = newUserData.nationality)
-        saveUpdatedUserData(updatedUserData)
-
+        saveUpdatedUserData(casSession, updatedUserData)
       case _ => halt(404)
     }
   }
@@ -280,18 +353,17 @@ class AdminServlet(val resourcePath: String, protected val cfg: Config, oppijanT
 
   private def decorateWithPaymentHistory(p: Payment) = p.copy(history = Some(db.findStateChangingEventsForPayment(p).sortBy(_.created)))
 
-  private def fetchUserData(u: User): UserData = {
-    val payments = db.findPayments(u)
-    UserData(user, u, db.findApplicationObjects(u), PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory),PaymentUtil.hasPaid(payments))
-  }
+  private def fetchUserData(casSession: CasSession, u: User): DBIO[UserData] =
+    for {
+      payments <- db.findPaymentsAction(u) map PaymentUtil.sortPaymentsByStatus
+      applicationObjects <- db.findApplicationObjects(u)
+    } yield UserData(casSession, u, applicationObjects, payments map decorateWithPaymentHistory, PaymentUtil.hasPaid(payments))
 
-  private def syncAndWriteResponse(u: User) = {
-    val data = fetchUserData(u)
-    insertSyncRequests(data)
-    data
-  }
-
-  private def insertSyncRequests(u: UserData) = u.applicationObject.foreach(db.insertSyncRequest(u.user, _))
+  private def syncAndWriteResponse(casSession: CasSession, u: User): DBIO[UserData] =
+    for {
+      userData <- fetchUserData(casSession, u)
+      _ <- DBIO.sequence(userData.applicationObject.map(db.insertSyncRequest(userData.user, _)))
+    } yield userData
 
   def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list)))
 }

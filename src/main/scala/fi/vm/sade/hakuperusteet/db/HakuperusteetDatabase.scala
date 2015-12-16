@@ -10,24 +10,28 @@ import fi.vm.sade.hakuperusteet.admin.SynchronizationStatus
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.DB
 import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.db.generated.Tables._
-import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
-import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, User, _}
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, PaymentEvent, User, _}
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
+import slick.dbio
 import slick.driver.PostgresDriver
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
-import fi.vm.sade.hakuperusteet.domain.PaymentEvent
+import scala.util.Try
 
-case class HakuperusteetDatabase(db: DB) extends LazyLogging {
+case class HakuperusteetDatabase(db: DB)(implicit val executionContext: ExecutionContext) extends LazyLogging {
   import HakuperusteetDatabase._
 
   implicit class RunAndAwait[R](r: slick.dbio.DBIOAction[R, slick.dbio.NoStream, Nothing]) {
     def run: R = Await.result(db.run(r), Duration.Inf)
   }
+
+  def run[R](r: DBIO[R], duration: Duration) = Await.result(db.run(r), duration)
+
   val useAutoIncrementId = 0
 
   def findUser(email: String): Option[AbstractUser] = {
@@ -123,14 +127,14 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
     }
   }
 
-  def findApplicationObjects(user: AbstractUser): Seq[ApplicationObject] =
-    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).result.run.map(aoRowToAo)
+  def findApplicationObjects(user: AbstractUser): dbio.DBIO[Seq[ApplicationObject]] =
+    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).result map (_.map(aoRowToAo))
 
-  def findApplicationObjectByHakukohdeOid(user: AbstractUser, hakukohdeOid: String) =
-    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).filter(_.hakukohdeOid === hakukohdeOid).result.headOption.run.map(aoRowToAo)
+  def findApplicationObjectByHakukohdeOid(user: AbstractUser, hakukohdeOid: String): dbio.DBIO[Option[ApplicationObject]] =
+    Tables.ApplicationObject.filter(_.henkiloOid === user.personOid).filter(_.hakukohdeOid === hakukohdeOid).result.headOption map (_.map(aoRowToAo))
 
-  def upsertApplicationObject(applicationObject: ApplicationObject) =
-    (Tables.ApplicationObject returning Tables.ApplicationObject).insertOrUpdate(aoToAoRow(applicationObject)).run.map(aoRowToAo)
+  def upsertApplicationObject(applicationObject: ApplicationObject): dbio.DBIO[Option[ApplicationObject]] =
+    (Tables.ApplicationObject returning Tables.ApplicationObject).insertOrUpdate(aoToAoRow(applicationObject)) map (_.map(aoRowToAo))
 
   def findPaymentByHenkiloOidAndHakemusOid(henkiloOid: String, hakemusOid: String): Option[Payment] =
     Tables.Payment.filter(_.henkiloOid === henkiloOid).filter(_.hakemusOid === hakemusOid).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
@@ -141,6 +145,9 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
   def findPaymentsByPersonOid(personOid: String): Seq[Payment] =
     Tables.Payment.filter(_.henkiloOid === personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)
 
+  def findPaymentsAction(user: AbstractUser): dbio.DBIO[Seq[Payment]] =
+    Tables.Payment.filter(_.henkiloOid === user.personOid).sortBy(_.tstamp.desc).result map (_.map(paymentRowToPayment))
+
   def findPayments(user: AbstractUser): Seq[Payment] =
     Tables.Payment.filter(_.henkiloOid === user.personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)
 
@@ -149,8 +156,8 @@ case class HakuperusteetDatabase(db: DB) extends LazyLogging {
 
   def nextOrderNumber() = sql"select nextval('#$schemaName.ordernumber');".as[Int].run.head
 
-  def insertSyncRequest(user: User, ao: ApplicationObject) = (Tables.Synchronization returning Tables.Synchronization).insertOrUpdate(
-    SynchronizationRow(useAutoIncrementId, now, user.personOid.get, Some(ao.hakuOid), Some(ao.hakukohdeOid), SynchronizationStatus.todo.toString, None, None)).run
+  def insertSyncRequest(user: User, ao: ApplicationObject): dbio.DBIO[Unit] = (Tables.Synchronization returning Tables.Synchronization).insertOrUpdate(
+    SynchronizationRow(useAutoIncrementId, now, user.personOid.get, Some(ao.hakuOid), Some(ao.hakukohdeOid), SynchronizationStatus.todo.toString, None, None)) map (_ => ())
 
   def insertPaymentSyncRequest(user:AbstractUser, payment: Payment) = (Tables.Synchronization returning Tables.Synchronization).insertOrUpdate(
     SynchronizationRow(useAutoIncrementId, now, user.personOid.get, None, None, SynchronizationStatus.todo.toString, None, payment.hakemusOid)).run
@@ -231,6 +238,7 @@ object HakuperusteetDatabase extends LazyLogging {
   val inited = scala.collection.mutable.HashMap.empty[Config, HakuperusteetDatabase]
 
   def init(config: Config): HakuperusteetDatabase = {
+    implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
     this.synchronized {
       val url = config.getString("hakuperusteet.db.url")
       val user = config.getString("hakuperusteet.db.user")
@@ -246,6 +254,8 @@ object HakuperusteetDatabase extends LazyLogging {
       inited(config)
     }
   }
+
+  def toDBIO[T](t: Try[T]): DBIO[T] = t map (DBIO.successful) recover { case e => DBIO.failed(e) } get
 
   def close = inited.values.foreach(_.db.close)
 

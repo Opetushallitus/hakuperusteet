@@ -1,5 +1,16 @@
 {
   "email": {
+    "paymentInfo": {
+      "fi": {
+        "title": "Opintopolku - täydennyspyyntö"
+      },
+      "sv": {
+        "title": "Studieinfo - kompletteringsbegäran"
+      },
+      "en": {
+        "title": "Studyinfo – request to supplement your application"
+      }
+    },
     "welcome": {
       "fi": {
         "title": "Opintopolku - Rekisteröinti onnistui",

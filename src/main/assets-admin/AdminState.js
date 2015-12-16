@@ -1,6 +1,7 @@
 import Bacon from 'baconjs'
 import _ from 'lodash'
 
+import {paymentRequiredWithCurrentHakukohdeOid} from '../assets/AppLogic.js'
 import {submitUserDataToServer} from './userdata/UserDataForm.js'
 import {submitEducationDataToServer} from './education/EducationForm.js'
 import {submitPaymentDataToServer} from './payment/Payment.js'
@@ -123,11 +124,35 @@ export function initAppState(props) {
         if(newAo == null) {
             return {...state, ['applicationObjects']: []}
         }
-        function decorateWithErrors(a) {
-            const aoFromServer = _.find(state.fromServer.applicationObject, ao => ao.id == newAo.id)
-            return applicationObjectWithValidationErrors(_.isMatch(a, aoFromServer) ? withNoChanges(a) : withChanges(a))
+        function aoFromServer(id) {
+            return _.find(state.fromServer.applicationObject, ao => ao.id == id)
         }
-        var updatedAos = _.map(state.applicationObjects, (oldAo => oldAo.id == newAo.id ? decorateWithErrors(newAo) : oldAo))
+        function decorateWithErrors(a) {
+            return applicationObjectWithValidationErrors(_.isMatch(a, aoFromServer(a.id)) ? withNoChanges(a) : withChanges(a))
+        }
+        function paymentWasNotPreviouslyRequired(id) {
+            return !paymentRequiredWithCurrentHakukohdeOid(state, aoFromServer(id))
+        }
+        function paymentIsCurrentlyRequired(ao) {
+            return paymentRequiredWithCurrentHakukohdeOid(state, ao)
+        }
+        function allPaymentsFailed(payments) {
+            return _.every(payments, p => _.contains(["cancel", "error", "unknown"], p.status))
+        }
+        function updatePaymentRequiredNotification(ao) {
+            ao['paymentRequiredNotification'] = (allPaymentsFailed(state.payments)
+                                                 && paymentWasNotPreviouslyRequired(ao.id)
+                                                 && paymentIsCurrentlyRequired(ao))
+            return ao
+        }
+        function updateAo(oldAo) {
+            if (oldAo.id === newAo.id) {
+                return updatePaymentRequiredNotification(decorateWithErrors(newAo))
+            } else {
+                return oldAo
+            }
+        }
+        var updatedAos = _.map(state.applicationObjects, updateAo)
         return {...state, ['applicationObjects']: updatedAos}
     }
     function onTarjontaValue(state, tarjonta) {

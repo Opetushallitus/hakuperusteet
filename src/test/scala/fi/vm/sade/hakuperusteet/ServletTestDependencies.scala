@@ -16,10 +16,12 @@ trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
   val config = Configuration.props
   val database = HakuperusteetDatabase.init(config)
   val verifier = new DummyVerifier
-  val countries = Countries(List(SimplifiedCode("032",List(SimplifiedLangValue("fi","032")))), List.empty)
+  val countries = Countries(List(SimplifiedCode("032",List(SimplifiedLangValue("fi","Argentiina"))), SimplifiedCode("246", List(SimplifiedLangValue("fi", "Suomi")))),
+    List("246"))
   val languages = Languages(List(SimplifiedCode("AK",List(SimplifiedLangValue("fi","AK")))))
-  val educations = Educations(List.empty[SimplifiedCode])
-  val oppijanTunnistus = new DummyOppijanTunnistus(config)
+  val educations = Educations(List(
+    SimplifiedCode("102", List(SimplifiedLangValue("fi", "Alempi korkeakoulututkinto")))))
+  val oppijanTunnistus: OppijanTunnistus = new DummyOppijanTunnistus(config)
   val emailSender = EmailSender.init(config)
   val signer = new DummyRSASigner(config)
 

@@ -2,19 +2,22 @@ package fi.vm.sade.hakuperusteet
 
 import javax.servlet.ServletContext
 
-import fi.vm.sade.hakuperusteet.admin.{Synchronization, AdminServlet, PaymentSynchronization}
+import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Synchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.koodisto.Koodisto
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.swagger.{AdminSwagger, SwaggerServlet}
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
-import fi.vm.sade.hakuperusteet.validation.{UserValidator, ApplicationObjectValidator}
+import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
 import org.scalatra.LifeCycle
-import org.scalatra.swagger.{Swagger}
+import org.scalatra.swagger.Swagger
+
+import scala.concurrent.ExecutionContext
 
 class ScalatraAdminBootstrap extends LifeCycle {
   implicit val swagger: Swagger = new AdminSwagger
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
   val database = HakuperusteetDatabase.init(config)
   val countries = Koodisto.initCountries(config)
@@ -32,7 +35,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
-    context mount(new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, userValidator, applicationObjectValidator, database), "/")
+    context mount(new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, userValidator, applicationObjectValidator, database, countries, tarjonta), "/")
     context mount(new SwaggerServlet, "/api-docs/*")
   }
 
