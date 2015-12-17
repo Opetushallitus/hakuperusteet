@@ -109,7 +109,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     if (!Vetuma.verifyReturnMac(config.getString("vetuma.shared.secret"), macParams, expectedMac)) halt(409)
 
     val userData = userDataFromSession
-    db.findPaymentByOrderNumber(userData, params.getOrElse("ORDNR", "")) match {
+    db.findPaymentByOrderNumber(userData.personOid.get, params.getOrElse("ORDNR", "")) match {
       case Some(p) => handlePayment(href, hash,userData, p, status)
       case None => handlePaymentWhenThereIsNoReferenceToPayment(href, hash)
     }

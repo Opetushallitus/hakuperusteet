@@ -60,11 +60,14 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
     failUnlessAuthenticated
     val params = parse(request.body).extract[Params]
     (userDataFromSession) match {
-      case userData: User =>
-        applicationObjectValidator.parseApplicationObjectWithoutPersonOid(params).bitraverse(
+      case userData: User => applicationObjectValidator.parseApplicationObjectWithoutPersonOid(params).bitraverse(
           errors => renderConflictWithErrors(errors),
           partialEducation => addNewEducation(user, userData, partialEducation(userData.personOid.getOrElse(halt(500))))
         )
+      case userData: PartialUser => {
+        logger.error(s"session contained a partial user ${userData.email}")
+        halt(500)
+      }
     }
   }
 

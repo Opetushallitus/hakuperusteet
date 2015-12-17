@@ -36,7 +36,7 @@ object DBSupport {
       ConfigUtil.writeConfigFile(EmbeddedPostgreSql.configAsMap)
       CleanShutdown.useEmbeddedPostgres()
       val config = Configuration.props
-      HakuperusteetDatabase.init(config)
+      HakuperusteetDatabase(config)
     }
     true
   }

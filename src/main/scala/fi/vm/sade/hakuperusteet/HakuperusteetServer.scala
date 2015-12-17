@@ -19,7 +19,7 @@ class HakuperusteetServer {
     val dbUrl = props.getString("hakuperusteet.db.url")
     val user = props.getString("hakuperusteet.db.user")
     val password = props.getString("hakuperusteet.db.password")
-    HakuperusteetDatabase.init(props)
+    HakuperusteetDatabase(props)
     val context: WebAppContext = createContext
     val server = JettyUtil.createServerWithContext(portHttp, portHttps, context, dbUrl, user, password, secureSessionCookie)
     server.start()

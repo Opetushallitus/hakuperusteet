@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
-case class HakuperusteetDatabase(db: DB)(implicit val executionContext: ExecutionContext) extends LazyLogging {
+class HakuperusteetDatabase(val db: DB)(implicit val executionContext: ExecutionContext) extends LazyLogging {
   import HakuperusteetDatabase._
 
   implicit class RunAndAwait[R](r: slick.dbio.DBIOAction[R, slick.dbio.NoStream, Nothing]) {
@@ -139,8 +139,8 @@ case class HakuperusteetDatabase(db: DB)(implicit val executionContext: Executio
   def findPaymentByHenkiloOidAndHakemusOid(henkiloOid: String, hakemusOid: String): Option[Payment] =
     Tables.Payment.filter(_.henkiloOid === henkiloOid).filter(_.hakemusOid === hakemusOid).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
 
-  def findPaymentByOrderNumber(user: AbstractUser, orderNumber: String): Option[Payment] =
-    Tables.Payment.filter(_.henkiloOid === user.personOid).filter(_.orderNumber === orderNumber).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
+  def findPaymentByOrderNumber(personOid: String, orderNumber: String): Option[Payment] =
+    Tables.Payment.filter(_.henkiloOid === personOid).filter(_.orderNumber === orderNumber).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
 
   def findPaymentsByPersonOid(personOid: String): Seq[Payment] =
     Tables.Payment.filter(_.henkiloOid === personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)
@@ -237,7 +237,7 @@ object HakuperusteetDatabase extends LazyLogging {
   val schemaName = "public"
   val inited = scala.collection.mutable.HashMap.empty[Config, HakuperusteetDatabase]
 
-  def init(config: Config): HakuperusteetDatabase = {
+  def apply(config: Config): HakuperusteetDatabase = {
     implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
     this.synchronized {
       val url = config.getString("hakuperusteet.db.url")
@@ -248,7 +248,7 @@ object HakuperusteetDatabase extends LazyLogging {
           throw new IllegalArgumentException("You're doing it wrong. For some reason DB config has changed.");
         }
         migrateSchema(url, user, password)
-        val db = HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config))
+        val db = new HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config))
         inited += (config -> db)
       }
       inited(config)

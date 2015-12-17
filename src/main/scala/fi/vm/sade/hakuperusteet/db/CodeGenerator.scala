@@ -4,7 +4,7 @@ import fi.vm.sade.hakuperusteet.Configuration
 
 object CodeGenerator extends App {
   private val config = Configuration.props
-  HakuperusteetDatabase.init(config)
+  HakuperusteetDatabase(config)
 
   slick.codegen.SourceCodeGenerator.main(Array(
     "slick.driver.PostgresDriver",
