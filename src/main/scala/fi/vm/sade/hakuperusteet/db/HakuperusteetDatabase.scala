@@ -139,8 +139,8 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
   def findPaymentByHenkiloOidAndHakemusOid(henkiloOid: String, hakemusOid: String): Option[Payment] =
     Tables.Payment.filter(_.henkiloOid === henkiloOid).filter(_.hakemusOid === hakemusOid).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
 
-  def findPaymentByOrderNumber(user: AbstractUser, orderNumber: String): Option[Payment] =
-    Tables.Payment.filter(_.henkiloOid === user.personOid).filter(_.orderNumber === orderNumber).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
+  def findPaymentByOrderNumber(personOid: String, orderNumber: String): Option[Payment] =
+    Tables.Payment.filter(_.henkiloOid === personOid).filter(_.orderNumber === orderNumber).sortBy(_.tstamp.desc).result.headOption.run.map(paymentRowToPayment)
 
   def findPaymentsByPersonOid(personOid: String): Seq[Payment] =
     Tables.Payment.filter(_.henkiloOid === personOid).sortBy(_.tstamp.desc).result.run.map(paymentRowToPayment)

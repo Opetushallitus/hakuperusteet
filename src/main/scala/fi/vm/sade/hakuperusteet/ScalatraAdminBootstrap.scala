@@ -4,7 +4,8 @@ import javax.servlet.ServletContext
 
 import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Synchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.koodisto.Koodisto
+import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
+import fi.vm.sade.hakuperusteet.koodisto.{Countries, Koodisto}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.swagger.{AdminSwagger, SwaggerServlet}
@@ -19,12 +20,14 @@ class ScalatraAdminBootstrap extends LifeCycle {
   implicit val swagger: Swagger = new AdminSwagger
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
+  val henkiloClient = HenkiloClient.init(config)
   val database = HakuperusteetDatabase(config)
   val countries = Koodisto.initCountries(config)
-  val languages = Koodisto.initLanguages(config)
-  val educations = Koodisto.initBaseEducation(config)
   val oppijanTunnistus = OppijanTunnistus.init(config)
   val tarjonta = Tarjonta.init(config)
+  val paymentService = PaymentService(database)
+  val languages = Koodisto.initLanguages(config)
+  val educations = Koodisto.initBaseEducation(config)
   val signer = RSASigner.init(config)
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
@@ -35,8 +38,10 @@ class ScalatraAdminBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
-    context mount(new AdminServlet("/webapp-admin/index.html",config, oppijanTunnistus, userValidator, applicationObjectValidator, database, countries, tarjonta), "/")
+    context mount(new AdminServlet("/webapp-admin/index.html",config, userValidator, applicationObjectValidator,
+      UserService(executionContext, henkiloClient, database),
+      paymentService,
+      ApplicationObjectService(executionContext, countries, database, oppijanTunnistus, paymentService, tarjonta)), "/")
     context mount(new SwaggerServlet, "/api-docs/*")
   }
-
 }
