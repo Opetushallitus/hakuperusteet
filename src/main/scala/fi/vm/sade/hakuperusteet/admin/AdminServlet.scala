@@ -202,7 +202,7 @@ class AdminServlet(val resourcePath: String,
         db.insertPaymentSyncRequest(u, payment)
         (u) match {
           case u: User =>
-            halt(status = 200, body = write(syncAndWriteResponse(casSession, u)))
+            halt(status = 200, body = write(db.run(syncAndWriteResponse(casSession, u), 5 seconds)))
           case u: PartialUser =>
             halt(status = 200, body = write(fetchPartialUserData(u)))
         }
