@@ -18,7 +18,7 @@ import org.mockito.Matchers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatra.test.scalatest.ScalatraSuite
-import fi.vm.sade.hakuperusteet.domain.User._
+import fi.vm.sade.hakuperusteet.domain.AbstractUser.PartialUser
 
 import scalaz.Failure
 
@@ -39,7 +39,7 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     val personOid = "4.4.4.4"
     val hakemusOid = "1.1.1.1"
     val email = "e@mail.com"
-    val user = database.upsertPartialUser(PartialUser(None, Some(personOid), email, OppijaToken, "en")).get
+    val user = database.upsertPartialUser(AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "en")).get
     val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error,Some(hakemusOid))).get
     val sync = database.insertPaymentSyncRequest(user, payment1).get
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))

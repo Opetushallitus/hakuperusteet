@@ -1,7 +1,7 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.util.concurrent.Executors
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase

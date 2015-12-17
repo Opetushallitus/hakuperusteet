@@ -1,7 +1,7 @@
 package fi.vm.sade.hakuperusteet.auth
 
 import javax.servlet.http.HttpServletRequest
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
@@ -32,7 +32,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
   def createSession(tokenFromRequest: String) = {
     Try { oppijanTunnistus.validateToken(tokenFromRequest) } match {
       case Success(Some((email, lang, Some(metadata)))) => {
-        val partialUser: PartialUser = PartialUser(None, Some(metadata.personOid), email, OppijaToken, lang)
+        val partialUser: PartialUser = AbstractUser.partialUser(None, Some(metadata.personOid), email, OppijaToken, lang)
         upsertIdpEntity(partialUser)
         val existingUser = db.findUser(email)
         val user: AbstractUser = existingUser.orElse(db.upsertPartialUser(partialUser)).get

@@ -10,7 +10,9 @@ import fi.vm.sade.hakuperusteet.admin.SynchronizationStatus
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.DB
 import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.db.generated.Tables._
-import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, PaymentEvent, User, _}
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, PaymentEvent, _}
+import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
+import fi.vm.sade.hakuperusteet.domain.AbstractUser.PartialUser
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.flywaydb.core.Flyway
 import org.joda.time.DateTime
@@ -88,7 +90,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
   def upsertPartialUser(partialUser: PartialUser): Option[AbstractUser] = {
     val upsertedUser = (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser)).run
     upsertedUser match {
-      case Some(r) => Some(PartialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang))
+      case Some(r) => Some(AbstractUser.partialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang))
       case None => None
     }
   }
@@ -220,14 +222,14 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
     val r = u._1
     (u._2) match {
       case Some(details) => userRowAndDetailsToUser(r, details)
-      case _ => PartialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang)
+      case _ => AbstractUser.partialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang)
     }
   }
   private def abstractUserAndDetailsToUser(r: AbstractUser, d: Tables.UserDetailsRow): User =
-    User(r.id, r.personOid, r.email, Some(d.firstname), Some(d.lastname), Some(d.birthdate), d.personid, r.idpentityid, Some(d.gender), Some(d.nativeLanguage), Some(d.nationality), r.uiLang)
+    AbstractUser.user(r.id, r.personOid, r.email, Some(d.firstname), Some(d.lastname), Some(d.birthdate), d.personid, r.idpentityid, Some(d.gender), Some(d.nativeLanguage), Some(d.nationality), r.uiLang)
 
   private def userRowAndDetailsToUser(r: Tables.UserRow, d: Tables.UserDetailsRow): User =
-   User(Some(r.id), r.henkiloOid, r.email, Some(d.firstname), Some(d.lastname), Some(d.birthdate), d.personid, IDPEntityId.withName(r.idpentityid), Some(d.gender), Some(d.nativeLanguage), Some(d.nationality), r.uilang)
+    AbstractUser.user(Some(r.id), r.henkiloOid, r.email, Some(d.firstname), Some(d.lastname), Some(d.birthdate), d.personid, IDPEntityId.withName(r.idpentityid), Some(d.gender), Some(d.nativeLanguage), Some(d.nationality), r.uilang)
 
   private def now = new java.sql.Timestamp(Calendar.getInstance.getTime.getTime)
 }

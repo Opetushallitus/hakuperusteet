@@ -10,7 +10,7 @@ import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
 import org.http4s.Uri._
 import org.http4s._
 import org.http4s.client.Client
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scalaz.concurrent.Task
 
 object HenkiloClient {

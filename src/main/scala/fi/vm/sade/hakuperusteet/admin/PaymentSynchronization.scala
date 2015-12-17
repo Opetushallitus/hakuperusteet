@@ -11,7 +11,7 @@ import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import fi.vm.sade.hakuperusteet.vetuma.{CheckResponse, VetumaCheck}
 import slick.driver.PostgresDriver.api._
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 

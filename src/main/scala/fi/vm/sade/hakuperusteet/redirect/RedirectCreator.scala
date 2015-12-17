@@ -3,8 +3,8 @@ package fi.vm.sade.hakuperusteet.redirect
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
-
-import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, User}
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObject}
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 
 object RedirectCreator {

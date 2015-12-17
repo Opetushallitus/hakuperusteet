@@ -14,7 +14,7 @@ import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz._

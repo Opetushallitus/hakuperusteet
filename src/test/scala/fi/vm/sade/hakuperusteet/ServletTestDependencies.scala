@@ -37,7 +37,7 @@ trait DummyDataTestDependency {
   def generateRandomUser = {
     val personOid = generateRandomPersonOid
     val email = s"$personOid@testi.com"
-    PartialUser(None, Some(personOid), email, OppijaToken, "fi")
+    AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "fi")
   }
 
   def now = new DateTime()

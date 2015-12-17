@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.email.EmailTemplate
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta

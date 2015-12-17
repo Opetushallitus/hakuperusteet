@@ -18,7 +18,7 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val rnd_number = scala.util.Random.nextInt(10000000)
   val email = s"test_$rnd_number@test.com"
   val userOid: Some[Oid] = Some(s"person_$rnd_number")
-  val testUser = User(None, userOid, email, Some("firstName"), Some("lastName"),
+  val testUser = AbstractUser.user(None, userOid, email, Some("firstName"), Some("lastName"),
     Some(new Date(100)), None, Google, Some("1"), Some("1"), Some("fi"), "fi")
   val appObject = ApplicationObject(None, userOid.get, "hakukohdeOid", "hakuOid", "educationLevel", "fi")
   val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, List())

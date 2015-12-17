@@ -33,15 +33,30 @@ sealed trait AbstractUser {
   def lang: String = if (List("fi", "sv", "en") contains (uiLang)) uiLang else "en"
 }
 
-case class PartialUser(id: Option[Int], personOid: Option[String], email: String, idpentityid: IDPEntityId, uiLang:String, partialUser: Boolean = true) extends AbstractUser {
-  def fullName = email
-}
 
-case class User(id: Option[Int], personOid: Option[String], email: String, firstName: Option[String], lastName: Option[String], birthDate: Option[Date],
-                personId: Option[String], idpentityid: IDPEntityId, gender: Option[String], nativeLanguage: Option[String], nationality: Option[String],
-                uiLang: String) extends AbstractUser {
-  def fullName = (firstName, lastName) match {
-    case (Some(firstName), Some(lastName)) => s"$firstName $lastName"
-    case _ => "<no name>"
+
+object AbstractUser {
+
+  case class PartialUser private[AbstractUser](id: Option[Int], personOid: Option[String], email: String, idpentityid: IDPEntityId, uiLang:String, partialUser: Boolean = true) extends AbstractUser {
+    def fullName = email
+  }
+
+  case class User private[AbstractUser](id: Option[Int], personOid: Option[String], email: String, firstName: Option[String], lastName: Option[String], birthDate: Option[Date],
+                                        personId: Option[String], idpentityid: IDPEntityId, gender: Option[String], nativeLanguage: Option[String], nationality: Option[String],
+                                        uiLang: String) extends AbstractUser {
+    def fullName = (firstName, lastName) match {
+      case (Some(firstName), Some(lastName)) => s"$firstName $lastName"
+      case _ => "<no name>"
+    }
+  }
+
+  def partialUser(id: Option[Int], personOid: Option[String], email: String, idpentityid: IDPEntityId, uiLang:String) = {
+    PartialUser(id, personOid, email.toLowerCase(), idpentityid, uiLang)
+  }
+
+  def user(id: Option[Int], personOid: Option[String], email: String, firstName: Option[String], lastName: Option[String], birthDate: Option[Date],
+           personId: Option[String], idpentityid: IDPEntityId, gender: Option[String], nativeLanguage: Option[String], nationality: Option[String],
+           uiLang: String) = {
+    User(id, personOid, email.toLowerCase(), firstName, lastName, birthDate, personId, idpentityid, gender, nativeLanguage, nationality, uiLang)
   }
 }

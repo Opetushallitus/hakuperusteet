@@ -9,7 +9,7 @@ import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil}
 import slick.dbio.DBIO
 import slick.driver.PostgresDriver.api._
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}

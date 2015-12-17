@@ -5,7 +5,7 @@ import fi.vm.sade.auditlog.hakuperusteet.LogMessage.builder
 import fi.vm.sade.auditlog.{ApplicationType, Audit}
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 object AuditLog {
   val serviceName = "hakuperusteet"
   val audit = new Audit(serviceName, ApplicationType.OPISKELIJA)

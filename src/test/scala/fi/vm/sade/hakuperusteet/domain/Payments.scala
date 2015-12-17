@@ -4,7 +4,7 @@ import java.time.{ZoneId, LocalDate}
 import java.util.Date
 
 import org.slf4j.LoggerFactory
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
 import scala.util.Random
 
 object Payments {

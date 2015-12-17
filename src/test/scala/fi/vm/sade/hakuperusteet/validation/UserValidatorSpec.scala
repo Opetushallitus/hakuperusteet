@@ -2,7 +2,8 @@ package fi.vm.sade.hakuperusteet.validation
 
 import java.time.LocalDate
 
-import fi.vm.sade.hakuperusteet.domain.{OppijaToken, User}
+import fi.vm.sade.hakuperusteet.domain.{OppijaToken}
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Languages, SimplifiedCode, SimplifiedLangValue}
 import org.scalatest.{Assertions, FlatSpec, Matchers}
 

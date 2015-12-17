@@ -16,7 +16,7 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization._
 import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
-
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scala.concurrent.ExecutionContext
 import scala.io.Source
 import scala.util.{Failure, Success}

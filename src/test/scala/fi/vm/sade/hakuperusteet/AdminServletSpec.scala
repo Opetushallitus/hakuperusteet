@@ -39,7 +39,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val applicationObjectServiceMock = ApplicationObjectService(testExecutionContext, countries, dbSpy, oppijanTunnistusMock, paymentServiceMock, tarjontaMock)
 
   val contentTypeJson: Map[String, String] = Map("Content-Type" -> "application/json")
-  val user = User(None, Some("1.2.246.562.24.00000000000"), "test@example.com", Some("firstName"),
+  val user = AbstractUser.user(None, Some("1.2.246.562.24.00000000000"), "test@example.com", Some("firstName"),
     Some("lastName"), Some(new Date()), None, OppijaToken, Some("1"), Some("102"), Some("102"), "fi")
   val bachelors = "102"
   val argentina = "032"

@@ -2,7 +2,8 @@ package fi.vm.sade.hakuperusteet
 
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, PaymentStatus, User}
+import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, PaymentStatus}
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
 import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
