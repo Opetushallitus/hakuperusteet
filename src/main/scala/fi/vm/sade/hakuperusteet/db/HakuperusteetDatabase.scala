@@ -6,6 +6,7 @@ import java.util.Calendar
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
+import fi.vm.sade.hakuperusteet.{NonOphOrganizationalAccess, OphOrganizationalAccess, OrganizationalAccess}
 import fi.vm.sade.hakuperusteet.admin.SynchronizationStatus
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.DB
 import fi.vm.sade.hakuperusteet.db.generated.Tables
@@ -85,7 +86,26 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
 
-  def allUsers: Seq[AbstractUser] = (Tables.User joinLeft Tables.UserDetails on (_.id === _.id)).result.run.map(userRowToUser)
+  private def filterByApplicationOptionOids(query: Query[(Tables.User, Rep[Option[Tables.UserDetails]]), (Tables.UserRow, Option[Tables.UserDetailsRow]), Seq], applicationOptions: List[String]) = {
+    (query joinLeft Tables.ApplicationObject on (_._1.henkiloOid === _.henkiloOid)).filter(r => r._2.map(_.hakukohdeOid) inSet applicationOptions).map(_._1)
+  }
+
+  private def organizationFilter(access: OrganizationalAccess, query: Query[(Tables.User, Rep[Option[Tables.UserDetails]]), (Tables.UserRow, Option[Tables.UserDetailsRow]), Seq]) = access match {
+    case NonOphOrganizationalAccess(applicationOptionOids) => filterByApplicationOptionOids(query, applicationOptionOids)
+    case OphOrganizationalAccess() => query
+  }
+
+  def findUserByOid(henkiloOid: String, access: OrganizationalAccess): Option[AbstractUser] = {
+    val query = Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)
+    organizationFilter(access, query).result.headOption.run.map(userRowToUser)
+  }
+
+  def findUserByOid(henkiloOid: String): Option[AbstractUser] = findUserByOid(henkiloOid, OphOrganizationalAccess())
+
+  def allUsers(access: OrganizationalAccess): Seq[AbstractUser] = {
+    val query = Tables.User joinLeft Tables.UserDetails on (_.id === _.id)
+    organizationFilter(access, query).distinct.result.run.map(userRowToUser)
+  }
 
   def upsertPartialUser(partialUser: PartialUser): Option[AbstractUser] = {
     (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser.copy(email = partialUser.email.toLowerCase()))).run match {

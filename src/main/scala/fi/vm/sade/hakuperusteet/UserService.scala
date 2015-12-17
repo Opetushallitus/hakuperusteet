@@ -6,6 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil}
 import slick.dbio.DBIO
 import slick.driver.PostgresDriver.api._
@@ -18,10 +19,12 @@ trait UserService extends LazyLogging {
   implicit val executionContext: ExecutionContext
   val db: HakuperusteetDatabase
   val henkiloClient: HenkiloClient
-  
-  def searchUsers(searchTerm: String): Seq[AbstractUser] = {
+  val tarjonta: Tarjonta
+
+  def searchUsers(casSession: CasSession, searchTerm: String): Seq[AbstractUser] = {
+    val organizationalAccess = parseOrganizationalAccess(casSession.roles)
     val lowerCaseSearchTerm = searchTerm.toLowerCase
-    db.allUsers.filter(u => lowerCaseSearchTerm.isEmpty ||
+    db.allUsers(organizationalAccess).filter(u => lowerCaseSearchTerm.isEmpty ||
       u.email.toLowerCase.contains(lowerCaseSearchTerm) ||
       u.fullName.toLowerCase.contains(lowerCaseSearchTerm))
   }
@@ -30,7 +33,7 @@ trait UserService extends LazyLogging {
     db.findUserByOid(personOid)
 
   def findUserData(casSession: CasSession, personOid: String): Option[AbstractUserData] =
-    db.findUserByOid(personOid).map {
+    db.findUserByOid(personOid, parseOrganizationalAccess(casSession.roles)).map {
       case user: User => db.run(fetchUserDataAction(casSession, user))
       case user: PartialUser => fetchPartialUserData(casSession, user)
     }
@@ -117,13 +120,22 @@ trait UserService extends LazyLogging {
       syncAndWriteResponse(casSession, user)
     case user: PartialUser => throw new RuntimeException(s"unexpected partial user ${user.email}")
   }
+
+  def parseOrganizationalAccess(roles: List[String]): OrganizationalAccess = {
+    val organizations = roles.filter(_.startsWith("APP_HAKUPERUSTEETADMIN_CRUD_")).map(_.split("_").last)
+    organizations.contains(Constants.OphOrganizationOid) match {
+      case true => OphOrganizationalAccess()
+      case false => NonOphOrganizationalAccess(tarjonta.getApplicationOptionsForOrganization(organizations))
+    }
+  }
 }
 
 object UserService {
-  def apply(ec: ExecutionContext, hc: HenkiloClient, database: HakuperusteetDatabase): UserService = new UserService {
+  def apply(ec: ExecutionContext, hc: HenkiloClient, database: HakuperusteetDatabase, t: Tarjonta): UserService = new UserService {
     override implicit val executionContext: ExecutionContext = ec
     override val henkiloClient: HenkiloClient = hc
     override val db: HakuperusteetDatabase = database
+    override val tarjonta: Tarjonta = t
   }
 }
 
@@ -134,3 +146,9 @@ case class UserData(session: CasSession, user: User, applicationObject: Seq[Appl
 case class PartialUserData(session: CasSession, user: PartialUser, payments: Seq[Payment], hasPaid: Boolean, isPartialUserData: Boolean = true) extends AbstractUserData
 
 case class UserPaymentData(user: AbstractUser, payments: Seq[Payment], old_state: Boolean, new_state: Boolean)
+
+sealed trait OrganizationalAccess
+
+case class OphOrganizationalAccess() extends OrganizationalAccess
+
+case class NonOphOrganizationalAccess(applicationOptionOids: List[String]) extends OrganizationalAccess

@@ -10,6 +10,7 @@ import fi.vm.sade.hakuperusteet.google.GoogleVerifier
 import fi.vm.sade.hakuperusteet.koodisto._
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import org.joda.time.DateTime
 
 trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
@@ -24,7 +25,7 @@ trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
   val oppijanTunnistus: OppijanTunnistus = new DummyOppijanTunnistus(config)
   val emailSender = EmailSender.init(config)
   val signer = new DummyRSASigner(config)
-
+  val tarjonta = Tarjonta.init(config)
 }
 
 trait DummyDataTestDependency {

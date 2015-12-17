@@ -6,7 +6,7 @@ import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Syn
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
-import fi.vm.sade.hakuperusteet.koodisto.{Countries, Koodisto}
+import fi.vm.sade.hakuperusteet.koodisto.Koodisto
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.swagger.{AdminSwagger, SwaggerServlet}
@@ -41,7 +41,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
     context mount(new AdminServlet("/webapp-admin/index.html",config, userValidator, applicationObjectValidator,
-      UserService(executionContext, henkiloClient, database),
+      UserService(executionContext, henkiloClient, database, tarjonta),
       paymentService,
       ApplicationObjectService(executionContext, countries, database, oppijanTunnistus, paymentService, tarjonta)), "/")
     context mount(new SwaggerServlet, "/api-docs/*")

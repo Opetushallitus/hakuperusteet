@@ -150,10 +150,10 @@ class AdminServlet(val resourcePath: String,
     summary "Search users"
     notes "Search users by name or email."
     parameter queryParam[Option[String]]("search").description("Search term"))) {
-    checkAuthentication()
+    val casSession: CasSession = checkAuthentication()
     contentType = "application/json"
     val search = params.getOrElse("search", halt(400))
-    write(userService.searchUsers(search))
+    write(userService.searchUsers(casSession, search))
   }
 
   get("/d27db1a1-eef3-48f6-84f7-007655c2413f") {

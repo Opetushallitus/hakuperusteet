@@ -1,31 +1,23 @@
 package fi.vm.sade.hakuperusteet
 
 import java.util.Date
-import java.util.concurrent.Executors
 
 import fi.vm.sade.hakuperusteet.admin.Synchronization
-import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.domain.PaymentState.PaymentState
-import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
+import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.hakuapp.HakuAppClient
-import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import org.http4s
 import org.http4s.Status
-import org.json4s.native.JsonMethods._
 import org.junit.runner.RunWith
-import org.mockito.{Mockito, Mock}
 import org.mockito.Matchers._
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.mockito.Mockito
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalatra.test.scalatest.ScalatraSuite
-import fi.vm.sade.hakuperusteet.domain.AbstractUser.PartialUser
-
-import scalaz.Failure
 
 @RunWith(classOf[JUnitRunner])
 class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDependencies with BeforeAndAfterAll {
   val hakuAppMock = Mockito.mock(classOf[HakuAppClient])
-  val tarjonta = Mockito.mock(classOf[Tarjonta])
   val synchronization = new Synchronization(config, database, tarjonta, countries, null) {
     override val hakuAppClient = hakuAppMock
     def publicCheckForId(id: Int) = checkSynchronizationForId(id)

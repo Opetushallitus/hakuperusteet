@@ -6,13 +6,14 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import fi.vm.sade.hakuperusteet
 import fi.vm.sade.hakuperusteet.admin.AdminServlet
 import fi.vm.sade.hakuperusteet.admin.auth.CasBasicAuthStrategy
-import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.domain.{CasSession, _}
 import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.swagger.AdminSwagger
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
 import org.json4s.native.Serialization.{write, _}
+import org.json4s.native.JsonMethods._
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.{AdditionalMatchers, Matchers, Mockito}
@@ -34,7 +35,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val oppijanTunnistusMock = Mockito.mock(classOf[OppijanTunnistus])
   val dbSpy = Mockito.spy(database)
   val tarjontaMock = Mockito.mock(classOf[Tarjonta])
-  val userServiceMock = UserService(testExecutionContext, HenkiloClient.init(config), dbSpy)
+  val userServiceMock = UserService(testExecutionContext, HenkiloClient.init(config), dbSpy, tarjontaMock)
   val paymentServiceMock = PaymentService(dbSpy)
   val applicationObjectServiceMock = ApplicationObjectService(testExecutionContext, countries, dbSpy, oppijanTunnistusMock, paymentServiceMock, tarjontaMock)
 
@@ -54,11 +55,14 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val aoCountryArgentina = ApplicationObject(None, user.personOid.get, "1.2.246.562.20.00000000000", "1.2.246.562.5.00000000000", bachelors, argentina)
   val aoCountryFinland = aoCountryArgentina.copy(educationCountry = finland)
   val okPayment = Payment(None, user.personOid.get, new Date(), "reference", "orderNumber", "paymentCallId", PaymentStatus.ok, None)
+  val officerOrganization = "1.2.3.4"
+  var sessionRoles = List[String]()
+
   val s = new AdminServlet("/webapp-admin/index.html",config, UserValidator(countries,languages), ApplicationObjectValidator(countries,educations), userServiceMock, paymentServiceMock, applicationObjectServiceMock) {
     override protected def registerAuthStrategies = {
       scentry.register("CAS", app => new CasBasicAuthStrategy(app, cfg) {
         override def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {
-          Some(CasSession(None, "oid", "username", List("APP_HAKUPERUSTEETADMIN_CRUD"), "ticket"))
+          Some(CasSession(None, "oid", "username", sessionRoles, "ticket"))
         }
       })
     }
@@ -67,6 +71,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   override def beforeAll = {
     super.beforeAll()
     HakuperusteetTestServer.cleanDB()
+    sessionRoles = List("APP_HAKUPERUSTEETADMIN_CRUD", s"APP_HAKUPERUSTEETADMIN_CRUD_$officerOrganization")
   }
 
   override def afterEach = {
@@ -158,6 +163,41 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
       status should equal(500)
       Mockito.verify(oppijanTunnistusMock, Mockito.never)
         .sendToken(any[String], any[String], any[String], any[String], any[String], any[Long])
+    }
+  }
+
+  test("do not return user with hakukohde outside of test organization") {
+    database.upsertUser(user)
+    database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds)
+    Mockito.when(tarjontaMock.getApplicationOptionsForOrganization(any[List[String]])).thenReturn(List())
+    val personOid = user.personOid.get
+    get(s"/api/v1/admin/$personOid") {
+      status should equal(404)
+      body should equal(s"user $personOid not found")
+    }
+  }
+
+  test("return user from matching organization") {
+    database.upsertUser(user)
+    val ao = database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    Mockito
+      .when(tarjontaMock.getApplicationOptionsForOrganization(List(officerOrganization)))
+      .thenReturn(List(ao.hakukohdeOid))
+    val personOid = user.personOid.get
+    get(s"/api/v1/admin/$personOid") {
+      status should equal(200)
+      (parse(body) \ "user" \ "personOid").extract[String] should equal(personOid)
+    }
+  }
+
+  test("return user for OPH role") {
+    database.upsertUser(user)
+    val ao = database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    sessionRoles = List("APP_HAKUPERUSTEETADMIN_CRUD", s"APP_HAKUPERUSTEETADMIN_CRUD_${Constants.OphOrganizationOid}") // OPH role
+    val personOid = user.personOid.get
+    get(s"/api/v1/admin/$personOid") {
+      status should equal(200)
+      (parse(body) \ "user" \ "personOid").extract[String] should equal(personOid)
     }
   }
 }

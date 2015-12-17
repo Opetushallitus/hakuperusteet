@@ -1,0 +1,167 @@
+{
+  "result": {
+    "tulokset": [
+      {
+        "oid": "1.2.246.562.10.58894046216",
+        "version": 0,
+        "nimi": {
+          "fi": "Ensimmäinen tarjoaja",
+          "en": ""
+        },
+        "tulokset": [
+          {
+            "oid": "1.2.246.562.20.11111111111",
+            "nimi": {
+              "sv": "",
+              "en": "Security and Mobile Computing – NordSecMob, Master of Science (Technology)",
+              "fi": ""
+            },
+            "kausi": {
+              "fi": "Kevät",
+              "sv": "Vår",
+              "en": "Spring"
+            },
+            "vuosi": 2016,
+            "tila": "JULKAISTU",
+            "koulutusasteTyyppi": "KORKEAKOULUTUS",
+            "toteutustyyppiEnum": "KORKEAKOULUTUS",
+            "koulutusmoduuliTyyppi": "TUTKINTO",
+            "opetuskielet": [
+              "kieli_fi"
+            ],
+            "hakutapa": {
+              "fi": "Jatkuva haku",
+              "sv": "Fortgående ansökan",
+              "en": "Jatkuva haku"
+            },
+            "hakuaikaRyhma": "(2015-05-01 07:00 - 2015-10-31 15:00)",
+            "aloituspaikat": 20,
+            "hakuOid": "1.2.246.562.29.41790660355",
+            "ryhmaliitokset": [],
+            "koulutuslaji": {}
+          },
+          {
+            "oid": "1.2.246.562.20.31077988074",
+            "nimi": {
+              "sv": "Tradenomi (AMK) Liiketalous Svenska",
+              "en": "Tradenomi (AMK) LiiketalousEnglish",
+              "fi": "Tradenomi (AMK), liiketalous, monimuotototeutus / Pietarsaari"
+            },
+            "kausi": {
+              "fi": "Kevät",
+              "sv": "Vår",
+              "en": "Spring"
+            },
+            "vuosi": 2016,
+            "tila": "JULKAISTU",
+            "koulutusasteTyyppi": "KORKEAKOULUTUS",
+            "toteutustyyppiEnum": "KORKEAKOULUTUS",
+            "koulutusmoduuliTyyppi": "TUTKINTO",
+            "opetuskielet": [
+              "kieli_fi"
+            ],
+            "hakutapa": {
+              "fi": "Jatkuva haku",
+              "sv": "Fortgående ansökan",
+              "en": "Jatkuva haku"
+            },
+            "hakuaikaRyhma": "(2015-05-01 07:00 - 2015-10-31 15:00)",
+            "aloituspaikat": 20,
+            "hakuOid": "1.2.246.562.29.41790660355",
+            "ryhmaliitokset": [],
+            "koulutuslaji": {}
+          },
+          {
+            "oid": "1.2.246.562.20.81381416718",
+            "nimi": {
+              "fi": "Käyttämätön hakukohde",
+              "sv": "",
+              "en": ""
+            },
+            "kausi": {
+              "fi": "Kevät",
+              "sv": "Vår",
+              "en": "Spring"
+            },
+            "vuosi": 2015,
+            "tila": "JULKAISTU",
+            "koulutusasteTyyppi": "KORKEAKOULUTUS",
+            "toteutustyyppiEnum": "KORKEAKOULUTUS",
+            "koulutusmoduuliTyyppi": "TUTKINTO",
+            "opetuskielet": [
+              "kieli_fi"
+            ],
+            "hakutapa": {
+              "fi": "Jatkuva haku",
+              "sv": "Fortgående ansökan",
+              "en": "Jatkuva haku"
+            },
+            "aloituspaikatKuvaukset": {
+              "fi": "5"
+            },
+            "hakuaikaRyhma": "(2014-08-01 08:00 - 2014-11-15 23:59)",
+            "aloituspaikat": 5,
+            "hakuOid": "1.2.246.562.29.20559551237",
+            "ryhmaliitokset": [],
+            "koulutuslaji": {}
+          }
+        ]
+      },
+      {
+        "oid": "1.2.246.562.10.16458902786",
+        "version": 0,
+        "nimi": {
+          "fi": "Toinen tarjoaja",
+          "sv": "",
+          "en": ""
+        },
+        "tulokset": [
+          {
+            "oid": "1.2.246.562.20.69046715533",
+            "nimi": {
+              "sv": "Säkerhet och mobil kommunikation – NordSecMob, Master of Science (Technology)",
+              "en": "Security and Mobile Computing – NordSecMob, Master of Science (Technology)",
+              "fi": "Turvallisuus ja Mobile Computing – NordSecMob, Master of Science (Technology)"
+            },
+            "kausi": {
+              "fi": "Syksy",
+              "sv": "Höst",
+              "en": "Autumn"
+            },
+            "vuosi": 2015,
+            "tila": "JULKAISTU",
+            "koulutusasteTyyppi": "KORKEAKOULUTUS",
+            "toteutustyyppiEnum": "KORKEAKOULUTUS",
+            "koulutusmoduuliTyyppi": "TUTKINTO",
+            "opetuskielet": [
+              "kieli_en"
+            ],
+            "hakutapa": {
+              "fi": "Erillishaku",
+              "sv": "Separata antagningar",
+              "en": "Erillishaku"
+            },
+            "aloituspaikatKuvaukset": {
+              "fi": "10"
+            },
+            "hakuaikaRyhma": "(2015-01-07 08:00 - 2015-04-30 15:00)",
+            "aloituspaikat": 0,
+            "hakuOid": "1.2.246.562.29.636307328310",
+            "ryhmaliitokset": [
+              {
+                "ryhmaOid": "1.2.246.562.28.92746277245"
+              },
+              {
+                "ryhmaOid": "1.2.246.562.28.66476080333"
+              }
+            ],
+            "koulutuslaji": {}
+          }
+        ]
+      }
+    ],
+    "tuloksia": 235
+  },
+  "accessRights": {},
+  "status": "OK"
+}

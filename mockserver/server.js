@@ -24,7 +24,7 @@ server.search('ou=People, dc=opintopolku, dc=fi', function(req, res, next) {
       uid: "testitest",
       sn: "Testaaja",
       givenname: "Testi",
-      description: '["APP_HAKUPERUSTEETADMIN_CRUD","APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA"]'
+      description: '["APP_HAKUPERUSTEETADMIN_CRUD","APP_HAKUPERUSTEETADMIN_CRUD_1.2.246.562.10.69981965515","APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA"]'
     }
   };
   res.send(obj);
@@ -61,10 +61,13 @@ app.post('/haku-app/applications/:oid/updatePaymentStatus', function(req, res){
 var fs        = require('fs');
 var publicdir = __dirname + '/static';
 app.use(function(req, res, next) {
-  var file = publicdir + req.path + '.json';
+  // Questionmark cannot be portably in file names
+  var relativePath = (req.url + '.json').replace("?", "[Q]");
+  var file = publicdir + relativePath;
   fs.exists(file, function(exists) {
-    if (exists)
-      req.url += '.json';
+    if (exists) {
+      req.url = relativePath;
+    }
     next();
   });
 });
