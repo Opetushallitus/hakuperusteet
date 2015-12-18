@@ -2,8 +2,6 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import fi.vm.sade.hakuperusteet.domain.User
-import fi.vm.sade.hakuperusteet.util.ValidationUtil
 import org.apache.http.HttpVersion
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType

@@ -3,7 +3,7 @@ package fi.vm.sade.hakuperusteet.validation
 import java.time.{ZoneId, LocalDate}
 import java.util.Date
 
-import fi.vm.sade.hakuperusteet.domain.{PaymentStatus, Payment, User}
+import fi.vm.sade.hakuperusteet.domain.{PaymentStatus, Payment}
 import fi.vm.sade.hakuperusteet.util.ValidationUtil
 import scala.util.Try
 import scalaz._

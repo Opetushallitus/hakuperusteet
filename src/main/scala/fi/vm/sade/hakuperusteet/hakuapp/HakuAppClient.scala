@@ -2,9 +2,7 @@ package fi.vm.sade.hakuperusteet.hakuapp
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
-import fi.vm.sade.hakuperusteet.domain.{PaymentUpdate, Henkilo, User, PaymentStatus}
-import fi.vm.sade.hakuperusteet.henkilo.IdpUpsertRequest
+import fi.vm.sade.hakuperusteet.domain.{PaymentUpdate}
 import fi.vm.sade.hakuperusteet.util.CasClientUtils
 import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasParams, CasClient}
 import org.http4s.Uri._
