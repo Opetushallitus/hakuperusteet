@@ -15,12 +15,10 @@ import scala.sys.process.Process
 
 class HakuperusteetTestServer extends HakuperusteetServer {
   override def secureSessionCookie = false
-  override def productionMode = false
 }
 
 class HakuperusteetTestAdminServer extends HakuperusteetAdminServer {
   override def secureSessionCookie = false
-  override def productionMode = false
 }
 
 object HakuperusteetTestServer {
@@ -36,14 +34,14 @@ object HakuperusteetTestServer {
     startCommandServer()
     val server: HakuperusteetTestServer = new HakuperusteetTestServer()
     val adminServer: HakuperusteetTestAdminServer = new HakuperusteetTestAdminServer()
-    logger.info("Starting HakuperusteetServer (http: " + server.portHttp + " https: " + server.portHttps + ")")
-    logger.info("Starting HakuperusteetAdminServer (http: " + adminServer.portHttp + " https: " + adminServer.portHttps + ")")
     new Thread() {
       override def run() = {
         Thread.sleep(2500) // Jetty's JDBC Session creates its database tables automatically. This wait prevents race condition between the two servers
+        logger.info("Starting HakuperusteetAdminServer (http: " + adminServer.portHttp + " https: " + adminServer.portHttps + ")")
         adminServer.runServer()
       }
     }.start()
+    logger.info("Starting HakuperusteetServer (http: " + server.portHttp + " https: " + server.portHttps + ")")
     server.runServer()
   }
 

@@ -14,7 +14,6 @@ class HakuperusteetServer {
   def portHttp = props.getInt("hakuperusteet.port.http")
   def portHttps = Option(props.getInt("hakuperusteet.port.https")).find(_ != -1)
   def secureSessionCookie = true
-  def productionMode = true
 
   def runServer() {
     val dbUrl = props.getString("hakuperusteet.db.url")
@@ -23,9 +22,6 @@ class HakuperusteetServer {
     HakuperusteetDatabase(props)
     val context: WebAppContext = createContext
     val server = JettyUtil.createServerWithContext(portHttp, portHttps, context, dbUrl, user, password, secureSessionCookie)
-    if(productionMode) {
-      context.setInitParameter(org.scalatra.EnvironmentKey, "production")
-    }
     server.start()
     server.join()
     logger.info(s"Using ports $portHttp and $portHttps")
@@ -40,6 +36,9 @@ class HakuperusteetServer {
     context.setContextPath("/hakuperusteet/")
     context.setBaseResource(resources)
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
+    if(productionMode) {
+      context.setInitParameter(org.scalatra.EnvironmentKey, "production")
+    }
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
     context
