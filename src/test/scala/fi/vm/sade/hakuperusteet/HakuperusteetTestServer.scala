@@ -15,10 +15,12 @@ import scala.sys.process.Process
 
 class HakuperusteetTestServer extends HakuperusteetServer {
   override def secureSessionCookie = false
+  override def productionMode = false
 }
 
 class HakuperusteetTestAdminServer extends HakuperusteetAdminServer {
   override def secureSessionCookie = false
+  override def productionMode = false
 }
 
 object HakuperusteetTestServer {
