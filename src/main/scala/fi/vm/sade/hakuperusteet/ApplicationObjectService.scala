@@ -55,14 +55,16 @@ trait ApplicationObjectService extends LazyLogging {
 
   private def sendPaymentInfoEmail(user: AbstractUser, hakukohdeOid: String): Try[Unit] = {
     logger.info(s"sending payment info email to ${user.email}")
-    getApplicationObjectName(hakukohdeOid, user.lang) flatMap (applicationObjectName =>
+    getApplicationObjectName(hakukohdeOid, user.lang) flatMap (applicationObjectName => {
+      val dueDate = nDaysInFuture(10)
       oppijanTunnistus.sendToken(hakukohdeOid, user.email,
         Translate("email", "paymentInfo", user.lang, "title"),
-        EmailTemplate.renderPaymentInfo(applicationObjectName, nDaysInFuture(10), user.lang),
-        user.lang) match {
+        EmailTemplate.renderPaymentInfo(applicationObjectName, dueDate, user.lang),
+        user.lang, dueDate.getTime) match {
         case Success(_) => Success(())
         case Failure(e) => Failure(new RuntimeException(s"sending payment info email to ${user.email} failed", e))
-      })
+      }
+    })
   }
 
   private def getApplicationObjectName(hakukohdeOid: String, lang: String): Try[String] =

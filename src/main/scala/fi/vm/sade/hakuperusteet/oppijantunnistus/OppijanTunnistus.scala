@@ -37,9 +37,15 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       .execute().returnContent().asString()
   }
 
-  def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String): Try[Unit] = {
+  def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
     val callbackUrl = s"${c.getString("host.url.base")}ao/${hakukohdeOid}/#/token/"
-    val data = Map("email" -> email, "url" -> callbackUrl, "lang" -> lang, "subject" -> subject, "template" -> template)
+    val data = Map(
+      "email" -> email,
+      "url" -> callbackUrl,
+      "lang" -> lang,
+      "subject" -> subject,
+      "expires" -> expires,
+      "template" -> template)
     Try(Request.Post(c.getString("oppijantunnistus.create.url"))
       .useExpectContinue()
       .version(HttpVersion.HTTP_1_1)
