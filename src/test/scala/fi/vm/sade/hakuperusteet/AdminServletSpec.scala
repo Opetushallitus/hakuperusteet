@@ -105,7 +105,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
     Mockito.when(tarjontaMock.getApplicationObject(aoCountryArgentina.hakukohdeOid))
       .thenReturn(aoInTarjonta)
-    Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String]))
+    Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String], any[Long]))
       .thenReturn(Success(()))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
@@ -119,7 +119,8 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
         AdditionalMatchers.and(
           Matchers.contains("{{verification-link}}"),
           Matchers.contains("hakukohteen nimi")),
-        Matchers.eq[String](user.lang))
+        Matchers.eq[String](user.lang),
+        any[Long])
     }
   }
 
@@ -132,14 +133,14 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
       val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
-      Mockito.verify(oppijanTunnistusMock, Mockito.never).sendToken(any[String], any[String], any[String], any[String], any[String])
+      Mockito.verify(oppijanTunnistusMock, Mockito.never).sendToken(any[String], any[String], any[String], any[String], any[String], any[Long])
     }
   }
 
   test("roll back application object update if sending email fails") {
     dbSpy.upsertUser(user)
     val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
-    Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String]))
+    Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String], any[Long]))
       .thenReturn(Failure(new RuntimeException("test fail")))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(500)
@@ -156,7 +157,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(500)
       Mockito.verify(oppijanTunnistusMock, Mockito.never)
-        .sendToken(any[String], any[String], any[String], any[String], any[String])
+        .sendToken(any[String], any[String], any[String], any[String], any[String], any[Long])
     }
   }
 }

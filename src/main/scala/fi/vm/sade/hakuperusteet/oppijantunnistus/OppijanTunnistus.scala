@@ -44,7 +44,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       "url" -> callbackUrl,
       "lang" -> lang,
       "subject" -> subject,
-      "expires" -> expires,
+      "expires" -> expires.toString,
       "template" -> template)
     Try(Request.Post(c.getString("oppijantunnistus.create.url"))
       .useExpectContinue()
