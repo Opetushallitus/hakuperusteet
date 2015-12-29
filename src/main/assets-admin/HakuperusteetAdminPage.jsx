@@ -20,19 +20,22 @@ export default class HakuperusteetPage extends React.Component {
         const oppijaClassName = state.isSearching ? "sidebar oppija-search searching" : "sidebar oppija-search"
         const fullName = (user) => (user.firstName && user.lastName) ? <span>{user.firstName}&nbsp;{user.lastName}</span> : <span>{user.email}</span>
 
-        const results = state.isSearching ? <ul></ul> : <ul>
-                        {users.filter(u => {
-                            if(_.isEmpty(state.userSearch)) {
-                                return true
-                            } else {
-                                var name = (u.firstName + " " + u.lastName).toLowerCase()
-                                return name.indexOf(state.userSearch.toLowerCase()) > -1
-                            }
-                        }).map((u, i) => {
-                            const selected = u.id == state.id ? "selected user" : "user"
-                            return <li key={i} className={selected}><a onClick={this.selectUser.bind(this, u.personOid)}>{fullName(u)}</a></li>;
-                        })}
-        </ul>
+        const filteredUsers = users.filter(u => {
+            if(_.isEmpty(state.userSearch)) {
+                return true
+            } else {
+                var name = (u.firstName + " " + u.lastName).toLowerCase()
+                return name.indexOf(state.userSearch.toLowerCase()) > -1
+            }
+        })
+        const results = state.isSearching ? <ul/> : (
+            <ul>
+                {filteredUsers.map((u, i) => {
+                    const selected = u.id == state.id ? "selected user" : "user"
+                    return <li key={i} className={selected}><a onClick={this.selectUser.bind(this, u.personOid)}>{fullName(u)}</a></li>;
+                    })}
+            </ul>
+        )
         return <div>
             {state.changesView ?
             <div className="content-area">
@@ -58,6 +61,9 @@ export default class HakuperusteetPage extends React.Component {
                     </label>
                     <div className="user-search">
                         {results}
+                    </div>
+                    <div className="user-search-summary">
+                        Hakutuloksia {filteredUsers.length} kappaletta
                     </div>
                 </div>
                 <AdminForm state={state} controller={controller} />

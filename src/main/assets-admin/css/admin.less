@@ -130,8 +130,18 @@ th {
       list-style: none;
       margin: 5px 0 0 0;
       padding: 0;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      max-height: 600px;
+      min-height: 200px;
+      min-width: 200px;
+      border-top: 1px solid #CCC;
+      border-bottom: 1px solid #CCC;
 
       li {
+        &:nth-child(2n) {
+          background-color: #EEE;
+        }
         cursor: pointer;
         position: relative;
         height: 49px;
@@ -166,6 +176,10 @@ th {
       0% { opacity: 0; }
       100% { opacity: 0.5;}
     }
+  }
+
+  .user-search-summary {
+    padding: 5px;
   }
 
   .lisaa-oppija {
