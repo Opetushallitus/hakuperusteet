@@ -3,7 +3,7 @@ package fi.vm.sade.hakuperusteet.tarjonta
 import java.util.Date
 
 import com.typesafe.config.Config
-import fi.vm.sade.hakuperusteet.Constants
+import fi.vm.sade.hakuperusteet.{OrganizationGroupOid, OrganizationOid, Oid, Constants}
 import fi.vm.sade.hakuperusteet.util.{TTLCache, ServerException}
 import org.json4s.NoTypeHints
 import org.json4s.native.Serialization
@@ -26,19 +26,22 @@ object EnrichedApplicationObject {
 case class Tarjonta(tarjontaBaseUrl: String) {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  val cache = TTLCache[String, List[String]](300, 100)
+  val cache = TTLCache[Oid, List[String]](300, 100)
 
   def getApplicationObject(hakukohdeOid: String) = hakukohdeToApplicationObject(read[Result](urlToString(tarjontaBaseUrl + "hakukohde/" + hakukohdeOid)).result)
 
   def getApplicationSystem(hakuOid: String) = hakuToApplicationSystem(read[Result2](urlToString(tarjontaBaseUrl + "haku/" + hakuOid)).result)
 
-  def getApplicationOptionsForOrganization(organizationOids: List[String]): List[String] = {
+  def getApplicationOptionsForOrganization(organizationOids: List[Oid]): List[String] = {
     if (organizationOids.contains(Constants.OphOrganizationOid)) {
       // As OPH is parent of everything it must be handled as a special case in higher level
       throw new AssertionError("Method must not be called for root organization")
     } else {
       organizationOids.flatMap(organizationOid => {
-        cache.getOrElseUpdate(organizationOid, () => organizationSearchToHakukohdeOids(read[Search](urlToString(tarjontaBaseUrl + "hakukohde/search?organisationOid=" + organizationOid)).result))
+        organizationOid match {
+          case oid: OrganizationOid => cache.getOrElseUpdate(oid, () => search(tarjontaBaseUrl + "hakukohde/search?organisationOid=" + oid))
+          case oid: OrganizationGroupOid => cache.getOrElseUpdate(oid, () => search(tarjontaBaseUrl + "hakukohde/search?organisaatioRyhmaOid=" + oid))
+        }
       })
     }
   }
@@ -49,6 +52,7 @@ case class Tarjonta(tarjontaBaseUrl: String) {
 
   private def hakukohdeToApplicationObject(r: Hakukohde) = ApplicationObject(r.oid, r.hakuOid, Nimi2(r.hakukohteenNimet), r.tarjoajaNimet, tarjontaUrisToKoodis(r.hakukelpoisuusvaatimusUris), Nimi2(r.lisatiedot), r.hakuaikaId, r.tila)
   private def hakuToApplicationSystem(r: Haku) = ApplicationSystem(r.oid, r.hakulomakeUri, r.maksumuuriKaytossa, r.hakuaikas)
+  private def search(url: String): List[String] = organizationSearchToHakukohdeOids(read[Search](urlToString(url)).result)
   private def organizationSearchToHakukohdeOids(result: OrganizationResults): List[String] = result.tulokset.flatMap(r => r.tulokset.map(t => t.oid))
 }
 

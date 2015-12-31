@@ -55,7 +55,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val aoCountryArgentina = ApplicationObject(None, user.personOid.get, "1.2.246.562.20.00000000000", "1.2.246.562.5.00000000000", bachelors, argentina)
   val aoCountryFinland = aoCountryArgentina.copy(educationCountry = finland)
   val okPayment = Payment(None, user.personOid.get, new Date(), "reference", "orderNumber", "paymentCallId", PaymentStatus.ok, None)
-  val officerOrganization = "1.2.3.4"
+  val officerOrganization = Oid("1.2.246.562.28.1234")
   var sessionRoles = List[String]()
 
   val s = new AdminServlet("/webapp-admin/index.html",config, UserValidator(countries,languages), ApplicationObjectValidator(countries,educations), userServiceMock, paymentServiceMock, applicationObjectServiceMock) {
@@ -169,7 +169,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   test("do not return user with hakukohde outside of test organization") {
     database.upsertUser(user)
     database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds)
-    Mockito.when(tarjontaMock.getApplicationOptionsForOrganization(any[List[String]])).thenReturn(List())
+    Mockito.when(tarjontaMock.getApplicationOptionsForOrganization(any[List[Oid]])).thenReturn(List())
     val personOid = user.personOid.get
     get(s"/api/v1/admin/$personOid") {
       status should equal(404)

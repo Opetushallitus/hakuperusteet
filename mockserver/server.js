@@ -24,7 +24,7 @@ server.search('ou=People, dc=opintopolku, dc=fi', function(req, res, next) {
       uid: "testitest",
       sn: "Testaaja",
       givenname: "Testi",
-      description: '["APP_HAKUPERUSTEETADMIN_CRUD","APP_HAKUPERUSTEETADMIN_CRUD_1.2.246.562.10.69981965515","APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA"]'
+      description: '["APP_HAKUPERUSTEETADMIN_CRUD","APP_HAKUPERUSTEETADMIN_CRUD_1.2.246.562.10.69981965515","APP_HAKUPERUSTEETADMIN_CRUD_1.2.246.562.28.10000","APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA"]'
     }
   };
   res.send(obj);

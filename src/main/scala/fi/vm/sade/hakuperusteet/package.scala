@@ -13,8 +13,6 @@ import org.json4s.native.Serialization
 import org.json4s.{CustomSerializer, DefaultFormats}
 
 package object hakuperusteet {
-  type Oid = String
-
   case object DateSerializer extends CustomSerializer[Date](format => (
     {
       case JString(s) => new Date(s.toLong)

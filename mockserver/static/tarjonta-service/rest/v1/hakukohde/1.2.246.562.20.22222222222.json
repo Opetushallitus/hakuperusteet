@@ -1,0 +1,84 @@
+{
+  "result": {
+    "modified": 1414742650558,
+    "modifiedBy": "1.2.246.562.24.88210189636",
+    "oid": "1.2.246.562.20.22222222222",
+    "version": 3,
+    "hakukohteenNimet": {
+      "kieli_sv": "",
+      "kieli_en": "Hakukohde organisaatioryhmän alta",
+      "kieli_fi": ""
+    },
+    "tarjoajaNimet": {
+      "fi": "Aalto-yliopisto, Perustieteiden korkeakoulu",
+      "sv": "Aalto-universitetet, Högskolan för teknikvetenskaper",
+      "en": "Aalto University, School of Science"
+    },
+    "koulutusmoduuliToteutusTarjoajatiedot": {
+      "1.2.246.562.17.45494016913": {
+        "tarjoajaOids": [
+          "1.2.246.562.10.39920288212"
+        ]
+      }
+    },
+    "tarjoajaOids": [
+      "1.2.246.562.10.39920288212"
+    ],
+    "hakuOid": "1.2.246.562.29.11111111111",
+    "hakuaikaId": "579942",
+    "hakukelpoisuusvaatimusUris": [
+      "pohjakoulutusvaatimuskorkeakoulut_101",
+      "pohjakoulutusvaatimuskorkeakoulut_102",
+      "pohjakoulutusvaatimuskorkeakoulut_116",
+      "pohjakoulutusvaatimuskorkeakoulut_106"
+    ],
+    "opintoOikeusUris": [],
+    "hakukohdeKoulutusOids": [
+      "1.2.246.562.17.45494016913"
+    ],
+    "alinHyvaksyttavaKeskiarvo": 0.0,
+    "alinValintaPistemaara": 0,
+    "ylinValintapistemaara": 0,
+    "aloituspaikatLkm": 30,
+    "edellisenVuodenHakijatLkm": 0,
+    "valintojenAloituspaikatLkm": 0,
+    "tila": "LUONNOS",
+    "ulkoinenTunniste": "SCI20800",
+    "koulutusAsteTyyppi": "KORKEAKOULUTUS",
+    "toteutusTyyppi": "KORKEAKOULUTUS",
+    "koulutusmoduuliTyyppi": "TUTKINTO",
+    "lisatiedot": {
+      "kieli_sv": "<p><span lang=\"SV\">Ansökningen sker via Aalto-universitetets elektroniska ansöknings- och urvalssystem. Ansökningstiden för år 2015 är 1.10.-5.12.2014. Ansökan och dess bilagor ska lämnas in till Aalto-universitetets högskolan för teknikvetenskaper.</span></p>\n<p><span lang=\"SV\">Urvalet till magisterprogrammen görs i första hand på basis av de sökandes tidigare studieframgång.<br></span></p>\n<p><span lang=\"SV\"><span lang=\"SV\"><span lang=\"SV\">Mer information på</span>&nbsp;<a href=\"nordsecmob.aalto.fi\">programmets webbplats.</a></span></span></p>",
+      "kieli_en": "<p><span lang=\"EN-US\">Applying to the programme is done via Aalto University's online application system. The application period for studies starting in autumn 2015 will be organized 1 October - 5 December 2014. The application documents are returned to the School of Science.<br></span></p>\n<p><span lang=\"EN-US\">Admission is primarily based on the student’s previous academic record. </span></p>\n<p><span lang=\"EN-US\">More information on the <a href=\"nordsecmob.aalto.fi\">programme website</a></span></p>",
+      "kieli_fi": "<p>Hakeminen tapahtuu Aalto-yliopiston sähköisen haku- ja valintajärjestelmän kautta. Haku lukuvuonna 2015 alkaviin opintoihin järjestetään 1.10.-5.12.2014. Hakemus liitteineen toimitetaan Aalto-yliopiston Perustieteiden korkeakouluun.</p>\n<p>Valinta ylempään tutkintoon johtaviin maisteriohjelmiin perustuu pääsääntöisesti aiempien opintojen perusteella saatuun näyttöön ja toteutetaan todistusvalintana, ilman pääsykoetta. </p>\n<p><span lang=\"SV\">Lisätietoa</span> <a href=\"http://nordsecmob.aalto.fi/\">ohjelman verkkosivuilta</a></p>"
+    },
+    "hakukelpoisuusVaatimusKuvaukset": {
+      "kieli_sv": "",
+      "kieli_en": "",
+      "kieli_fi": ""
+    },
+    "aloituspaikatKuvaukset": {
+      "kieli_fi": "30"
+    },
+    "kaytetaanJarjestelmanValintaPalvelua": false,
+    "kaytetaanHaunPaattymisenAikaa": false,
+    "kaytetaanHakukohdekohtaistaHakuaikaa": false,
+    "hakukohteenLiitteet": [],
+    "yhteystiedot": [],
+    "valintakokeet": [],
+    "kaksoisTutkinto": false,
+    "opetusKielet": [
+      "kieli_en"
+    ],
+    "valintaPerusteKuvausKielet": [],
+    "soraKuvausKielet": [],
+    "painotettavatOppiaineet": [],
+    "hakuMenettelyKuvaukset": {},
+    "peruutusEhdotKuvaukset": {},
+    "ryhmaliitokset": [],
+    "organisaatioRyhmaOids": [],
+    "ylioppilastutkintoAntaaHakukelpoisuuden": false
+  },
+  "accessRights": {},
+  "status": "OK"
+}

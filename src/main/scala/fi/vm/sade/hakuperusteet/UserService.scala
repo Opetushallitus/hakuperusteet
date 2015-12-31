@@ -122,7 +122,7 @@ trait UserService extends LazyLogging {
   }
 
   def parseOrganizationalAccess(roles: List[String]): OrganizationalAccess = {
-    val organizations = roles.filter(_.startsWith("APP_HAKUPERUSTEETADMIN_CRUD_")).map(_.split("_").last)
+    val organizations = roles.filter(_.startsWith("APP_HAKUPERUSTEETADMIN_CRUD_")).map(v => Oid(v.split("_").last))
     organizations.contains(Constants.OphOrganizationOid) match {
       case true => OphOrganizationalAccess()
       case false => NonOphOrganizationalAccess(tarjonta.getApplicationOptionsForOrganization(organizations))

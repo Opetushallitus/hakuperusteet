@@ -6,9 +6,8 @@ import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.tarjonta.{ApplicationSystem, Tarjonta}
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.junit.JUnitRunner
-import org.scalatra.HaltException
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatra.test.scalatest.ScalatraSuite
 
 @RunWith(classOf[JUnitRunner])
@@ -17,7 +16,7 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val formRedirect = new FormRedirectServlet(config, database, oppijanTunnistus, verifier, signer, countries, Mockito.mock(classOf[Tarjonta]))
   val rnd_number = scala.util.Random.nextInt(10000000)
   val email = s"test_$rnd_number@test.com"
-  val userOid: Some[Oid] = Some(s"person_$rnd_number")
+  val userOid: Some[String] = Some(s"person_$rnd_number")
   val testUser = AbstractUser.user(None, userOid, email, Some("firstName"), Some("lastName"),
     Some(new Date(100)), None, Google, Some("1"), Some("1"), Some("fi"), "fi")
   val appObject = ApplicationObject(None, userOid.get, "hakukohdeOid", "hakuOid", "educationLevel", "fi")

@@ -36,7 +36,7 @@ object Users {
     ("Kalevi", MIES, "261095-9854"), ("Marja", NAINEN, "261095-9843"),
     ("Jouko", MIES, "301195-9756"))
 
-  private val lastNames = List("Annilainen", "Ossilainen", "Penttiläinen", "Ritvanen", "Iljanen", "Simonen", "Kalevinen", "Marjanen","Maksuton")
+  private val lastNames = List("Annilainen", "Ossilainen", "Penttiläinen", "Ritvanen", "Iljanen", "Simonen", "Kalevinen", "Organisaatioryhmästä", "Maksuton")
 
   private def birthDate = Date.from(LocalDate.from(personIdDateFormatter.parse("261095")).atStartOfDay(ZoneId.systemDefault()).toInstant())
 }
