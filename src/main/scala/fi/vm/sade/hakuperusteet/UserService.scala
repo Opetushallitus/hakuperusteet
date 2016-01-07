@@ -112,14 +112,12 @@ trait UserService extends LazyLogging {
   }
 
   private def upsertAndAudit(casSession: CasSession, user: AbstractUser): AbstractUserData = user match {
-    case user: User => {
+    case user: User =>
       db.insertUserDetails(user)
       AuditLog.auditAdminPostUserdata(casSession.oid, user)
       syncAndWriteResponse(casSession, user)
-    }
     case user: PartialUser => throw new RuntimeException(s"unexpected partial user ${user.email}")
   }
-
 }
 
 object UserService {
