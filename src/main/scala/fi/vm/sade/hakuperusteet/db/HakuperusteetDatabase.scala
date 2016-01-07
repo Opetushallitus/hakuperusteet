@@ -58,7 +58,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
 
   def findAllUsersAndPaymentsWithDrasticallyChangedPaymentStates: List[(AbstractUser, Vector[Payment])] = {
     val potentiallyChangedPersonOids = findPotentiallyChangedPersonOidsAfterVetumaCheck
-    potentiallyChangedPersonOids.map(personOid => {
+    potentiallyChangedPersonOids.flatMap(personOid => {
       val paymentsWithHistory = findPaymentsWithEventsByPersonOid(personOid)
       val isSomeOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(oldestPaymentStatuses))
       val isSomeOtherOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(newestPaymentStatuses))
@@ -67,7 +67,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
       } else {
         None
       }
-    }).flatten.flatten.groupBy(_.personOid).toList.map(e => (findUserByOid(e._1).get, e._2))
+    }).flatten.groupBy(_.personOid).toList.map(e => (findUserByOid(e._1).get, e._2))
   }
   private def findPotentiallyChangedPersonOidsAfterVetumaCheck = sql"select distinct henkilo_oid from payment where exists (select null from payment_event as pe where payment.id = pe.payment_id and (pe.old_status = 'ok' and pe.new_status != 'ok')  or (pe.new_status = 'ok' and pe.old_status != 'ok'))".as[String].run
   private def findPaymentEventsForPayments(ids: Seq[Int]) = Tables.PaymentEvent.filter(p => p.paymentId inSet ids).result.run.map(paymentEventRowToPaymentEvent)
