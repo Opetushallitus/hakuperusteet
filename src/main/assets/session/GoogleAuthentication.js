@@ -6,7 +6,7 @@ export function initGoogleAuthentication(properties) {
   return Bacon.fromBinder(sink => {
     gapi.load('auth2', () => {
       var proprs = {
-        client_id: properties.googleAuthenticationClientId,
+        client_id: properties.googleAuthenticationClientId
         //hosted_domain: properties.googleAuthenticationHostedDomain // todo: enable this
       }
       const auth2 = gapi.auth2.init(proprs)

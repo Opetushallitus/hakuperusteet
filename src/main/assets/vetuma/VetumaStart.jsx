@@ -15,7 +15,6 @@ export default class VetumaStart extends React.Component {
       } else {
         return "/" + state.hakukohdeOid
       }
-      return "";
     }
 
     return state.properties.vetumaStartUrl + createVetumaUrlPostfix()
