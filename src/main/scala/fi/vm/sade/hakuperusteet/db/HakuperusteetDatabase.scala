@@ -183,12 +183,11 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
       case _ => None
     }
   }
-  private def convertHakuAppSyncRequest(row: SynchronizationRow) = {
-    (row.hakemusOid) match {
+  private def convertHakuAppSyncRequest(row: SynchronizationRow) = row.hakemusOid match {
       case Some(hakemusOid) => Some(HakuAppSyncRequest(row.id, row.henkiloOid,hakemusOid))
       case _ => None
     }
-  }
+
   def synchronizationRowToSyncRequest(r: Tables.SynchronizationRow) = convertApplicationObjectSyncRequest(r).orElse(convertHakuAppSyncRequest(r))
   def findSynchronizationRow(id: Int): Seq[Tables.SynchronizationRow] = Tables.Synchronization.filter(_.id === id).result.run
   def findSynchronizationRequest(id: Int): Seq[Option[SyncRequest]] = findSynchronizationRow(id).map(synchronizationRowToSyncRequest)
