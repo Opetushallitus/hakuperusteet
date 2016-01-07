@@ -106,7 +106,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
                            handlePayment: (String, String, AbstractUser, Payment, PaymentStatus) => Unit) = {
     val macParams = createMacParams
     val expectedMac = params.getOrElse("MAC", "")
-    if (!Vetuma.verifyReturnMac(config.getString("vetuma.shared.secret"), macParams, expectedMac)) halt(409)
+    if (!Vetuma.verifyReturnMac(config.getString("vetuma.shared.secret"), macParams, expectedMac)) halt(403)
 
     val userData = userDataFromSession
     db.findPaymentByOrderNumber(userData.personOid.get, params.getOrElse("ORDNR", "")) match {
