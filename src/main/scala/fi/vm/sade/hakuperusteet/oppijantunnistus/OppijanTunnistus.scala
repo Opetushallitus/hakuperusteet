@@ -38,7 +38,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
   }
 
   def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
-    val callbackUrl = s"${c.getString("host.url.base")}ao/${hakukohdeOid}/#/token/"
+    val callbackUrl = s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/"
     val data = ("email" -> email) ~
       ("url" -> callbackUrl) ~
       ("lang" -> lang) ~
@@ -51,8 +51,8 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
       .execute().returnResponse()) match {
       case Success(r) if 200 == r.getStatusLine.getStatusCode => Success(())
-      case Success(_) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}"))
-      case Failure(e) => Failure(new RuntimeException(s"Failed to send authentication email to ${email}", e))
+      case Success(_) => Failure(new RuntimeException(s"Failed to send authentication email to $email"))
+      case Failure(e) => Failure(new RuntimeException(s"Failed to send authentication email to $email", e))
     }
   }
 
