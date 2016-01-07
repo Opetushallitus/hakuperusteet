@@ -218,7 +218,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
 
   private def userRowToUser(u: (Tables.UserRow, Option[Tables.UserDetailsRow])): AbstractUser = {
     val r = u._1
-    (u._2) match {
+    u._2 match {
       case Some(details) => userRowAndDetailsToUser(r, details)
       case _ => AbstractUser.partialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang)
     }
@@ -245,7 +245,7 @@ object HakuperusteetDatabase extends LazyLogging {
       val password = config.getString("hakuperusteet.db.password")
       if(!inited.contains(config)) {
         if(inited.nonEmpty) {
-          throw new IllegalArgumentException("You're doing it wrong. For some reason DB config has changed.");
+          throw new IllegalArgumentException("You're doing it wrong. For some reason DB config has changed.")
         }
         migrateSchema(url, user, password)
         val db = new HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config))
