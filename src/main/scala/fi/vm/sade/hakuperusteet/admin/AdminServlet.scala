@@ -49,7 +49,7 @@ class AdminServlet(val resourcePath: String,
 
   def checkAuthentication(): CasSession = {
     authenticate
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
 
     if(!user.roles.contains("APP_HAKUPERUSTEETADMIN_CRUD")) {
       logger.error(s"User ${user.username} is unauthorized!")

@@ -21,18 +21,18 @@ import scala.util.{Failure, Success, Try}
 class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
   get("/openvetuma/:hakemusoid/with_hakemus") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     val hakemusOid = params.get("hakemusoid").map(app => s"&app=$app")
     createVetumaWithHref(getHref, hakemusOid, params.get("hakemusoid"))
   }
 
   get("/openvetuma") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     createVetumaWithHref(getHref, None, None)
   }
 
   get("/openvetuma/:hakukohdeoid") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     val hakukohdeOid = params.get("hakukohdeoid").map(ao => s"&ao=$ao")
     createVetumaWithHref(getHref, hakukohdeOid, None)
   }

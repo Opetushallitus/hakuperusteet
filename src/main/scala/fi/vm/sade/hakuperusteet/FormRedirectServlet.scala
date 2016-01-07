@@ -18,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, signer: RSASigner, countries: Countries, tarjonta: Tarjonta) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
   get("/redirect") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
 
     userDataFromSession match {
       case userData: User =>

@@ -27,12 +27,12 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
     if(!isAuthenticated || TokenAuthStrategy.hasTokenInRequest(request)) {
       authenticate()
     }
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     returnUserData
   }
 
   get("/session") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     returnUserData
   }
 
@@ -49,7 +49,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   }
 
   post("/userData") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     val params = parse(request.body).extract[Params]
     userValidator.parseUserDataWithoutEmailAndIdpentityid(params).bitraverse(
       errors => renderConflictWithErrors(errors),
@@ -57,7 +57,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   }
 
   post("/educationData") {
-    failUnlessAuthenticated
+    failUnlessAuthenticated()
     val params = parse(request.body).extract[Params]
     userDataFromSession match {
       case userData: User => applicationObjectValidator.parseApplicationObjectWithoutPersonOid(params).bitraverse(
