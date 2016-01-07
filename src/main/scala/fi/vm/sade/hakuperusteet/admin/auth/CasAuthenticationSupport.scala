@@ -25,7 +25,7 @@ object CasSessionDB {
 
 trait CasAuthenticationSupport extends ScentrySupport[CasSession] with BasicAuthSupport[CasSession] { self: AdminServlet =>
   override abstract def initialize(config: ConfigT) = super.initialize(config)
-  protected val scentryConfig = (new ScentryConfig {}).asInstanceOf[ScentryConfiguration]
+  protected val scentryConfig = new ScentryConfig {}.asInstanceOf[ScentryConfiguration]
 
   protected def fromSession = { case ticket: String => CasSessionDB.get(ticket) }
   protected def toSession = { case usr: CasSession => usr.ticket }
@@ -36,5 +36,5 @@ trait CasAuthenticationSupport extends ScentrySupport[CasSession] with BasicAuth
 
   val redirectUrl = cfg.getString("hakuperusteet.cas.url") + "/cas/login?service=" + URLEncoder.encode(cfg.getString("hakuperusteetadmin.url.base"), "UTF-8")
 
-  def failUnlessAuthenticated = if (!isAuthenticated) redirect(redirectUrl)
+  def failUnlessAuthenticated() = if (!isAuthenticated) redirect(redirectUrl)
 }

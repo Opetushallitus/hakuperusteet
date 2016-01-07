@@ -10,7 +10,7 @@ object IDPEntityId {
   def withName(name: String): IDPEntityId = name match {
     case "google" => Google
     case "oppijaToken" => OppijaToken
-    case x => throw new NoSuchElementException(s"No value found for '${x}'")
+    case x => throw new NoSuchElementException(s"No value found for '$x'")
   }
 }
 
@@ -30,7 +30,7 @@ sealed trait AbstractUser {
   def personOid: Option[String]
   def uiLang: String
 
-  def lang: String = if (List("fi", "sv", "en") contains (uiLang)) uiLang else "en"
+  def lang: String = if (List("fi", "sv", "en") contains uiLang) uiLang else "en"
 }
 
 

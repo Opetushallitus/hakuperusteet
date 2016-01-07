@@ -22,7 +22,7 @@ class HakuperusteetAdminServer extends HakuperusteetServer {
       ))
 
     val context = new WebAppContext()
-    context setContextPath ("/hakuperusteetadmin")
+    context.setContextPath("/hakuperusteetadmin")
     context.setBaseResource(resources)
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraAdminBootstrap].getCanonicalName)
     context.addEventListener(new ScalatraListener)

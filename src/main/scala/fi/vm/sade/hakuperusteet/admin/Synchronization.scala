@@ -91,7 +91,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 
   private def continueWithTarjontaData(row: ApplicationObjectSyncRequest, as: ApplicationSystem) =
     db.findUserByOid(row.henkiloOid).foreach { (u) =>
-      (u) match {
+      u match {
         case u:User =>
           db.run(db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid), 5 seconds)
             .foreach(synchronizeWithData(row, as, u, db.findPayments(u)))

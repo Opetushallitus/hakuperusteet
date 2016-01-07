@@ -31,7 +31,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
 
   def createSession(tokenFromRequest: String) = {
     Try { oppijanTunnistus.validateToken(tokenFromRequest) } match {
-      case Success(Some((email, lang, Some(metadata)))) => {
+      case Success(Some((email, lang, Some(metadata)))) =>
         val partialUser: PartialUser = AbstractUser.partialUser(None, Some(metadata.personOid), email, OppijaToken, lang)
         upsertIdpEntity(partialUser)
         val existingUser = db.findUser(email)
@@ -43,7 +43,6 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
           }
         }
         Some(Session(email, tokenFromRequest, OppijaToken.toString))
-      }
       case Success(Some((email, lang, None))) => Some(Session(email, tokenFromRequest, OppijaToken.toString))
       case Success(None) => None
       case Failure(f) =>
@@ -55,10 +54,9 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
   def upsertIdpEntity(user: AbstractUser): Unit = {
     Try(henkiloClient.upsertIdpEntity(user).run) match {
       case Success(h) =>
-      case Failure(f) => {
+      case Failure(f) =>
         logger.error("henkiloClient.upsertIdpEntity error inserting idp entity for user: " + user, f)
         halt(500)
-      }
     }
   }
 }

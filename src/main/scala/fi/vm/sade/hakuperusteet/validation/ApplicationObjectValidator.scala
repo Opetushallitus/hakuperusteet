@@ -6,7 +6,7 @@ import fi.vm.sade.hakuperusteet.koodisto.{Educations, Countries}
 import scalaz._
 import scalaz.syntax.applicative._
 import scalaz.syntax.validation._
-import fi.vm.sade.hakuperusteet.util.{ValidationUtil}
+import fi.vm.sade.hakuperusteet.util.ValidationUtil
 
 case class ApplicationObjectValidator(countries: Countries, educations: Educations) extends ValidationUtil {
 

@@ -69,5 +69,5 @@ trait ValidationUtil {
     }
 
   def parseIDPEntityId(params: Params): ValidationResult[IDPEntityId] = parseNonEmpty("idpentityid")(params) flatMap
-    (name => Try(IDPEntityId withName name) map (_.successNel) getOrElse (s"invalid idpentityid $name".failureNel))
+    (name => Try(IDPEntityId withName name) map (_.successNel) getOrElse s"invalid idpentityid $name".failureNel)
 }

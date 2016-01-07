@@ -48,7 +48,7 @@ trait ApplicationObjectService extends LazyLogging {
   private def sendPaymentInfoEmailIfPaymentNowRequired(user: AbstractUser,
                                                        oldAO: Option[ApplicationObject],
                                                        newAO: ApplicationObject): Try[Unit] = oldAO match {
-    case Some(ao) if (paymentNowRequired(paymentService.findPayments(user), ao, newAO)) =>
+    case Some(ao) if paymentNowRequired(paymentService.findPayments(user), ao, newAO) =>
       sendPaymentInfoEmail(user, newAO.hakukohdeOid)
     case _ => Success(())
   }
@@ -70,7 +70,7 @@ trait ApplicationObjectService extends LazyLogging {
   private def getApplicationObjectName(hakukohdeOid: String, lang: String): Try[String] =
     Try(tarjonta.getApplicationObject(hakukohdeOid)) match {
       case Success(ao) => Success(ao.name.get(lang))
-      case Failure(e) => Failure(new RuntimeException(s"fetching application object ${hakukohdeOid} from tarjonta failed", e))
+      case Failure(e) => Failure(new RuntimeException(s"fetching application object $hakukohdeOid from tarjonta failed", e))
     }
 
   private def nDaysInFuture(n: Int) = new Date(new Date().getTime + n * 24 * 60 * 60 * 1000)
@@ -85,7 +85,7 @@ trait ApplicationObjectService extends LazyLogging {
     countries.shouldPay(newAO.educationCountry, newAO.educationLevel)
 
   private def paymentNowRequired(payments: Seq[Payment], oldAO: ApplicationObject, newAO: ApplicationObject) =
-    (allPaymentsFailed(payments) && paymentWasNotPreviouslyRequired(oldAO) && paymentIsCurrentlyRequired(newAO))
+    allPaymentsFailed(payments) && paymentWasNotPreviouslyRequired(oldAO) && paymentIsCurrentlyRequired(newAO)
 }
 
 object ApplicationObjectService {

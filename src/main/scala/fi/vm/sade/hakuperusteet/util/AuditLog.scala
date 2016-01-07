@@ -32,7 +32,7 @@ object AuditLog {
       .email(userData.email)
       .firstName(userData.firstName.getOrElse("<none>"))
       .lastName(userData.lastName.getOrElse("<none>"))
-      .birthDate(userData.birthDate.getOrElse(null))
+      .birthDate(userData.birthDate.orNull)
       .personId(userData.personId.getOrElse("<none>"))
       .gender(userData.gender.getOrElse("<none>"))
       .nativeLanguage(userData.nativeLanguage.getOrElse("<none>"))

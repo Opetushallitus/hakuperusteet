@@ -29,7 +29,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
   def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {
     Option(request.getParameter("ticket")) match {
       case Some(ticket) =>
-        logger.debug(s"User is trying to authenticate with service ticket ${ticket}")
+        logger.debug(s"User is trying to authenticate with service ticket $ticket")
         Try(casClient.validateServiceTicket(adminhost)(ticket).run) match {
           case Success(uid) =>
             logger.info(s"User $uid found")

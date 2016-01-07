@@ -68,10 +68,9 @@ class AdminServlet(val resourcePath: String,
     val logoutRequest = params.getOrElse("logoutRequest",halt(500))
     CasLogout.parseTicketFromLogoutRequest(logoutRequest) match {
       case Some(ticket) => CasSessionDB.invalidate(ticket)
-      case None => {
+      case None =>
         logger.error(s"Invalid logout request: $logoutRequest")
         halt(500, "Invalid logout request!")
-      }
     }
     halt(200)
   }
@@ -232,14 +231,13 @@ class AdminServlet(val resourcePath: String,
           case None => halt(400, "bad application object request")
         }
         applicationObjectService.upsertApplicationObject(casSession, user, education) match {
-          case Success(()) => {
+          case Success(()) =>
             val userData = userService.fetchUserData(casSession, user) match {
               case userData: UserData => userData
               case userData: PartialUserData => halt(500)
             }
             AuditLog.auditAdminPostEducation(casSession.oid, userData.user, education)
             halt (200, body = write(userData))
-          }
           case Failure(e: IllegalArgumentException) =>
             logger.error("bad application object update request", e)
             halt(400, body = e.getMessage)

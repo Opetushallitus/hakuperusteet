@@ -75,12 +75,12 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
     val (_, payments) = k
     !payments.exists(p => {
       val (_, _, timestamp) = p
-      new DateTime(timestamp.getTime()).isAfter(anHourAgo)
+      new DateTime(timestamp.getTime).isAfter(anHourAgo)
     })
   }
   def findUnchekedPaymentsGroupedByPersonOid = findUnchekedRecentEnoughPayments.groupBy(_._2).filter(tooRecent(new DateTime().minusHours(1)))
   def findUnchekedRecentEnoughPayments = sql"select id, henkilo_oid, tstamp from payment where tstamp > (CURRENT_TIMESTAMP - INTERVAL '14 days') and not exists (select NULL from payment_event where payment.id = payment_event.payment_id and (payment_event.created + INTERVAL '1 day') > CURRENT_TIMESTAMP)".as[(Int,String,java.sql.Timestamp)].run
-  def findStateChangingEventsForPayment(payment: Payment) = (Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get).filter(p => p.newStatus =!= p.oldStatus || p.newStatus.isEmpty && p.oldStatus.isDefined || p.newStatus.isDefined && p.oldStatus.isEmpty)).result.run.map(paymentEventRowToPaymentEvent)
+  def findStateChangingEventsForPayment(payment: Payment) = Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get).filter(p => p.newStatus =!= p.oldStatus || p.newStatus.isEmpty && p.oldStatus.isDefined || p.newStatus.isDefined && p.oldStatus.isEmpty).result.run.map(paymentEventRowToPaymentEvent)
 
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
@@ -114,17 +114,15 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
     try {
       val upsertedUser = (Tables.User returning Tables.User).insertOrUpdate(u).run
       upsertedUser match {
-        case Some(newUser) => {
+        case Some(newUser) =>
           val detailsWithCopiedId: Tables.UserDetailsRow = d.copy(id = newUser.id)
           upsertUserDetails(newUser, detailsWithCopiedId)
-        }
         case None => None
       }
     } catch {
-      case e : Throwable => {
+      case e : Throwable =>
         logger.error("Upserting user failed!", e)
         throw e
-      }
     }
   }
 
@@ -175,7 +173,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
 
   def fetchNextSyncIds: Seq[Int] = sql"update synchronization set status = '#${SynchronizationStatus.active.toString}' where id in (select id from synchronization where status = '#${SynchronizationStatus.todo.toString}' or status = '#${SynchronizationStatus.error.toString}' order by status desc, created asc limit 1) returning ( id );".as[Int].run
 
-  def findSynchronizationRequestsForIds(ids: Seq[Int]): Seq[Option[SyncRequest]] = ids.flatMap(findSynchronizationRequest(_))
+  def findSynchronizationRequestsForIds(ids: Seq[Int]): Seq[Option[SyncRequest]] = ids.flatMap(findSynchronizationRequest)
 
   private def convertApplicationObjectSyncRequest(row: SynchronizationRow) = {
     (row.hakuOid,row.hakukohdeOid) match {
@@ -255,9 +253,9 @@ object HakuperusteetDatabase extends LazyLogging {
     }
   }
 
-  def toDBIO[T](t: Try[T]): DBIO[T] = t map (DBIO.successful) recover { case e => DBIO.failed(e) } get
+  def toDBIO[T](t: Try[T]): DBIO[T] = t map DBIO.successful recover { case e => DBIO.failed(e) } get
 
-  def close = inited.values.foreach(_.db.close)
+  def close() = inited.values.foreach(_.db.close)
 
   private def migrateSchema(url: String, user: String, password: String) = {
     try {

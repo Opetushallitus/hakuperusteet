@@ -29,12 +29,12 @@ package object hakuperusteet {
 
   case object UiDateSerializer extends CustomSerializer[Date](format => (
     {
-      case JString(s) => Date.from(LocalDate.parse(s, UIDateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+      case JString(s) => Date.from(LocalDate.parse(s, UIDateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant)
       case JNull => null
     },
     {
       case d: Date => JString(UIDateFormatter.format(
-        LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime()), ZoneId.systemDefault())))
+        LocalDateTime.ofInstant(Instant.ofEpochMilli(d.getTime), ZoneId.systemDefault())))
     }
     )
   )

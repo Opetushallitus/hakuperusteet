@@ -25,7 +25,7 @@ class GoogleOAuth2Strategy(config: Config, db: HakuperusteetDatabase, googleVeri
         if (googleVerifier.verify(tokenFromRequest)) {
           Some(Session(emailFromRequest, tokenFromRequest, idpentityidFromSession))
         } else {
-          logger.warn(s"Session verify failed for user ${emailFromRequest} with token ${tokenFromRequest}")
+          logger.warn(s"Session verify failed for user $emailFromRequest with token $tokenFromRequest")
           halt(401)
         }
       case _ => None

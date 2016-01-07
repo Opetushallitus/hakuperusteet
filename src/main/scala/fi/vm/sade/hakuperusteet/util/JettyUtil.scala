@@ -18,7 +18,7 @@ object JettyUtil extends LazyLogging {
     initRequestLog(server)
     configureJDBCSession(context, dbUrl, user, password, server)
     if(secureSessionCookie) {
-      setSecureCookieParams(context);  
+      setSecureCookieParams(context)
     }
     server
   }
@@ -27,7 +27,7 @@ object JettyUtil extends LazyLogging {
     val requestLog = new RequestLogImpl()
     requestLog.setFileName(sys.props.getOrElse("logback.access", "src/main/resources/logback-access.xml"))
     server.setRequestLog(requestLog)
-    requestLog.start
+    requestLog.start()
   }
 
   private def createConnectors(portHttp: Int, portHttps: Option[Int], server: Server): Array[Connector] = {

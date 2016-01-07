@@ -20,7 +20,7 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
   get("/redirect") {
     failUnlessAuthenticated
 
-    (userDataFromSession) match {
+    userDataFromSession match {
       case userData: User =>
         val hakukohdeOid = params.get("hakukohdeOid").getOrElse(halt(409))
         val applicationObjectForThisHakukohde = db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid), 5 seconds).getOrElse(halt(409))
