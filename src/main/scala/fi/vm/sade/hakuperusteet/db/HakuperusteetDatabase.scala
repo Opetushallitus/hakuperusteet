@@ -81,35 +81,34 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
   def findUnchekedPaymentsGroupedByPersonOid = findUnchekedRecentEnoughPayments.groupBy(_._2).filter(tooRecent(new DateTime().minusHours(1)))
   def findUnchekedRecentEnoughPayments = sql"select id, henkilo_oid, tstamp from payment where tstamp > (CURRENT_TIMESTAMP - INTERVAL '14 days') and not exists (select NULL from payment_event where payment.id = payment_event.payment_id and (payment_event.created + INTERVAL '1 day') > CURRENT_TIMESTAMP)".as[(Int,String,java.sql.Timestamp)].run
   def findStateChangingEventsForPayment(payment: Payment) = (Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get).filter(p => p.newStatus =!= p.oldStatus || p.newStatus.isEmpty && p.oldStatus.isDefined || p.newStatus.isDefined && p.oldStatus.isEmpty)).result.run.map(paymentEventRowToPaymentEvent)
-  //
+
   def findUserByOid(henkiloOid: String): Option[AbstractUser] =
     (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
 
   def allUsers: Seq[AbstractUser] = (Tables.User joinLeft Tables.UserDetails on (_.id === _.id)).result.run.map(userRowToUser)
 
   def upsertPartialUser(partialUser: PartialUser): Option[AbstractUser] = {
-    val upsertedUser = (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser)).run
-    upsertedUser match {
+    (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser)).run match {
       case Some(r) => Some(AbstractUser.partialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang))
       case None => None
     }
   }
 
   private def upsertUserDetails(user: Tables.UserRow, details: Tables.UserDetailsRow) = {
-    val upsertedUserDetails: Option[Tables.UserDetailsRow] = (Tables.UserDetails returning Tables.UserDetails).insertOrUpdate(details).run
-    (upsertedUserDetails) match {
+    (Tables.UserDetails returning Tables.UserDetails).insertOrUpdate(details).run match {
       case Some(upsertedUserDetails) => Some(userRowAndDetailsToUser(user, upsertedUserDetails))
       case _ => Some(userRowToUser(user, None))
     }
   }
+
   def insertUserDetails(user: User) = {
     val (u,d) = userToUserRow(user)
-    val upsertedUserDetails: Option[Tables.UserDetailsRow] = (Tables.UserDetails returning Tables.UserDetails).insertOrUpdate(d).run
-    (upsertedUserDetails) match {
+    (Tables.UserDetails returning Tables.UserDetails).insertOrUpdate(d).run match {
       case Some(upsertedUserDetails) => Some(abstractUserAndDetailsToUser(user, upsertedUserDetails))
       case _ => Some(user)
     }
   }
+
   def upsertUser(user: User): Option[AbstractUser] = {
     val (u,d) = userToUserRow(user)
     try {
