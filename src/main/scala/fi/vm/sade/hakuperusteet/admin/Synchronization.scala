@@ -103,8 +103,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   private def synchronizeWithData(row: ApplicationObjectSyncRequest, as: ApplicationSystem, u: User, payments: Seq[Payment])(ao: ApplicationObject) {
     val shouldPay = countries.shouldPay(ao.educationCountry, ao.educationLevel)
     val hasPaid = PaymentUtil.hasPaid(payments)
-    val formUrl = as.formUrl
-    formUrl match {
+    as.formUrl match {
       case Some(formUrl) =>
         val body = generatePostBody(generateParamMap(signer, u, ao, shouldPay, hasPaid, admin = true))
         logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
