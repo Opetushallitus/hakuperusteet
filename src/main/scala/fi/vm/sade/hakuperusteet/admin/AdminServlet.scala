@@ -69,7 +69,7 @@ class AdminServlet(val resourcePath: String,
     CasLogout.parseTicketFromLogoutRequest(logoutRequest) match {
       case Some(ticket) => CasSessionDB.invalidate(ticket)
       case None => {
-        logger.error(s"Invalid logout request: ${logoutRequest}")
+        logger.error(s"Invalid logout request: $logoutRequest")
         halt(500, "Invalid logout request!")
       }
     }
@@ -202,7 +202,7 @@ class AdminServlet(val resourcePath: String,
     userService.findUserData(casSession, personOid).map {
       case userData: UserData => write(userData)
       case partialUserData: PartialUserData => write(partialUserData)
-    }.getOrElse(halt(404, body = s"user ${personOid} not found"))
+    }.getOrElse(halt(404, body = s"user $personOid not found"))
   }
 
   post("/api/v1/admin/user") {

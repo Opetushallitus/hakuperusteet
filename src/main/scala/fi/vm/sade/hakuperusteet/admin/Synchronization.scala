@@ -35,15 +35,15 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   }
 
   protected def checkSynchronizationForId(id: Int): Unit = {
-    db.findSynchronizationRequest(id).foreach(syncs => syncs match {
+    db.findSynchronizationRequest(id).foreach {
       case Some(sync: HakuAppSyncRequest) => synchronizePaymentRow(sync)
       case Some(sync: ApplicationObjectSyncRequest) => synchronizeUserRow(sync)
       case _ => logger.error("Unexpected sync request")
-    })
+    }
   }
 
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
-    val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments(_)).getOrElse(Seq())).headOption
+    val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments).getOrElse(Seq())).headOption
     (payments match {
       case Some(payment) => paymentStatusToPaymentState(payment.status)
       case _ => None
@@ -54,10 +54,9 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         case Success(r) => handleHakuAppPostSuccess(row, state, r)
         case Failure(f) => handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f))
       }
-      case None => {
+      case None =>
         // TODO: What to do when payment has no state that requires update?
         db.markSyncDone(row.id)
-      }
     }
   }
 
@@ -73,10 +72,10 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     val statusCode = response.status.code
     statusCode match {
       case 200 | 204 =>
-        logger.info(s"Synced row id ${row.id} with Haku-App, henkiloOid ${row.henkiloOid}, hakemusOid ${row.hakemusOid} and payment state ${state}")
+        logger.info(s"Synced row id ${row.id} with Haku-App, henkiloOid ${row.henkiloOid}, hakemusOid ${row.hakemusOid} and payment state $state")
         db.markSyncDone(row.id)
       case 403 =>
-        logger.warn(s"Tried to sync row id ${row.id} with Haku-App, henkiloOid ${row.henkiloOid}, hakemusOid ${row.hakemusOid} and payment state ${state} but the user is no longer liable for payment.")
+        logger.warn(s"Tried to sync row id ${row.id} with Haku-App, henkiloOid ${row.henkiloOid}, hakemusOid ${row.hakemusOid} and payment state $state but the user is no longer liable for payment.")
         db.markSyncDone(row.id)
       case _ =>
         logger.error(s"Synchronization error with statuscode $statusCode")

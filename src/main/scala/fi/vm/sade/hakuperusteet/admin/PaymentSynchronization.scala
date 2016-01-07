@@ -46,7 +46,7 @@ class PaymentSynchronization(config: Config,
     if(hadPaid != hasPaid) {
       logger.info(s"$u payment status has changed from $hadPaid to $hasPaid starting synchronization.")
       newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
-      (u) match {
+      u match {
         case u: User =>
           db.run(db.findApplicationObjects(u) flatMap (aos => DBIO.sequence(aos map (a => db.insertSyncRequest(u, a)))), 5 seconds)
         case _ =>
@@ -79,7 +79,7 @@ class PaymentSynchronization(config: Config,
     val oldStatus = payment.status
     // TODO: Update original payment, code below! This change is for production dry run.
     val p = updateOriginalPaymentIfStatusIsOk(payment,newStatus, oldStatus)
-    db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, true, check.paymentStatus,
+    db.insertEvent(PaymentEvent(None, payment.id.get, new Date(), check.timestmp, checkSucceeded = true, check.paymentStatus,
       Some(newStatus), Some(oldStatus)))
     p
   }
