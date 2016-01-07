@@ -23,7 +23,7 @@ trait UserService extends LazyLogging {
     val lowerCaseSearchTerm = searchTerm.toLowerCase
     db.allUsers.filter(u => lowerCaseSearchTerm.isEmpty ||
       u.email.toLowerCase.contains(lowerCaseSearchTerm) ||
-      (u.fullName).toLowerCase.contains(lowerCaseSearchTerm))
+      u.fullName.toLowerCase.contains(lowerCaseSearchTerm))
   }
 
   def findByPersonOid(personOid: String): Option[AbstractUser] =
@@ -73,10 +73,9 @@ trait UserService extends LazyLogging {
   }
   
   def fetchPartialUserData(casSession: CasSession, user: AbstractUser): AbstractUserData = user match {
-    case user: PartialUser => {
+    case user: PartialUser =>
       val payments = db.findPayments(user)
       PartialUserData(casSession, user, PaymentUtil.sortPaymentsByStatus(payments).map(decorateWithPaymentHistory), PaymentUtil.hasPaid(payments))
-    }
     case user: User => throw new RuntimeException(s"unexpected full user ${user.email}")
   }
   
