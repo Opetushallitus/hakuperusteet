@@ -45,5 +45,4 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     val res = formRedirect.doRedirect(testUser, appObject, appSystem, "educationLevel")
     res.isRight shouldBe(true)
   }
-
 }

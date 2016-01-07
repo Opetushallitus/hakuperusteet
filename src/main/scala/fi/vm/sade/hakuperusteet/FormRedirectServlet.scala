@@ -43,7 +43,6 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
         logger.error("Session had no valid user for redirection!")
         halt(500)
     }
-
   }
 
   def doRedirect(userData: User, applicationObjectForThisHakukohde: ApplicationObject, as: ApplicationSystem, educationLevel : String) : Either[Int, Map[String, Any]] = {
@@ -53,9 +52,9 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
     val hasPaid = payments.exists(_.status.equals(PaymentStatus.ok))
 
     if (shouldPay && !hasPaid) {
-      return Left(409)
+      Left(409)
+    } else {
+      Right(Map("url" -> formUrl, "params" -> RedirectCreator.generateParamMap(signer, userData, applicationObjectForThisHakukohde, shouldPay, hasPaid)))
     }
-
-    Right(Map("url" -> formUrl, "params" -> RedirectCreator.generateParamMap(signer, userData, applicationObjectForThisHakukohde, shouldPay, hasPaid)))
   }
 }
