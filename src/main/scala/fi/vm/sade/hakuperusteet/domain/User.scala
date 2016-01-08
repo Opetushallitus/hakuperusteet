@@ -10,7 +10,6 @@ object IDPEntityId {
   def withName(name: String): IDPEntityId = name match {
     case "google" => Google
     case "oppijaToken" => OppijaToken
-    case x => throw new NoSuchElementException(s"No value found for '$x'")
   }
 }
 
