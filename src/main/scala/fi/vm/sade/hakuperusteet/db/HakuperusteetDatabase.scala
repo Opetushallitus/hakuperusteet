@@ -241,9 +241,10 @@ object HakuperusteetDatabase extends LazyLogging {
       val url = config.getString("hakuperusteet.db.url")
       val user = config.getString("hakuperusteet.db.user")
       val password = config.getString("hakuperusteet.db.password")
-      if(!inited.contains(config)) {
-        if(inited.nonEmpty) {
-          throw new IllegalArgumentException("You're doing it wrong. For some reason DB config has changed.")
+      if (!inited.contains(config)) {
+        if (inited.nonEmpty) {
+          logger.error("You're doing it wrong. For some reason DB config has changed.")
+          System.exit(1)
         }
         migrateSchema(url, user, password)
         val db = new HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config))
