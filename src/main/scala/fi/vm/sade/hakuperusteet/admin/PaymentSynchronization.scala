@@ -67,8 +67,9 @@ class PaymentSynchronization(config: Config,
 
   private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus, oldStatus:PaymentStatus): Payment = {
     if(PaymentStatus.ok == newStatus && oldStatus != newStatus) {
-      db.upsertPayment(payment.copy(status = newStatus))
-      payment.copy(status = newStatus)
+      val copy = payment.copy(status = newStatus)
+      db.upsertPayment(copy)
+      copy
     } else {
       payment
     }
