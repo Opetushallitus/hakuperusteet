@@ -26,15 +26,14 @@ class PaymentSynchronization(config: Config,
   def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, TimeUnit.MINUTES.toSeconds(1), SECONDS)
 
   def checkPaymentSynchronizations = asSimpleRunnable { () =>
-    db.findUnchekedPaymentsGroupedByPersonOid.foreach(r => {
-      val (personOid, paymentIds) = r
-      val u: AbstractUser = db.findUserByOid(personOid).get
+    db.findUnchekedPaymentsGroupedByPersonOid.foreach { case (personOid, paymentIds) =>
+      val u = db.findUserByOid(personOid).get
       try {
         handleUserPayments(u, paymentIds.flatMap(p => db.findPayment(p._1)))
       } catch {
         case e:Throwable => logger.error(s"Vetuma check failed to $u!", e)
       }
-    })
+    }
   }
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
     val hadPaid = PaymentUtil.hasPaid(payments)
