@@ -29,6 +29,7 @@ hakuperusteet.db.registerMbeans=true
 hakuperusteet.db.initializationFailFast=true
 
 admin.synchronization.interval= 30 seconds
+admin.synchronization.timeout = 30 seconds
 
 vetuma.host={{hakuperusteet_vetuma_host}}
 vetuma.success.url=api/v1/vetuma/return/ok

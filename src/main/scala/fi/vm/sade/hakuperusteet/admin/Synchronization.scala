@@ -31,10 +31,12 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   def start = scheduler.scheduleWithFixedDelay(checkTodoSynchronizations, 1, config.getDuration("admin.synchronization.interval", SECONDS), SECONDS)
 
   def checkTodoSynchronizations = asSimpleRunnable { () =>
+    logger.info("Starting synchronization, fetching next sync id...")
     db.fetchNextSyncIds.foreach(checkSynchronizationForId)
   }
 
   protected def checkSynchronizationForId(id: Int): Unit = {
+    logger.info(s"Found synchronization id $id, fetching details...")
     db.findSynchronizationRequest(id).foreach {
       case Some(sync: HakuAppSyncRequest) => synchronizePaymentRow(sync)
       case Some(sync: ApplicationObjectSyncRequest) => synchronizeUserRow(sync)

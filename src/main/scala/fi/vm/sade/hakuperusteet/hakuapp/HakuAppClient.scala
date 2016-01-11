@@ -1,5 +1,7 @@
 package fi.vm.sade.hakuperusteet.hakuapp
 
+import java.util.concurrent.TimeUnit
+
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.domain.PaymentUpdate
@@ -15,13 +17,14 @@ object HakuAppClient {
     val host = c.getString("hakuperusteet.cas.url")
     val username = c.getString("hakuperusteet.user")
     val password = c.getString("hakuperusteet.password")
+    val timeout = c.getDuration("admin.synchronization.timeout", TimeUnit.MILLISECONDS)
     val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
     val casParams = CasParams("/haku-app", username, password)
-    new HakuAppClient(host, new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
+    new HakuAppClient(host, timeout, new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
   }
 }
 
-class HakuAppClient(hakuAppServerUrl: String, client: Client) extends LazyLogging with CasClientUtils {
+class HakuAppClient(hakuAppServerUrl: String, timeout: Long, client: Client) extends LazyLogging with CasClientUtils {
   import fi.vm.sade.hakuperusteet._
 
   def url(hakemusOid: String) = {
@@ -30,7 +33,7 @@ class HakuAppClient(hakuAppServerUrl: String, client: Client) extends LazyLoggin
   }
   def path(hakemusOid: String) = s"/haku-app/applications/$hakemusOid/updatePaymentStatus"
 
-  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = client.prepare(req(hakemusOid, status)).run
+  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = client.prepare(req(hakemusOid, status)).runFor(timeoutInMillis = timeout)
 
   private def req(hakemusOid: String, paymentStatus: PaymentState) = Request(
     method = Method.POST,
