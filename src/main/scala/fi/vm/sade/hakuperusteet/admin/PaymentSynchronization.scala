@@ -93,7 +93,7 @@ class PaymentSynchronization(config: Config,
     }
   }
 
-  private def isValidVetumaCheck(vetumaCheck: CheckResponse) = !"ERROR".equals(vetumaCheck.status)
+  private def isValidVetumaCheck(vetumaCheck: CheckResponse) = vetumaCheck.status != "ERROR"
 
   private def asSimpleRunnable(f: () => Unit) = new Runnable() {
     override def run() {
