@@ -54,25 +54,23 @@ class PaymentSynchronization(config: Config,
     }
   }
 
-  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]): Seq[Payment] = paymentAndChecks.map(pAndC => {
-    val (payment, check) = pAndC
-    if(isValidVetumaCheck(check)) {
+  private def updatePaymentsAndCreateEvents(paymentAndChecks: Seq[(Payment, CheckResponse)]): Seq[Payment] = paymentAndChecks.map { case (payment, check) =>
+    if (isValidVetumaCheck(check)) {
       updatePaymentAndCreateEvent(payment, check)
     } else {
       logger.error(s"Vetuma check returned ERROR status to $payment")
       payment
     }
-  })
+  }
 
-  private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus, oldStatus:PaymentStatus): Payment = {
-    if(PaymentStatus.ok == newStatus && oldStatus != newStatus) {
+  private def updateOriginalPaymentIfStatusIsOk(payment: Payment, newStatus:PaymentStatus, oldStatus:PaymentStatus): Payment =
+    if (PaymentStatus.ok == newStatus && oldStatus != newStatus) {
       val copy = payment.copy(status = newStatus)
       db.upsertPayment(copy)
       copy
     } else {
       payment
     }
-  }
 
   private def updatePaymentAndCreateEvent(payment: Payment, check: CheckResponse): Payment = {
     val newStatus: PaymentStatus = vetumaPaymentStatusToPaymentStatus(check.paymentStatus)
