@@ -33,7 +33,7 @@ trait ApplicationObjectService extends LazyLogging {
       _ <- db.upsertApplicationObject(ao)
       _ <- insertSyncRequests(user)
       _ <- HakuperusteetDatabase.toDBIO(sendPaymentInfoEmailIfPaymentNowRequired(user, oldAo, ao))
-    } yield ()).transactionally.asTry, 5 seconds)
+    } yield ()).transactionally.asTry)
 
   private def ensureFullUser(user: AbstractUser): DBIO[Unit] = user match {
     case u: User => DBIO.successful(())

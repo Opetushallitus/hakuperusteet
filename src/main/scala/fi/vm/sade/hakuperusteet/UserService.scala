@@ -31,7 +31,7 @@ trait UserService extends LazyLogging {
 
   def findUserData(casSession: CasSession, personOid: String): Option[AbstractUserData] =
     db.findUserByOid(personOid).map {
-      case user: User => db.run(fetchUserDataAction(casSession, user), 5 seconds)
+      case user: User => db.run(fetchUserDataAction(casSession, user))
       case user: PartialUser => fetchPartialUserData(casSession, user)
     }
   
@@ -68,7 +68,7 @@ trait UserService extends LazyLogging {
       db.run((for {
         userData <- fetchUserDataAction(casSession, user)
         _ <- DBIO.sequence(userData.applicationObject.map(db.insertSyncRequest(userData.user, _)))
-      } yield userData).transactionally, 5 seconds)
+      } yield userData).transactionally)
     case user: PartialUser => throw new RuntimeException(s"unexpected partial user ${user.email}")
   }
   
@@ -80,7 +80,7 @@ trait UserService extends LazyLogging {
   }
   
   def fetchUserData(casSession: CasSession, user: AbstractUser): AbstractUserData = user match {
-    case user: User => db.run(fetchUserDataAction(casSession, user), 5 seconds)
+    case user: User => db.run(fetchUserDataAction(casSession, user))
     case user: PartialUser => throw new RuntimeException(s"unexpected partial user ${user.email}")
   }
 

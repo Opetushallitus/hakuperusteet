@@ -73,7 +73,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   private def returnUserData = {
     db.findUser(user.email) match {
       case Some(u : User) =>
-        val educations = db.run(db.findApplicationObjects(u), 5 seconds).toList
+        val educations = db.run(db.findApplicationObjects(u)).toList
         val payments = db.findPayments(u).toList
         write(SessionData(user, Some(u), educations, payments))
       case Some(u : PartialUser) =>
@@ -115,8 +115,8 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
 
   def addNewEducation(session: Session, userData: User, education: ApplicationObject) = {
     logger.info(s"Updating education: $education")
-    db.run(db.upsertApplicationObject(education), 10 seconds)
-    val educations = db.run(db.findApplicationObjects(userData), 5 seconds).toList
+    db.run(db.upsertApplicationObject(education))
+    val educations = db.run(db.findApplicationObjects(userData)).toList
     val payments = db.findPayments(userData).toList
     AuditLog.auditPostEducation(userData, education)
     halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, Some(userData), educations, payments))))

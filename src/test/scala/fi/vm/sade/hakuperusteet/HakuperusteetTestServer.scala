@@ -126,7 +126,7 @@ class ResetDatabaseForAdminTests extends ResetDatabase {
       val u = db.findUser(user.email)
       if (u.isEmpty) {
         db.upsertUser(user)
-        applicationObjects.foreach(ao => db.run(db.upsertApplicationObject(ao), 10 seconds))
+        applicationObjects.foreach(ao => db.run(db.upsertApplicationObject(ao)))
         payments.foreach(db.upsertPayment)
       }
     }

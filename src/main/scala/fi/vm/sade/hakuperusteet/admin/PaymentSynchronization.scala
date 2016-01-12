@@ -47,7 +47,7 @@ class PaymentSynchronization(config: Config,
       newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
       u match {
         case u: User =>
-          db.run(db.findApplicationObjects(u) flatMap (aos => DBIO.sequence(aos map (a => db.insertSyncRequest(u, a)))), 5 seconds)
+          db.run(db.findApplicationObjects(u) flatMap (aos => DBIO.sequence(aos map (a => db.insertSyncRequest(u, a)))))
         case _ =>
           logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")
       }

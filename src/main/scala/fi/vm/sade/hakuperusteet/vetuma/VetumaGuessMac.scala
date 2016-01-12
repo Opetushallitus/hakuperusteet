@@ -16,7 +16,7 @@ class VetumaGuessMac(config: Config, db: HakuperusteetDatabase) extends LazyLogg
         if(payment.hakemusOid.isDefined) {
           handleHakuAppUserPayment(payment, user)
         } else {
-          handleAppObjectUserPayment(payment, user, db.run(db.findApplicationObjects(user), 5 seconds))
+          handleAppObjectUserPayment(payment, user, db.run(db.findApplicationObjects(user)))
         }
       case _ =>
         logger.error(s"Unable to find User for payment $payment")

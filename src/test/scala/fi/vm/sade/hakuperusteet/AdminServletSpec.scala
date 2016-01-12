@@ -87,7 +87,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   test("400 if user does not exist") {
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina), contentTypeJson) {
       status should equal(400)
-      dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds).isDefined should be (false)
+      dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid)).isDefined should be (false)
     }
   }
 
@@ -95,14 +95,14 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     dbSpy.upsertUser(user)
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina), contentTypeJson) {
       status should equal(200)
-      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
+      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
     }
   }
 
   test("send email if payment is required after update") {
     dbSpy.upsertUser(user)
-    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland)).get
     Mockito.when(tarjontaMock.getApplicationObject(aoCountryArgentina.hakukohdeOid))
       .thenReturn(aoInTarjonta)
     Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String], any[Long]))
@@ -110,7 +110,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
-      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
+      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
       Mockito.verify(oppijanTunnistusMock).sendToken(
         Matchers.eq[String](aoCountryArgentina.hakukohdeOid),
@@ -126,12 +126,12 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
 
   test("do not send email if ok payment exists") {
     dbSpy.upsertUser(user)
-    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland)).get
     dbSpy.upsertPayment(okPayment)
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
-      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
+      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
       Mockito.verify(oppijanTunnistusMock, Mockito.never).sendToken(any[String], any[String], any[String], any[String], any[String], any[Long])
     }
@@ -139,19 +139,19 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
 
   test("roll back application object update if sending email fails") {
     dbSpy.upsertUser(user)
-    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland)).get
     Mockito.when(oppijanTunnistusMock.sendToken(any[String], any[String], any[String], any[String], any[String], any[Long]))
       .thenReturn(Failure(new RuntimeException("test fail")))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(500)
-      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid), 5 seconds)
+      val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryFinland.educationCountry)
     }
   }
 
   test("do not send email if application object update fails") {
     dbSpy.upsertUser(user)
-    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = dbSpy.run(dbSpy.upsertApplicationObject(aoCountryFinland)).get
     Mockito.when(dbSpy.upsertApplicationObject(aoCountryArgentina.copy(id = ao.id)))
       .thenReturn(DBIO.failed(new RuntimeException("test fail")))
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {

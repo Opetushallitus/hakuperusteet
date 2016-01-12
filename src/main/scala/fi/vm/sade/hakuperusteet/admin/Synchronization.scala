@@ -95,7 +95,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     db.findUserByOid(row.henkiloOid).foreach { (u) =>
       u match {
         case u:User =>
-          db.run(db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid), 5 seconds)
+          db.run(db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid))
             .foreach(synchronizeWithData(row, as, u, db.findPayments(u)))
         case u: PartialUser =>
           logger.error("PartialUser in user sync loop!")

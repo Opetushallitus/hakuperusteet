@@ -22,17 +22,17 @@ import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 import scala.util.Try
 
-class HakuperusteetDatabase(val db: DB)(implicit val executionContext: ExecutionContext) extends LazyLogging {
+class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val executionContext: ExecutionContext) extends LazyLogging {
   import HakuperusteetDatabase._
 
   implicit class RunAndAwait[R](r: slick.dbio.DBIOAction[R, slick.dbio.NoStream, Nothing]) {
-    def run: R = Await.result(db.run(r), Duration.Inf)
+    def run: R = Await.result(db.run(r), timeout)
   }
 
-  def run[R](r: DBIO[R], duration: Duration) = Await.result(db.run(r), duration)
+  def run[R](r: DBIO[R]) = Await.result(db.run(r), timeout)
 
   val useAutoIncrementId = 0
 
@@ -235,13 +235,14 @@ object HakuperusteetDatabase extends LazyLogging {
       val url = config.getString("hakuperusteet.db.url")
       val user = config.getString("hakuperusteet.db.user")
       val password = config.getString("hakuperusteet.db.password")
+      val timeout = Duration.fromNanos(config.getDuration("hakuperusteet.db.timeout").toNanos)
       if (!inited.contains(config)) {
         if (inited.nonEmpty) {
           logger.error("You're doing it wrong. For some reason DB config has changed.")
           System.exit(1)
         }
         migrateSchema(url, user, password)
-        val db = new HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config))
+        val db = new HakuperusteetDatabase(Database.forConfig("hakuperusteet.db", config), timeout)
         inited += (config -> db)
       }
       inited(config)

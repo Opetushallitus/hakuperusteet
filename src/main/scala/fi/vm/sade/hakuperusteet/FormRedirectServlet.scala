@@ -23,7 +23,7 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
     userDataFromSession match {
       case userData: User =>
         val hakukohdeOid = params.get("hakukohdeOid").getOrElse(halt(409))
-        val applicationObjectForThisHakukohde = db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid), 5 seconds).getOrElse(halt(409))
+        val applicationObjectForThisHakukohde = db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid)).getOrElse(halt(409))
         val educationLevel = Some(applicationObjectForThisHakukohde.educationLevel).getOrElse(halt(409))
         Try { tarjonta.getApplicationSystem(applicationObjectForThisHakukohde.hakuOid) } match {
           case Success(as) => doRedirect(userData, applicationObjectForThisHakukohde, as, educationLevel) match {

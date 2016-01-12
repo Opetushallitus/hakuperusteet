@@ -27,9 +27,10 @@ hakuperusteet.db.numThreads=20
 hakuperusteet.db.queueSize=10000
 hakuperusteet.db.registerMbeans=true
 hakuperusteet.db.initializationFailFast=true
+hakuperusteet.db.timeout=20 seconds
 
-admin.synchronization.interval= 30 seconds
-admin.synchronization.timeout = 30 seconds
+admin.synchronization.interval=30 seconds
+admin.synchronization.timeout=30 seconds
 
 vetuma.host={{hakuperusteet_vetuma_host}}
 vetuma.success.url=api/v1/vetuma/return/ok
