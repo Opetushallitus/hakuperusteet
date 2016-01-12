@@ -14,6 +14,16 @@ object Users {
       AbstractUser.user(None, Some(personOidFromIndex(i)), s"${name}.${lastName}@example.com".toLowerCase, Some(name), Some(lastName), Some(birthDate), Option(personId), Google, Some(gender), Some("AB"), Some("004"), "en") }
   }
 
+  private val rnd_number_gen = scala.util.Random
+  def generateRandomPersonOid = s"person_oid_${rnd_number_gen.nextInt(10000000)}"
+  def generateNumSeq = "%09d".format(Math.abs(rnd_number_gen.nextInt()))
+
+  def generateRandomUser = {
+    val personOid = generateRandomPersonOid
+    val email = s"$personOid@testi.com"
+    AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "fi")
+  }
+
   private def personOidFromIndex(index: Int) = f"1.2.246.562.24.${index + 1000}%011d"
 
   private val MIES = "1"

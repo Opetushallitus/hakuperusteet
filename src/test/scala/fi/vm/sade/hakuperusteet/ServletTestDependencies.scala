@@ -34,11 +34,7 @@ trait DummyDataTestDependency {
   def generateRandomPersonOid = s"person_oid_${rnd_number_gen.nextInt(10000000)}"
   def generateNumSeq = "%09d".format(Math.abs(rnd_number_gen.nextInt()))
 
-  def generateRandomUser = {
-    val personOid = generateRandomPersonOid
-    val email = s"$personOid@testi.com"
-    AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "fi")
-  }
+  def generateRandomUser = Users.generateRandomUser
 
   def now = new DateTime()
 

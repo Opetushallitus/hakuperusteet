@@ -17,7 +17,7 @@ class HakuperusteetDatabaseSpec extends FlatSpec with LazyLogging with Matchers 
     HakuperusteetTestServer.cleanDB()
   }
 
-  it should "should create new session" in {
+  it should "create new session" in {
     val user = AbstractUser.user(None, Some("personOid.1.1.1"), "", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en")
     db.upsertUser(user)
 
@@ -25,5 +25,12 @@ class HakuperusteetDatabaseSpec extends FlatSpec with LazyLogging with Matchers 
     val p = Payment(None, "personOid.1.1.1", new Date(), "refNo", "orderNo", "paymCallId", PaymentStatus.ok, None)
     db.upsertPayment(p)
     db.findPayments(user).length shouldEqual 1
+  }
+
+  it should "save email in lowercase" in {
+    val someUser = Users.generateRandomUser
+    val newEmail = "Capital" + someUser.email
+    val u = db.upsertPartialUser(someUser.copy(email = newEmail)).get
+    u.email shouldEqual newEmail.toLowerCase()
   }
 }

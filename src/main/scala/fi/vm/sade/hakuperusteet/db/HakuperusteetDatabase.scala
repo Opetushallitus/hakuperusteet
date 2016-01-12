@@ -88,7 +88,7 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
   def allUsers: Seq[AbstractUser] = (Tables.User joinLeft Tables.UserDetails on (_.id === _.id)).result.run.map(userRowToUser)
 
   def upsertPartialUser(partialUser: PartialUser): Option[AbstractUser] = {
-    (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser)).run match {
+    (Tables.User returning Tables.User).insertOrUpdate(partialUserToUserRow(partialUser.copy(email = partialUser.email.toLowerCase()))).run match {
       case Some(r) => Some(AbstractUser.partialUser(Some(r.id), r.henkiloOid, r.email, IDPEntityId.withName(r.idpentityid), r.uilang))
       case None => None
     }
@@ -110,19 +110,13 @@ class HakuperusteetDatabase(val db: DB)(implicit val executionContext: Execution
   }
 
   def upsertUser(user: User): Option[AbstractUser] = {
-    val (u,d) = userToUserRow(user)
-    try {
-      val upsertedUser = (Tables.User returning Tables.User).insertOrUpdate(u).run
-      upsertedUser match {
-        case Some(newUser) =>
-          val detailsWithCopiedId: Tables.UserDetailsRow = d.copy(id = newUser.id)
-          upsertUserDetails(newUser, detailsWithCopiedId)
-        case None => None
-      }
-    } catch {
-      case e : Throwable =>
-        logger.error("Upserting user failed!", e)
-        throw e
+    val (u,d) = userToUserRow(user.copy(email = user.email.toLowerCase))
+    val upsertedUser = (Tables.User returning Tables.User).insertOrUpdate(u).run
+    upsertedUser match {
+      case Some(newUser) =>
+        val detailsWithCopiedId: Tables.UserDetailsRow = d.copy(id = newUser.id)
+        upsertUserDetails(newUser, detailsWithCopiedId)
+      case None => None
     }
   }
 
