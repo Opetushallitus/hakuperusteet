@@ -31,8 +31,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
 
   def createSession(tokenFromRequest: String) = {
     Try { oppijanTunnistus.validateToken(tokenFromRequest) } match {
-      case Success(Some((emailWithPotentiallyUppercaseLetters, lang, Some(metadata)))) =>
-        val email = emailWithPotentiallyUppercaseLetters.toLowerCase
+      case Success(Some((email, lang, Some(metadata)))) =>
         val partialUser: PartialUser = AbstractUser.partialUser(None, Some(metadata.personOid), email, OppijaToken, lang)
         upsertIdpEntity(partialUser)
         val existingUser = db.findUser(email)
