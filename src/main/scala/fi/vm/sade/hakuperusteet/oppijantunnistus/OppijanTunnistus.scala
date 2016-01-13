@@ -65,7 +65,8 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       .version(HttpVersion.HTTP_1_1)
       .execute().returnContent().asString()
 
-    val verification = parse(verifyResult).extract[OppijanTunnistusVerification]
+    val verificationWithCapitalCaseEmail = parse(verifyResult).extract[OppijanTunnistusVerification]
+    val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))
     if(verification.valid) {
       verification.email match {
         case Some(email) => Some(email, verification.lang.get, parseHakuAppMetadata(verification.metadata.getOrElse(Map())))
