@@ -25,7 +25,7 @@ class PaymentSynchronization(config: Config,
   val scheduler = Executors.newScheduledThreadPool(1)
   def start = scheduler.scheduleWithFixedDelay(checkPaymentSynchronizations, 1, TimeUnit.MINUTES.toSeconds(1), SECONDS)
 
-  def checkPaymentSynchronizations = asSimpleRunnable { () =>
+  def checkPaymentSynchronizations = SynchronizationUtil.asSimpleRunnable { () =>
     db.findUnchekedPaymentsGroupedByPersonOid.foreach { case (personOid, paymentIds) =>
       val u = db.findUserByOid(personOid).get
       try {
@@ -94,10 +94,4 @@ class PaymentSynchronization(config: Config,
   }
 
   private def isValidVetumaCheck(vetumaCheck: CheckResponse) = vetumaCheck.status != "ERROR"
-
-  private def asSimpleRunnable(f: () => Unit) = new Runnable() {
-    override def run() {
-      f()
-    }
-  }
 }

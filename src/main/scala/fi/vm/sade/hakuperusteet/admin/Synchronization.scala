@@ -30,7 +30,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   val scheduler = Executors.newScheduledThreadPool(1)
   def start = scheduler.scheduleWithFixedDelay(checkTodoSynchronizations, 1, config.getDuration("admin.synchronization.interval", SECONDS), SECONDS)
 
-  def checkTodoSynchronizations = asSimpleRunnable { () =>
+  def checkTodoSynchronizations = SynchronizationUtil.asSimpleRunnable { () =>
     logger.info("Starting synchronization, fetching next sync id...")
     db.fetchNextSyncIds.foreach(checkSynchronizationForId)
   }
@@ -143,8 +143,6 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     }
 
   }
-
-  private def asSimpleRunnable(f: () => Unit) = new Runnable() { override def run() { f() } }
 }
 
 object Synchronization {
@@ -154,4 +152,15 @@ object Synchronization {
 object SynchronizationStatus extends Enumeration {
   type SynchronizationStatus = Value
   val todo, active, done, error = Value
+}
+
+object SynchronizationUtil extends LazyLogging {
+  def asSimpleRunnable(f: () => Unit) = new Runnable() {
+    override def run() {
+      Try(f()).recoverWith { case e =>
+        logger.error("synchronization runnable got exception, which is ignored", e)
+        Success()
+      }
+    }
+  }
 }
