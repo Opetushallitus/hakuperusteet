@@ -10,35 +10,19 @@ sealed trait Caching[K , V] {
 }
 
 class Cache[K, V](cache: GuavaCache[K,V]) extends Caching[K, V] {
-  def get(k: K): Option[V] = {
-    Option(cache.getIfPresent(k))
-  }
+  def get(k: K): Option[V] = Option(cache.getIfPresent(k))
 
-  def getOrElseUpdate(k: K, f: () => V): V = {
-    cache.get(k, new Callable[V] {
-      def call(): V = f()
-    })
-  }
+  def getOrElseUpdate(k: K, f: () => V): V = cache.get(k, new Callable[V] { def call(): V = f() })
 
-  def put(k: K, v: V) {
-    cache.put(k, v)
-  }
+  def put(k: K, v: V) = cache.put(k, v)
 
-  def remove(k: K) {
-    cache.invalidate(k)
-  }
+  def remove(k: K) = cache.invalidate(k)
 
-  def clear() {
-    cache.invalidateAll()
-  }
+  def clear() = cache.invalidateAll()
 
-  def size: Long = {
-    cache.size()
-  }
+  def size = cache.size()
 
-  def stats: CacheStats = {
-    cache.stats()
-  }
+  def stats = cache.stats()
 }
 
 object TTLCache {
@@ -46,8 +30,6 @@ object TTLCache {
    * Builds a TTL Cache store
    *
    * @param duration the TTL in seconds
-   * @tparam K
-   * @tparam V
    */
   def apply[K, V](duration: Long, maxSize: Int) = {
     val ttlCache: GuavaCache[K, V] =
