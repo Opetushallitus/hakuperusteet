@@ -40,7 +40,7 @@ class HakuperusteetDatabaseSpec extends FlatSpec with LazyLogging with Matchers 
     val hakuOid = "hakuoid"
     val hakukohdeA: String = "oid.A"
     val hakukohdeB: String = "oid.B"
-    val upsertAo = (user: AbstractUser, hakukohdeOid: String) => db.run(db.upsertApplicationObject(ApplicationObject(None, user.personOid.get, hakukohdeOid, hakuOid, "education-level", "fi")), 5 seconds)
+    val upsertAo = (user: AbstractUser, hakukohdeOid: String) => db.run(db.upsertApplicationObject(ApplicationObject(None, user.personOid.get, hakukohdeOid, hakuOid, "education-level", "fi")))
     val upsertUser = (henkiloOid: String) => db.upsertUser(AbstractUser.user(None, Some(henkiloOid), s"$henkiloOid@example.com", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en"))
 
     // "Ulkolomakkeella" täyttetyt hakemukset sisältävät hakukohteet hakuperusteissa

@@ -168,7 +168,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
 
   test("do not return user with hakukohde outside of test organization") {
     database.upsertUser(user)
-    database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds)
+    database.run(database.upsertApplicationObject(aoCountryFinland))
     Mockito.when(tarjontaMock.getApplicationOptionsForOrganization(any[List[Oid]])).thenReturn(List())
     val personOid = user.personOid.get
     get(s"/api/v1/admin/$personOid") {
@@ -179,7 +179,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
 
   test("return user from matching organization") {
     database.upsertUser(user)
-    val ao = database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = database.run(database.upsertApplicationObject(aoCountryFinland)).get
     Mockito
       .when(tarjontaMock.getApplicationOptionsForOrganization(List(officerOrganization)))
       .thenReturn(List(ao.hakukohdeOid))
@@ -192,7 +192,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
 
   test("return user for OPH role") {
     database.upsertUser(user)
-    val ao = database.run(database.upsertApplicationObject(aoCountryFinland), 10 seconds).get
+    val ao = database.run(database.upsertApplicationObject(aoCountryFinland)).get
     sessionRoles = List("APP_HAKUPERUSTEETADMIN_CRUD", s"APP_HAKUPERUSTEETADMIN_CRUD_${Constants.OphOrganizationOid}") // OPH role
     val personOid = user.personOid.get
     get(s"/api/v1/admin/$personOid") {

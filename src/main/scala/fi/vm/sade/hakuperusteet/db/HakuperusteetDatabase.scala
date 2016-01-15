@@ -83,9 +83,6 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
   def findUnchekedRecentEnoughPayments = sql"select id, henkilo_oid, tstamp from payment where tstamp > (CURRENT_TIMESTAMP - INTERVAL '14 days') and not exists (select NULL from payment_event where payment.id = payment_event.payment_id and (payment_event.created + INTERVAL '1 day') > CURRENT_TIMESTAMP)".as[(Int,String,java.sql.Timestamp)].run
   def findStateChangingEventsForPayment(payment: Payment) = Tables.PaymentEvent.filter(p => p.paymentId === payment.id.get).filter(p => p.newStatus =!= p.oldStatus || p.newStatus.isEmpty && p.oldStatus.isDefined || p.newStatus.isDefined && p.oldStatus.isEmpty).result.run.map(paymentEventRowToPaymentEvent)
 
-  def findUserByOid(henkiloOid: String): Option[AbstractUser] =
-    (Tables.User.filter(_.henkiloOid === henkiloOid) joinLeft Tables.UserDetails on (_.id === _.id)).result.headOption.run.map(userRowToUser)
-
   private def filterByApplicationOptionOids(query: Query[(Tables.User, Rep[Option[Tables.UserDetails]]), (Tables.UserRow, Option[Tables.UserDetailsRow]), Seq], applicationOptions: List[String]) = {
     (query joinLeft Tables.ApplicationObject on (_._1.henkiloOid === _.henkiloOid)).filter(r => r._2.map(_.hakukohdeOid) inSet applicationOptions).map(_._1)
   }
