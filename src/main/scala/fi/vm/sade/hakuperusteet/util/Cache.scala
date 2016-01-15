@@ -29,14 +29,14 @@ object TTLCache {
   /**
    * Builds a TTL Cache store
    *
-   * @param duration the TTL in seconds
+   * @param durationInSeconds the TTL in seconds
    */
-  def apply[K, V](duration: Long, maxSize: Int) = {
+  def apply[K, V](durationInSeconds: Long, maxSize: Int) = {
     val ttlCache: GuavaCache[K, V] =
       CacheBuilder
         .newBuilder()
         .recordStats()
-        .expireAfterWrite(duration, TimeUnit.SECONDS)
+        .expireAfterWrite(durationInSeconds, TimeUnit.SECONDS)
         .maximumSize(maxSize)
         .build().asInstanceOf[GuavaCache[K, V]]
     new Cache[K, V](ttlCache)
