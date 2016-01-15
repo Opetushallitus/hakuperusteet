@@ -1,0 +1,12 @@
+{
+  "name": "hakuperusteet",
+
+  "Makefile": "yes",
+
+  "projects": [
+    {"name": "hakuperusteet-web", "uses": "hakuperusteet-rest google-auth"},
+    {"name": "hakuperusteet-rest", "uses": "haku henkilo koodisto oppijantunnistus tarjonta vetuma hakuperusteetdb"},
+    {"name": "hakuperusteet-admin-web", "uses": "hakuperusteet-admin-rest google-auth"},
+    {"name": "hakuperusteet-admin-rest", "uses": "cas haku henkilo koodisto oppijantunnistus tarjonta vetuma hakuperusteetdb"}
+  ]
+}

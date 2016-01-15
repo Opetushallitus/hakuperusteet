@@ -1,5 +1,10 @@
 # hakuperusteet
 
+Hakemuksen käsittelymaksun maksumuuri. Jos hakijan pohjakoulutus on muun kuin EU- ja ETA-maiden tai Sveitsin
+koulutusjärjestelmän mukainen hakijan pitää maksaa käsittelymaksu jotta hakemus käsitellään.
+
+Projekti sisältää hakijan maksu-käyttöliittymän ja ylläpitäjän hallintakäyttöliittymän.
+
 ## Setup
 
 ### Requirements
@@ -80,11 +85,9 @@ This project has multiple configuration files, which are used for following purp
 
 ## Build
 
-To create assembly jars (app and admin), run the following commands
+To create assembly jars (app and admin), run
 
-1. `npm install`
-2. `./sbt assembly`
-3. `./sbt admin:assembly`
+    make package
 
 ## Postgres client classes for Slick
 
