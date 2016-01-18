@@ -26,7 +26,7 @@ object EnrichedApplicationObject {
 case class Tarjonta(tarjontaBaseUrl: String) {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  val cache = TTLCache[Oid, List[String]](300, 100)
+  val cache = TTLCache[Oid, List[String]](durationInSeconds = 300, maxSize = 100)
 
   def getApplicationObject(hakukohdeOid: String) = hakukohdeToApplicationObject(read[Result](urlToString(tarjontaBaseUrl + "hakukohde/" + hakukohdeOid)).result)
 

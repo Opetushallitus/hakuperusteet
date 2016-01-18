@@ -26,11 +26,6 @@ class Cache[K, V](cache: GuavaCache[K,V]) extends Caching[K, V] {
 }
 
 object TTLCache {
-  /**
-   * Builds a TTL Cache store
-   *
-   * @param durationInSeconds the TTL in seconds
-   */
   def apply[K, V](durationInSeconds: Long, maxSize: Int) = {
     val ttlCache: GuavaCache[K, V] =
       CacheBuilder
