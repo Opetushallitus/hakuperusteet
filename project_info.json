@@ -5,8 +5,8 @@
 
   "projects": [
     {"name": "hakuperusteet-web", "uses": "hakuperusteet-rest google-auth"},
-    {"name": "hakuperusteet-rest", "uses": "haku henkilo koodisto oppijantunnistus tarjonta vetuma hakuperusteetdb"},
+    {"name": "hakuperusteet-rest", "uses": "haku henkilo koodisto oppijan-tunnistus tarjonta vetuma hakuperusteetdb"},
     {"name": "hakuperusteet-admin-web", "uses": "hakuperusteet-admin-rest"},
-    {"name": "hakuperusteet-admin-rest", "uses": "cas haku henkilo koodisto oppijantunnistus tarjonta hakuperusteetdb"}
+    {"name": "hakuperusteet-admin-rest", "uses": "cas haku henkilo koodisto oppijan-tunnistus tarjonta hakuperusteetdb"}
   ]
 }
