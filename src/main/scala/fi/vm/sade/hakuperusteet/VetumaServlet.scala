@@ -41,7 +41,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
 
   private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String]) = {
     val userData = userDataFromSession
-    val language = getUserLang(userData)
+    val language = userData.lang
     val referenceNumber = referenceNumberFromPersonOid(userData.personOid.getOrElse(halt(500)))
     val orderNro = referenceNumber + db.nextOrderNumber()
     val paymCallId = "PCID" + orderNro
@@ -84,7 +84,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     db.upsertPayment(paymentWithSomeStatus)
     AuditLog.auditPayment(userData, paymentWithSomeStatus)
     if(status == PaymentStatus.ok) {
-      sendReceipt(userData, paymentWithSomeStatus)
+      emailSender.sendReceipt(userData, paymentWithSomeStatus)
     }
     db.insertPaymentSyncRequest(userData, paymentWithSomeStatus)
     val url = href + s"app/$hakemusOid$hash"
@@ -95,7 +95,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     db.upsertPayment(paymentWithSomeStatus)
     AuditLog.auditPayment(userData, paymentWithSomeStatus )
     if (status == PaymentStatus.ok) {
-      sendReceipt(userData, paymentWithSomeStatus)
+      emailSender.sendReceipt(userData, paymentWithSomeStatus)
     }
     halt(status = 303, headers = Map("Location" -> createUrl(href, hash, hakukohdeOid)))
   }
@@ -120,11 +120,6 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
   private def createMacParams = {
     def p(name: String) = params.getOrElse(name, "")
     List(p("RCVID"), p("TIMESTMP"), p("SO"), p("LG"), p("RETURL"), p("CANURL"), p("ERRURL"), p("PAYID"), p("REF"), p("ORDNR"), p("PAID"), p("STATUS"))
-  }
-
-  private def sendReceipt(userData: AbstractUser, payment: Payment) = {
-    val p = ReceiptValues(userData.fullName, config.getString("vetuma.amount"), payment.reference)
-    emailSender.send(userData.email, Translate("email.receipt", getUserLang(userData),"title"), EmailTemplate.renderReceipt(p, getUserLang(userData)))
   }
 
   private def fetchNameFromTarjonta(hakukohdeOid: String) =

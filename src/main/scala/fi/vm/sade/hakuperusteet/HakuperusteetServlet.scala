@@ -16,15 +16,6 @@ class HakuperusteetServlet(val configuration: Config, val db: HakuperusteetDatab
 
   def cookieToLang = cookies.get("i18next").filter(lang => List("en","fi","sv").contains(lang)).getOrElse("en")
 
-  def getUserLang(userData: AbstractUser): String = {
-    var lang = userData.uiLang
-    if (!List("en","fi","sv").contains(lang)){
-      lang = "en"
-    }
-    lang
-  }
-
-
   before() {
     contentType = "application/json"
   }
