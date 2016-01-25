@@ -8,16 +8,19 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import fi.vm.sade.hakuperusteet.vetuma.{CheckResponse, VetumaCheck}
 import slick.driver.PostgresDriver.api._
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 
 class PaymentSynchronization(config: Config,
-                             db: HakuperusteetDatabase)
+                             db: HakuperusteetDatabase,
+                             emailSender: EmailSender)
                             (implicit val executionContext: ExecutionContext) extends LazyLogging {
   val vetumaCheck = new VetumaCheck(config, "PAYMENT-APP2", "P")
   val vetumaQueryHost = s"${config.getString("vetuma.host")}Query"
@@ -47,6 +50,11 @@ class PaymentSynchronization(config: Config,
       newPayments.filter(p => p.hakemusOid.isDefined).foreach(p => db.insertPaymentSyncRequest(u, p))
       u match {
         case u: User =>
+          if(hasPaid) {
+            Try(emailSender.sendReceipt(u, newPayments.find(_.status == PaymentStatus.ok).get)) recover {
+              case ex => logger.error("Vetuma check failed to send receipt on succesful payment!", ex)
+            }
+          }
           db.run(db.findApplicationObjects(u) flatMap (aos => DBIO.sequence(aos map (a => db.insertSyncRequest(u, a)))))
         case _ =>
           logger.debug(s"$u is partial user and hence doesnt have applications so skipping application sync!")

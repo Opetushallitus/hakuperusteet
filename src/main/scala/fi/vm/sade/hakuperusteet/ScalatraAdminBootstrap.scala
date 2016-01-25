@@ -4,6 +4,7 @@ import javax.servlet.ServletContext
 
 import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Synchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
+import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Koodisto}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
@@ -31,8 +32,9 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val signer = RSASigner.init(config)
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
+  val emailSender = EmailSender.init(config)
   Synchronization(config, database, tarjonta, countries, signer).start
-  val paymentSynchronization = new PaymentSynchronization(config, database)
+  val paymentSynchronization = new PaymentSynchronization(config, database, emailSender)
   paymentSynchronization.start
 
   override def init(context: ServletContext) {
