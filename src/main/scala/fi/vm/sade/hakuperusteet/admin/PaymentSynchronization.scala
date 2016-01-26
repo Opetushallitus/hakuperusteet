@@ -51,6 +51,7 @@ class PaymentSynchronization(config: Config,
       u match {
         case u: User =>
           if(hasPaid) {
+            // TODO: Uses first OK-payment in receipt. Is this ok?
             Try(emailSender.sendReceipt(u, newPayments.find(_.status == PaymentStatus.ok).get)) recover {
               case ex => logger.error("Vetuma check failed to send receipt on succesful payment!", ex)
             }
