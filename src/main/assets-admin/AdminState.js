@@ -45,7 +45,7 @@ export function initAppState(props) {
     }
     const propertiesS = Bacon.fromPromise(HttpUtil.get(propertiesUrl))
     const serverUpdatesBus = new Bacon.Bus()
-    const searchS = dispatcher.stream(events.search).skipDuplicates(_.isEqual)
+    const searchS = dispatcher.stream(events.search).debounce(250).skipDuplicates(_.isEqual)
     const fetchUsersFromServerS =
       searchS.flatMapLatest(search => {
           // Show no results if query is too short (avoid flooding UI with too many results)
