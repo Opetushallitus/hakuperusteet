@@ -4,7 +4,7 @@ import {assertSubmitDisabled, assertSubmitEnabled, assertEnabled, assertDisabled
 
 describe('Admin UI front', () => {
   before(commandServer.resetAdmin)
-  before(openPage("/hakuperusteetadmin", pageLoaded(form => form.find(".user").length == 9)))
+  before(openPage("/hakuperusteetadmin", pageLoaded(form => form.find("#userSearch").length == 1)))
   describe('Search functionality', () => {
     it('insert should be able to filter with email', setField("#userSearch", "anni.annilainen@example.com"))
     it('should show only filtered user', wait.until(() => select(".user").length == 1))

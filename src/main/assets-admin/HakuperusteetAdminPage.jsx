@@ -54,7 +54,7 @@ export default class HakuperusteetPage extends React.Component {
                 <div className={oppijaClassName}>
                     <label htmlFor="userSearch">
                         <span>Opiskelija</span>
-                        <input type="text" id="userSearch" name="userSearch" onChange={this.changes} onBlur={this.changes} maxLength="255" />
+                        <input type="text" id="userSearch" name="userSearch" placeholder="Syötä vähintään 3 merkkiä" onChange={this.changes} onBlur={this.changes} maxLength="255" />
                     </label>
                     <div className="user-search">
                         {results}

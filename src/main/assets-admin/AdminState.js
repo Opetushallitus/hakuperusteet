@@ -14,6 +14,7 @@ import {applicationObjectWithValidationErrors} from './util/ApplicationObjectVal
 import {paymentWithValidationErrors} from './util/PaymentValidator.js'
 import {hideBusy} from '../assets/util/HtmlUtils.js'
 import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../assets/util/Constants'
+import {STUDENT_SEARCH_NAME_MIN_LENGTH} from './util/Config'
 
 const dispatcher = new Dispatcher()
 const events = {
@@ -44,9 +45,12 @@ export function initAppState(props) {
     }
     const propertiesS = Bacon.fromPromise(HttpUtil.get(propertiesUrl))
     const serverUpdatesBus = new Bacon.Bus()
-    const searchS = Bacon.mergeAll(dispatcher.stream(events.search),Bacon.once("")).skipDuplicates(_.isEqual)
+    const searchS = dispatcher.stream(events.search).debounce(250).skipDuplicates(_.isEqual)
     const fetchUsersFromServerS =
       searchS.flatMapLatest(search => {
+          // Show no results if query is too short (avoid flooding UI with too many results)
+          if (search.length < STUDENT_SEARCH_NAME_MIN_LENGTH)
+            return Bacon.once([])
           return Bacon.fromPromise(HttpUtil.get(`/hakuperusteetadmin/api/v1/admin?search=${search}`))
       })
 
@@ -72,8 +76,8 @@ export function initAppState(props) {
 
     const stateP = Bacon.update(initialState,
         [propertiesS], onStateInit,
-        [fetchUsersFromServerS], onSearchUpdate,
         [searchS], onSearch,
+        [fetchUsersFromServerS], onSearchUpdate,
         [tarjontaS], onTarjontaValue,
         [updateRouteS],onUpdateUser,
         [updateEducationFormS], onUpdateEducationForm,
