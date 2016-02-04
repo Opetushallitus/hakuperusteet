@@ -139,6 +139,9 @@ object HakuperusteetBuild extends Build {
             cp filter {_.data.getName == "guava-jdk5-13.0.jar"}
           },
           credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+          artifact in assembly := {
+            Artifact("hakuperusteetadmin", new URL("file:///" + baseDirectory + "/target/scala-2.11/hakuperusteetadmin-0.1.0-SNAPSHOT-assembly.jar"))
+          },
           publishTo := {
             if (Version.trim.endsWith("SNAPSHOT"))
               Some("snapshots" at artifactory + "/oph-sade-snapshot-local;build.timestamp=" + new java.util.Date().getTime)
