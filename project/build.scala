@@ -137,6 +137,13 @@ object HakuperusteetBuild extends Build {
           assemblyExcludedJars in assembly := {
             val cp = (fullClasspath in assembly).value
             cp filter {_.data.getName == "guava-jdk5-13.0.jar"}
+          },
+          credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+          publishTo := {
+            if (Version.trim.endsWith("SNAPSHOT"))
+              Some("snapshots" at artifactory + "/oph-sade-snapshot-local;build.timestamp=" + new java.util.Date().getTime)
+            else
+              Some("releases" at artifactory + "/oph-sade-release-local")
           }
         ))
   )
