@@ -1,6 +1,18 @@
 import axios from 'axios'
 import Promise from 'bluebird'
 
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+const csrf = getCookie("CSRF")
+if(csrf) {
+  axios.defaults.headers.common["CSRF"]=csrf;
+}
+axios.defaults.headers.common["clientSubSystemCode"]="hakuperusteet.web"
+
 export default class HttpUtil {
 
   static get(url) {
