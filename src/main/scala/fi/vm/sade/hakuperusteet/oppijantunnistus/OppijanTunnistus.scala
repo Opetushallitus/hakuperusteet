@@ -38,7 +38,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
   }
 
   def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
-    val callbackUrl = s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/"
+    val callbackUrl = s"${c.getString("host.url.base")}#/token/"
     val data = ("email" -> email) ~
       ("url" -> callbackUrl) ~
       ("lang" -> lang) ~
