@@ -3,6 +3,8 @@
 
   "Makefile": "yes",
 
+  "csrf": "web ja admin-web ok, backend ?",
+
   "projects": [
     {"name": "hakuperusteet-web", "uses": "hakuperusteet-rest google-auth"},
     {"name": "hakuperusteet-rest", "uses": "haku henkilo-rest koodisto-rest oppijan-tunnistus tarjonta-rest vetuma hakuperusteet-postgres"},
