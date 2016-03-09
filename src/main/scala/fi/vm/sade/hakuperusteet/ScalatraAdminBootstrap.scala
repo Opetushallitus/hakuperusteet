@@ -38,6 +38,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   paymentSynchronization.start
 
   override def init(context: ServletContext) {
+    context.initParameters("org.scalatra.cors.enable") = "false"
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
     context mount(new AdminServlet("/webapp-admin/index.html",config, userValidator, applicationObjectValidator,

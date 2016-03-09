@@ -30,6 +30,7 @@ class ScalatraBootstrap extends LifeCycle {
   val userValidator = UserValidator(countries, languages)
 
   override def init(context: ServletContext) {
+    context.initParameters("org.scalatra.cors.enable") = "false"
     context mount(new IndexServlet, "/app")
     context mount(new IndexServlet, "/ao")
     context mount(new VetumaServlet(config, database, oppijanTunnistus, verifier, emailSender, tarjonta), "/api/v1/vetuma")
