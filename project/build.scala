@@ -87,7 +87,7 @@ object HakuperusteetBuild extends Build {
         "org.apache.httpcomponents" % "fluent-hc" % "4.5",
         "fi.vm.sade" %% "scala-cas" % "0.3.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-utils-validator" % "0.3.0-SNAPSHOT",
-        "fi.vm.sade" %% "scala-security" % "0.2.0-SNAPSHOT" exclude("org.scalatra", "scalatra-json_2.11") exclude("org.scalatra", "scalatra_2.11"),
+        "fi.vm.sade" %% "scala-ldap-client" % "1.0.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
         "org.scalatest" %% "scalatest" % "2.2.4" % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",

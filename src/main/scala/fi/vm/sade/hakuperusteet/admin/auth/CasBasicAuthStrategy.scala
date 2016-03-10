@@ -3,19 +3,12 @@ package fi.vm.sade.hakuperusteet.admin.auth
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 
 import com.typesafe.scalalogging.LazyLogging
-import com.unboundid.ldap.sdk._
-import fi.vm.sade.hakuperusteet.Configuration
-import fi.vm.sade.hakuperusteet.domain.{CasSession, Session}
+import fi.vm.sade.hakuperusteet.domain.{CasSession}
 import fi.vm.sade.security.ldap._
-import fi.vm.sade.security.{ProductionSecurityContext, SecurityContext}
 import fi.vm.sade.utils.cas.CasClient
-import org.json4s.DefaultFormats
-import org.json4s.jackson.Serialization._
-import org.json4s.native.JsonMethods._
-import org.scalatra.{Unauthorized, ScalatraBase}
+import org.scalatra.{ScalatraBase}
 import org.scalatra.auth.ScentryStrategy
 import com.typesafe.config.Config
-import fi.vm.sade.utils.cas.CasClient.ST
 import scala.util.{Failure, Success, Try}
 
 class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config) extends ScentryStrategy[CasSession] with LazyLogging {
