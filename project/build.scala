@@ -74,7 +74,7 @@ object HakuperusteetBuild extends Build {
         "org.eclipse.jetty" % "jetty-jmx" % jettyVersion,
         "javax.servlet" % "javax.servlet-api" % "3.1.0",
         "com.typesafe" % "config" % "1.3.0",
-        "org.json4s" %% "json4s-native" % "3.2.11",
+        "org.json4s" %% "json4s-jackson" % "3.3.0",
         "org.scalaz" %% "scalaz-core" % "7.1.3",
         "com.netaporter" %% "scala-uri" % "0.4.7" exclude("org.parboiled", "parboiled_2.11"),
         "commons-codec" % "commons-codec" % "1.6",

@@ -11,7 +11,7 @@ import fi.vm.sade.hakuperusteet.hakuapp.HakuAppClient
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import org.http4s
 import org.http4s.Status
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 import org.junit.runner.RunWith
 import org.mockito.{Mockito, Mock}
 import org.mockito.Matchers._

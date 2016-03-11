@@ -10,7 +10,7 @@ import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.redirect.RedirectCreator
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.tarjonta.{ApplicationSystem, Tarjonta}
-import org.json4s.native.Serialization.write
+import org.json4s.jackson.Serialization.write
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}

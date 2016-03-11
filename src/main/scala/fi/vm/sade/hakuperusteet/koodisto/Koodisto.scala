@@ -3,8 +3,8 @@ package fi.vm.sade.hakuperusteet.koodisto
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 import org.json4s.NoTypeHints
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization._
 
 case class SimplifiedCode(id: String, names: List[SimplifiedLangValue])
 case class SimplifiedLangValue(lang: String, name: String)

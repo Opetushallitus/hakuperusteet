@@ -3,13 +3,13 @@ package fi.vm.sade.hakuperusteet
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import org.json4s._
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization._
 import org.scalatra.ScalatraServlet
-import org.scalatra.json.NativeJsonSupport
+import org.scalatra.json.JacksonJsonSupport
 
 import scala.util.{Failure, Success, Try}
 
-class TarjontaServlet(tarjonta: Tarjonta) extends ScalatraServlet with NativeJsonSupport with LazyLogging {
+class TarjontaServlet(tarjonta: Tarjonta) extends ScalatraServlet with JacksonJsonSupport with LazyLogging {
   protected implicit val jsonFormats: Formats = DefaultFormats
 
   before() {

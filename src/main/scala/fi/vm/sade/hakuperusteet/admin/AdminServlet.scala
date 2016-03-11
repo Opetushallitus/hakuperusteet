@@ -12,8 +12,8 @@ import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, PaymentV
 import fi.vm.sade.utils.cas.CasLogout
 import org.json4s.JsonDSL._
 import org.json4s._
-import org.json4s.native.JsonMethods._
-import org.json4s.native.Serialization._
+import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization._
 import org.scalatra.ScalatraServlet
 import org.scalatra.swagger.{AllowableValues, DataType, ModelProperty, Swagger, SwaggerSupport}
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._

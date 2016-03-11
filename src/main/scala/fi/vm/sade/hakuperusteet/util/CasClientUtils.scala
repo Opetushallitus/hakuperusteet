@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.http4s.headers.`Content-Type`
 import org.http4s._
 import org.json4s.Formats
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization._
 
 import scala.util.control.NoStackTrace
 import scalaz.\/._

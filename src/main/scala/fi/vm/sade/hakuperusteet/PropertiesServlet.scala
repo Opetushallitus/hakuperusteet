@@ -7,11 +7,11 @@ import fi.vm.sade.hakuperusteet.tarjonta.ApplicationObject
 import org.json4s.JValue
 import org.json4s.JsonAST.JValue
 import org.scalatra.ScalatraServlet
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 import org.json4s.JsonDSL._
 import org.json4s._
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization.{read, write}
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization.{read, write}
 
 class PropertiesServlet(config: Config, countries: Countries, languages: Languages, educations: Educations) extends ScalatraServlet with LazyLogging {
   implicit val formats = Serialization.formats(NoTypeHints)

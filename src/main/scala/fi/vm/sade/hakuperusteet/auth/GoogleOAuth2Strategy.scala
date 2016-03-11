@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain.Session
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 import org.scalatra.Control
 import org.scalatra.servlet.RichRequest
 

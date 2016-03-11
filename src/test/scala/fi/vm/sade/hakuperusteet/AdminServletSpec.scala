@@ -12,7 +12,7 @@ import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.swagger.AdminSwagger
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
-import org.json4s.native.Serialization.{write, _}
+import org.json4s.jackson.Serialization.{write, _}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.{AdditionalMatchers, Matchers, Mockito}

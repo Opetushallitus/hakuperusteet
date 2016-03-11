@@ -5,8 +5,8 @@ import java.util.Date
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.util.ServerException
 import org.json4s.NoTypeHints
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 
 case class ApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, hakuaikaId: String, status: String)

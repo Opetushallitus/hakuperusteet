@@ -18,7 +18,7 @@ import org.apache.http.HttpVersion
 import org.apache.http.client.fluent.{Request, Response}
 import org.apache.http.entity.ContentType
 import org.http4s
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization._
 
 import scala.concurrent.duration._
 import scala.util.control.Exception._

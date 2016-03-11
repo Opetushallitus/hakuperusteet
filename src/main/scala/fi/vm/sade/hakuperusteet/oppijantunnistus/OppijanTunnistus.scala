@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.http.HttpVersion
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
 

@@ -1,7 +1,7 @@
 package fi.vm.sade.hakuperusteet.swagger
 
 import org.scalatra.ScalatraServlet
-import org.scalatra.swagger.{NativeSwaggerBase, ApiInfo, Swagger}
+import org.scalatra.swagger.{JacksonSwaggerBase, ApiInfo, Swagger}
 
 class AdminSwagger extends Swagger("1.2","1", ApiInfo(
   "Hakuperusteet Admin",
@@ -12,4 +12,4 @@ class AdminSwagger extends Swagger("1.2","1", ApiInfo(
   "http://www.osor.eu/eupl/"
 ))
 
-class SwaggerServlet(implicit val swagger: Swagger) extends ScalatraServlet with NativeSwaggerBase
+class SwaggerServlet(implicit val swagger: Swagger) extends ScalatraServlet with JacksonSwaggerBase

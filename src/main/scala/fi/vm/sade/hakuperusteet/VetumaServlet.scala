@@ -14,7 +14,7 @@ import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.util.{Translate, AuditLog}
 import fi.vm.sade.hakuperusteet.vetuma.Vetuma
-import org.json4s.native.Serialization._
+import org.json4s.jackson.Serialization._
 
 import scala.util.{Failure, Success, Try}
 

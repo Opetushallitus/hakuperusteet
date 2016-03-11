@@ -9,7 +9,7 @@ import fi.vm.sade.hakuperusteet.domain.IDPEntityId
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
 import org.json4s.JsonAST.{JInt, JNull, JString}
-import org.json4s.native.Serialization
+import org.json4s.jackson.Serialization
 import org.json4s.{CustomSerializer, DefaultFormats}
 
 package object hakuperusteet {

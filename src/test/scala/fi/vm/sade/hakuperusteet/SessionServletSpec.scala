@@ -1,7 +1,7 @@
 package fi.vm.sade.hakuperusteet
 
 import fi.vm.sade.hakuperusteet.validation.{UserValidator, ApplicationObjectValidator}
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
