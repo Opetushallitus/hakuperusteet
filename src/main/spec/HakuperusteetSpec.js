@@ -2,6 +2,12 @@ import {expect, done} from 'chai'
 import {commandServer, openPage, hakuperusteetLoaded, testFrame, logout, takeScreenshot, S, S2, directLogout} from './testUtil.js'
 import {assertDisabled, assertElementsFound, assertEnabled, assertNotFound, assertOneFound, assertSubmitDisabled, assertSubmitEnabled} from './assertions'
 
+function delete_cookie( name ) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+delete_cookie("i18next")
+
 describe('Page without session', () => {
   before(directLogout)
   before(commandServer.reset)

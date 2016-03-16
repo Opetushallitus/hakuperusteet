@@ -5,9 +5,7 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.util.Try
-import com.typesafe.config._
-
+// note: There is also Configuration object in test. if you add a field here your tests might fail
 object Configuration extends LazyLogging {
 
   val props = ConfigFactory
