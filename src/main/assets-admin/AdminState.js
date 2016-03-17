@@ -37,7 +37,7 @@ export function changeListeners() {
 
 export function initAppState(props) {
     document.domain = location.hostname
-    const {tarjontaUrl, propertiesUrl, usersUrl, userUpdateUrl, applicationObjectUpdateUrl, paymentUpdateUrl} = props
+    const {hakuperusteetadmin:{tarjontaUrl, propertiesUrl, userUpdateUrl, applicationObjectUpdateUrl, paymentUpdateUrl}} = props
     const initialState = {
         ['userUpdateUrl']:userUpdateUrl,
         ['applicationObjectUpdateUrl']:applicationObjectUpdateUrl,

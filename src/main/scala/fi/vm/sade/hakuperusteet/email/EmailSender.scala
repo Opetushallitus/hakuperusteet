@@ -20,7 +20,7 @@ object EmailSender {
 
     val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
     val casParams = CasParams("/ryhmasahkoposti-service", username, password)
-    val emailClient = new EmailClient(host, new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
+    val emailClient = new EmailClient(new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
     new EmailSender(emailClient, c)
   }
 }
@@ -51,13 +51,13 @@ case class EmailRecipient(email: String)
 case class EmailMessage(from: String, subject: String, body: String, isHtml: Boolean)
 case class EmailData(email: EmailMessage, recipient: List[EmailRecipient])
 
-class EmailClient(emailServerUrl: String, client: Client) extends LazyLogging with CasClientUtils {
+class EmailClient(client: Client) extends LazyLogging with CasClientUtils {
   implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
   def send(email: EmailData): Task[Response] = client.prepare(req(email))
 
   private def req(email: EmailData) = Request(
     method = Method.POST,
-    uri = resolve(urlToUri(emailServerUrl), Uri(path = "/ryhmasahkoposti-service/email"))
+    uri = urlToUri("ryhmasahkoposti-service.email")
   ).withBody(email)(json4sEncoderOf[EmailData])
 }

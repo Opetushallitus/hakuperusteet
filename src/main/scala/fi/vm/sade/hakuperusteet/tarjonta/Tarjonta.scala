@@ -2,7 +2,6 @@ package fi.vm.sade.hakuperusteet.tarjonta
 
 import java.util.Date
 
-import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.util.ServerException
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
@@ -22,14 +21,14 @@ object EnrichedApplicationObject {
   }
 }
 
-case class Tarjonta(tarjontaBaseUrl: String) {
+case class Tarjonta() {
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  def getApplicationObject(hakukohdeOid: String) = hakukohdeToApplicationObject(read[Result](urlToString(tarjontaBaseUrl + "hakukohde/" + hakukohdeOid)).result)
+  def getApplicationObject(hakukohdeOid: String) = hakukohdeToApplicationObject(read[Result](urlKeyToString("tarjonta-service.hakukohde", hakukohdeOid)).result)
 
-  def getApplicationSystem(hakuOid: String) = hakuToApplicationSystem(read[Result2](urlToString(tarjontaBaseUrl + "haku/" + hakuOid)).result)
+  def getApplicationSystem(hakuOid: String) = hakuToApplicationSystem(read[Result2](urlKeyToString("tarjonta-service.haku", hakuOid)).result)
 
-  def enrichHakukohdeWithHaku(ao: ApplicationObject) = EnrichedApplicationObject(ao, hakuToApplicationSystem(read[Result2](urlToString(tarjontaBaseUrl + "haku/" + ao.hakuOid)).result))
+  def enrichHakukohdeWithHaku(ao: ApplicationObject) = EnrichedApplicationObject(ao, hakuToApplicationSystem(read[Result2](urlKeyToString("tarjonta-service.haku", ao.hakuOid)).result))
 
   private def tarjontaUrisToKoodis(tarjontaUri: List[String]) = tarjontaUri.map(_.split("_")(1))
 
@@ -38,7 +37,7 @@ case class Tarjonta(tarjontaBaseUrl: String) {
 }
 
 object Tarjonta {
-  def init(p: Config) = Tarjonta(p.getString("tarjonta.api.url"))
+  def init() = new Tarjonta()
 }
 
 private case class Result(result: Hakukohde)

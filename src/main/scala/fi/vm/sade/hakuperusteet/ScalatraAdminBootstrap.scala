@@ -25,7 +25,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val database = HakuperusteetDatabase(config)
   val countries = Koodisto.initCountries(config)
   val oppijanTunnistus = OppijanTunnistus.init(config)
-  val tarjonta = Tarjonta.init(config)
+  val tarjonta = Tarjonta.init()
   val paymentService = PaymentService(database)
   val languages = Koodisto.initLanguages(config)
   val educations = Koodisto.initBaseEducation(config)

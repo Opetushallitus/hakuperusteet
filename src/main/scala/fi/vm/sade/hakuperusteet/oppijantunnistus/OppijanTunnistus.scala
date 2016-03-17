@@ -30,7 +30,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
     val siteUrlBase = if (hakukohdeOid.length > 0) s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/" else s"${c.getString("host.url.base")}#/token/"
     val data = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
 
-    Request.Post(c.getString("oppijantunnistus.create.url"))
+    Request.Post(Urls.urls.url("oppijan-tunnistus.create"))
       .useExpectContinue()
       .version(HttpVersion.HTTP_1_1)
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       ("subject" -> subject) ~
       ("expires" -> expires) ~
       ("template" -> template)
-    Try(Request.Post(c.getString("oppijantunnistus.create.url"))
+    Try(Request.Post(Urls.urls.url("oppijan-tunnistus.create"))
       .useExpectContinue()
       .version(HttpVersion.HTTP_1_1)
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
@@ -58,9 +58,8 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
     logger.info(s"Validating token $token")
-    val verifyUrl = c.getString("oppijantunnistus.verify.url") + s"/$token"
 
-    val verifyResult = Request.Get(verifyUrl)
+    val verifyResult = Request.Get(Urls.urls.url("oppijan-tunnistus.verify", token))
       .useExpectContinue()
       .version(HttpVersion.HTTP_1_1)
       .execute().returnContent().asString()

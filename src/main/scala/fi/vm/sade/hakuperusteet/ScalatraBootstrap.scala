@@ -23,7 +23,7 @@ class ScalatraBootstrap extends LifeCycle {
   val countries = Koodisto.initCountries(config)
   val languages = Koodisto.initLanguages(config)
   val educations = Koodisto.initBaseEducation(config)
-  val tarjonta = Tarjonta.init(config)
+  val tarjonta = Tarjonta.init()
   val oppijanTunnistus = OppijanTunnistus.init(config)
   val emailSender = EmailSender.init(config)
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)

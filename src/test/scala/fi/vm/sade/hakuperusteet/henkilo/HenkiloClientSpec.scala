@@ -36,7 +36,7 @@ class HenkiloClientSpec extends FlatSpec with Matchers {
     }
     val client = new CasAuthenticatingClient(new CasClient(virkailijaUri, casMock),
       CasParams("/authentication-service", "foo", "bar"), mock)
-    val henkiloClient = new HenkiloClient(virkailijaUrl, client)
+    val henkiloClient = new HenkiloClient(client)
 
     val emptyUser = AbstractUser.user(None, None,"", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en")
     val henkilo:Henkilo = henkiloClient.upsertHenkilo(FindOrCreateUser(emptyUser))

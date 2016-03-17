@@ -89,10 +89,11 @@ object HakuperusteetBuild extends Build {
         "fi.vm.sade" %% "scala-utils-validator" % "0.3.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-ldap-client" % "1.0.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
+        "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT",
         "org.scalatest" %% "scalatest" % "2.2.4" % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
         "org.typelevel" %% "scalaz-scalatest" % "0.2.2" % "test",
-        "ru.yandex.qatools.embed" % "postgresql-embedded" % "1.7" % "test"
+        "ru.yandex.qatools.embed" % "postgresql-embedded" % "1.10" % "test"
       ),
       mainClass in (Compile, run) := Some("fi.vm.sade.hakuperusteet.HakuperusteetServer"),
       compile <<= (compile in Compile) dependsOn npmInstallTask,

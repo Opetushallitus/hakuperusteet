@@ -10,7 +10,6 @@ import fi.vm.sade.hakuperusteet.domain.{ApplicationObjects, Payments, Users}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration._
 import scala.sys.process.Process
 
 class HakuperusteetTestServer extends HakuperusteetServer {
@@ -32,6 +31,7 @@ object HakuperusteetTestServer {
     startMockServer()
     DBSupport.ensureEmbeddedIsStartedIfNeeded()
     startCommandServer()
+    Urls.urls.defaults.put("baseUrl", "http://localhost:3001")
     val server: HakuperusteetTestServer = new HakuperusteetTestServer()
     val adminServer: HakuperusteetTestAdminServer = new HakuperusteetTestAdminServer()
     new Thread() {
