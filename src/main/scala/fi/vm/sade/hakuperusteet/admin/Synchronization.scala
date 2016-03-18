@@ -13,8 +13,7 @@ import fi.vm.sade.hakuperusteet.koodisto.Countries
 import fi.vm.sade.hakuperusteet.redirect.RedirectCreator._
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
 import fi.vm.sade.hakuperusteet.tarjonta.{ApplicationSystem, Tarjonta}
-import fi.vm.sade.hakuperusteet.util.PaymentUtil
-import org.apache.http.HttpVersion
+import fi.vm.sade.hakuperusteet.util.{HttpUtil, PaymentUtil}
 import org.apache.http.client.fluent.{Request, Response}
 import org.apache.http.entity.ContentType
 import org.http4s
@@ -129,7 +128,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     }
   }
 
-  private def doPost(formUrl: String, body: String) = Request.Post(formUrl).useExpectContinue().version(HttpVersion.HTTP_1_1)
+  private def doPost(formUrl: String, body: String) = HttpUtil.addHeaders(Request.Post(formUrl))
     .bodyString(body, ContentType.create("application/x-www-form-urlencoded")).execute()
 
   private def createCurl(formUrl: String, body: String) = "curl -i -X POST --data \"" + body + "\" " + formUrl
