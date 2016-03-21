@@ -2,10 +2,8 @@ package fi.vm.sade.hakuperusteet.email
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import fi.vm.sade.hakuperusteet.domain.{Payment, AbstractUser}
-import fi.vm.sade.hakuperusteet.util.{Translate, CasClientUtils}
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
-import org.http4s.Uri._
+import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Payment}
+import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil, Translate}
 import org.http4s._
 import org.http4s.client.Client
 
@@ -14,14 +12,7 @@ import scalaz.concurrent.Task
 
 object EmailSender {
   def init(c: Config) = {
-    val host = c.getString("hakuperusteet.cas.url")
-    val username = c.getString("hakuperusteet.user")
-    val password = c.getString("hakuperusteet.password")
-
-    val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
-    val casParams = CasParams("/ryhmasahkoposti-service", username, password)
-    val emailClient = new EmailClient(new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
-    new EmailSender(emailClient, c)
+    new EmailSender(new EmailClient(HttpUtil.casClient(c, "/ryhmasahkoposti-service")), c)
   }
 }
 

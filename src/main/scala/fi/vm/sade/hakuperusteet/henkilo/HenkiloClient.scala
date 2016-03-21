@@ -6,22 +6,16 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.util.CasClientUtils
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
-import org.http4s.Uri._
+import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import org.http4s._
 import org.http4s.client.Client
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+
 import scalaz.concurrent.Task
 
 object HenkiloClient {
   def init(c: Config) = {
-    val host = c.getString("hakuperusteet.cas.url")
-    val username = c.getString("hakuperusteet.user")
-    val password = c.getString("hakuperusteet.password")
-    val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
-    val casParams = CasParams("/authentication-service", username, password)
-    new HenkiloClient(new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
+    new HenkiloClient(HttpUtil.casClient(c, "/authentication-service"))
   }
 }
 

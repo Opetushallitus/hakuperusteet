@@ -85,7 +85,7 @@ object HakuperusteetBuild extends Build {
         "org.flywaydb" % "flyway-core" % "3.2.1",
         "com.google.api-client" % "google-api-client" % "1.20.0",
         "org.apache.httpcomponents" % "fluent-hc" % "4.5",
-        "fi.vm.sade" %% "scala-cas" % "0.3.0-SNAPSHOT",
+        "fi.vm.sade" %% "scala-cas" % "0.3.2-SNAPSHOT",
         "fi.vm.sade" %% "scala-utils-validator" % "0.3.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-ldap-client" % "1.0.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
