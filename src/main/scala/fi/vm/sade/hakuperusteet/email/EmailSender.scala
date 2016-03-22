@@ -2,6 +2,7 @@ package fi.vm.sade.hakuperusteet.email
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
+import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Payment}
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil, Translate}
 import org.http4s._
@@ -49,6 +50,6 @@ class EmailClient(client: Client) extends LazyLogging with CasClientUtils {
 
   private def req(email: EmailData) = Request(
     method = Method.POST,
-    uri = urlToUri("ryhmasahkoposti-service.email")
+    uri = urlToUri(Urls.urls.url("ryhmasahkoposti-service.email"))
   ).withBody(email)(json4sEncoderOf[EmailData])
 }
