@@ -4,7 +4,6 @@ import _ from 'lodash'
 import {tarjontaForHakukohdeOid} from "../../assets/util/TarjontaUtil.js"
 
 import {createSelectOptions, mapAndSortKoodistoByLang} from '../../assets/util/HtmlUtils.js'
-import HttpUtil from '../../assets/util/HttpUtil'
 import AjaxLoader from '../util/AjaxLoader.jsx'
 
 import {requiredField} from '../../assets/util/FieldValidator.js'

@@ -4,23 +4,18 @@ import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
+import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.util.CasClientUtils
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
-import org.http4s.Uri._
+import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import org.http4s._
 import org.http4s.client.Client
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+
 import scalaz.concurrent.Task
 
 object HenkiloClient {
   def init(c: Config) = {
-    val host = c.getString("hakuperusteet.cas.url")
-    val username = c.getString("hakuperusteet.user")
-    val password = c.getString("hakuperusteet.password")
-    val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
-    val casParams = CasParams("/authentication-service", username, password)
-    new HenkiloClient(host, new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient))
+    new HenkiloClient(HttpUtil.casClient(c, "/authentication-service"))
   }
 }
 
@@ -55,7 +50,7 @@ object IfGoogleAddEmailIDP {
   }
 }
 
-class HenkiloClient(henkiloServerUrl: String, client: Client) extends LazyLogging with CasClientUtils {
+class HenkiloClient(client: Client) extends LazyLogging with CasClientUtils {
   implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
   def upsertHenkilo(user: FindOrCreateUser) = client.prepAs[Henkilo](req(user))(json4sOf[Henkilo]).run
@@ -67,11 +62,11 @@ class HenkiloClient(henkiloServerUrl: String, client: Client) extends LazyLoggin
 
   private def req(idpUpsert: IdpUpsertRequest) = Request(
     method = Method.POST,
-    uri = resolve(urlToUri(henkiloServerUrl), Uri(path = "/authentication-service/resources/s2s/hakuperusteet/idp"))
+    uri = urlToUri(Urls.urls.url("authentication-service.idpUpsert"))
   ).withBody(idpUpsert)(json4sEncoderOf[IdpUpsertRequest])
 
   private def req(user: FindOrCreateUser) = Request(
     method = Method.POST,
-    uri = resolve(urlToUri(henkiloServerUrl), Uri(path = "/authentication-service/resources/s2s/hakuperusteet"))
+    uri = urlToUri(Urls.urls.url("authentication-service.findOrCreateUser"))
   ).withBody(user)(json4sEncoderOf[FindOrCreateUser])
 }

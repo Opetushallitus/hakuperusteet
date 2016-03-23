@@ -1,5 +1,6 @@
 host.url.base=https://{{host_oppija}}/hakuperusteet/
 hakuperusteetadmin.url.base=https://{{host_virkailija}}/hakuperusteetadmin/
+host.lb=https://{{host_virkailija}}
 
 cas.ldap.host={{host_ldap}}
 cas.ldap.userDn={{ldap_manager_userdn}}

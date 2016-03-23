@@ -25,7 +25,7 @@ export function changeListeners() {
 }
 
 export function initAppState(props) {
-  const {tarjontaUrl, propertiesUrl, sessionUrl, authenticationUrl} = props
+  const {hakuperusteet:{tarjontaUrl, propertiesUrl, sessionUrl, authenticationUrl}} = props
   const initialState = {}
 
   const gapiLoading = Bacon.fromPoll(10, checkGapiStatus).filter(skipLoadingMessages)

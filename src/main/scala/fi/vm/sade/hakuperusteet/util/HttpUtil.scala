@@ -1,8 +1,36 @@
 package fi.vm.sade.hakuperusteet.util
 
-import java.net.URL
+import com.typesafe.config.Config
+import fi.vm.sade.hakuperusteet.Urls
+import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
+import org.apache.http.HttpVersion
+import org.apache.http.client.fluent.Request
 
 object HttpUtil {
+  val id = "hakuperusteet"
 
-  def urlToString(url: String) = io.Source.fromInputStream(new URL(url).openStream()).mkString
+  def urlKeyToString(key: String, args: AnyRef*) = Request.Get(Urls.urls.url(key, args:_*))
+    .useExpectContinue()
+    .version(HttpVersion.HTTP_1_1)
+    .addHeader("clientSubSystemCode", id)
+    .execute().returnContent().asString()
+
+  def addHeaders(request: Request) = request
+    .useExpectContinue()
+    .version(HttpVersion.HTTP_1_1)
+    .setHeader("clientSubSystemCode", id)
+    .setHeader("CSRF",id)
+    .setHeader("Cookie", "CSRF="+id)
+
+  def post(key: String, args: AnyRef*) = addHeaders(Request.Post(Urls.urls.url(key, args:_*)))
+
+  def casClient(c: Config, service: String): CasAuthenticatingClient = {
+    val host = c.getString("hakuperusteet.cas.url")
+    val username = c.getString("hakuperusteet.user")
+    val password = c.getString("hakuperusteet.password")
+    val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
+    val casParams = CasParams(service, username, password)
+    new CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient, "hakuperusteet")
+  }
+
 }

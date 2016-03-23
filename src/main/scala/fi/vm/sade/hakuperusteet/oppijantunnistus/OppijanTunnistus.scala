@@ -2,8 +2,7 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.http.HttpVersion
-import org.apache.http.client.fluent.Request
+import fi.vm.sade.hakuperusteet.util.HttpUtil
 import org.apache.http.entity.ContentType
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
@@ -30,9 +29,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
     val siteUrlBase = if (hakukohdeOid.length > 0) s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/" else s"${c.getString("host.url.base")}#/token/"
     val data = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
 
-    Request.Post(c.getString("oppijantunnistus.create.url"))
-      .useExpectContinue()
-      .version(HttpVersion.HTTP_1_1)
+    HttpUtil.post("oppijan-tunnistus.create")
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
       .execute().returnContent().asString()
   }
@@ -45,9 +42,7 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
       ("subject" -> subject) ~
       ("expires" -> expires) ~
       ("template" -> template)
-    Try(Request.Post(c.getString("oppijantunnistus.create.url"))
-      .useExpectContinue()
-      .version(HttpVersion.HTTP_1_1)
+    Try(HttpUtil.post("oppijan-tunnistus.create")
       .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
       .execute().returnResponse()) match {
       case Success(r) if 200 == r.getStatusLine.getStatusCode => Success(())
@@ -58,13 +53,8 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
     logger.info(s"Validating token $token")
-    val verifyUrl = c.getString("oppijantunnistus.verify.url") + s"/$token"
 
-    val verifyResult = Request.Get(verifyUrl)
-      .useExpectContinue()
-      .version(HttpVersion.HTTP_1_1)
-      .execute().returnContent().asString()
-
+    val verifyResult = HttpUtil.urlKeyToString("oppijan-tunnistus.verify", token)
     val verificationWithCapitalCaseEmail = parse(verifyResult).extract[OppijanTunnistusVerification]
     val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))
     if(verification.valid) {

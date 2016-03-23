@@ -4,16 +4,9 @@ import _ from 'lodash'
 
 import {initAppState, changeListeners} from './AdminState.js'
 import HakuperusteetAdminPage from './HakuperusteetAdminPage.jsx'
+import urlProperties from './hakuperusteetadmin-web-oph.js'
 
-
-const appState = initAppState({
-    tarjontaUrl: "/hakuperusteetadmin/api/v1/tarjonta",
-    propertiesUrl: "/hakuperusteetadmin/api/v1/properties",
-    usersUrl: "/hakuperusteetadmin/api/v1/admin",
-    userUpdateUrl: "/hakuperusteetadmin/api/v1/admin/user",
-    applicationObjectUpdateUrl: "/hakuperusteetadmin/api/v1/admin/applicationobject",
-    paymentUpdateUrl: "/hakuperusteetadmin/api/v1/admin/payment"
-})
+const appState = initAppState(urlProperties)
 
 appState
     .filter(state => !_.isEmpty(state))

@@ -27,10 +27,10 @@ object Koodisto {
   def initLanguages(props: Config) = Languages(languages(props))
   def initBaseEducation(props: Config) = Educations(educations(props))
 
-  private def educations(p: Config) = simplifyAndSort(read[List[Koodi]](urlToString(p.getString("koodisto.base.education.url"))))
-  private def languages(p: Config) = simplifyAndSort(read[List[Koodi]](urlToString(p.getString("koodisto.languages.url"))))
-  private def countries(p: Config) = simplifyAndSort(read[List[Koodi]](urlToString(p.getString("koodisto.countries.url"))))
-  private def eeaCountries(p: Config) = read[Valtioryhma](urlToString(p.getString("koodisto.eea.countries.url")))
+  private def educations(p: Config) = simplifyAndSort(read[List[Koodi]](urlKeyToString("koodisto-service.base.education")))
+  private def languages(p: Config) = simplifyAndSort(read[List[Koodi]](urlKeyToString("koodisto-service.languages")))
+  private def countries(p: Config) = simplifyAndSort(read[List[Koodi]](urlKeyToString("koodisto-service.countries")))
+  private def eeaCountries(p: Config) = read[Valtioryhma](urlKeyToString("koodisto-service.eea.countries"))
 
   private def simplifyAndSort(koodit: List[Koodi]) = koodit.filter(l => l.metadata.exists((m) => List("EN", "FI", "SV").contains(m.kieli)))
     .map(c => SimplifiedCode(c.koodiArvo,c.metadata.map( m => SimplifiedLangValue(m.kieli.toLowerCase, m.nimi))))

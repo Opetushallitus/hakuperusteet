@@ -4,13 +4,9 @@ import _ from 'lodash'
 
 import {initAppState, changeListeners} from './AppState.js'
 import HakuperusteetPage from './HakuperusteetPage.jsx'
+import urlProperties from './hakuperusteet-web-oph.js'
 
-const appState = initAppState({
-  tarjontaUrl: "/hakuperusteet/api/v1/tarjonta",
-  propertiesUrl: "/hakuperusteet/api/v1/properties",
-  sessionUrl: "/hakuperusteet/api/v1/session/session",
-  authenticationUrl: "/hakuperusteet/api/v1/session/authenticate"
-})
+const appState = initAppState(urlProperties)
 
 appState
   .filter(state => !_.isEmpty(state))
