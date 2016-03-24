@@ -10,3 +10,6 @@ test: npm-install
 
 package: test
 	./sbt compile assembly admin:assembly
+
+source-to-image: npm-install
+	./sbt compile assembly admin:assembly
