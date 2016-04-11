@@ -49,6 +49,7 @@ object HakuperusteetBuild extends Build {
       name := Name,
       version := Version,
       scalaVersion := ScalaVersion,
+      scalacOptions := Seq("-Xmax-classfile-name", "78"),
       resolvers += Resolver.mavenLocal,
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
       resolvers += "OPH snapshots" at "https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local",
