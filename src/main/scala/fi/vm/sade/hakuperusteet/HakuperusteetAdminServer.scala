@@ -1,8 +1,6 @@
 package fi.vm.sade.hakuperusteet
 
 import fi.vm.sade.hakuperusteet.Configuration._
-import fi.vm.sade.hakuperusteet.HakuperusteetAdminServer._
-import fi.vm.sade.hakuperusteet.util.JettyUtil
 import org.eclipse.jetty.servlet.DefaultServlet
 import org.eclipse.jetty.util.resource.ResourceCollection
 import org.eclipse.jetty.webapp.WebAppContext
@@ -25,6 +23,8 @@ class HakuperusteetAdminServer extends HakuperusteetServer {
     context.setContextPath("/hakuperusteetadmin")
     context.setBaseResource(resources)
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraAdminBootstrap].getCanonicalName)
+    context.setInitParameter(org.scalatra.EnvironmentKey, "production")
+    context.setInitParameter(org.scalatra.CorsSupport.EnableKey, "false")
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
     context

@@ -36,6 +36,8 @@ class HakuperusteetServer {
     context.setContextPath("/hakuperusteet/")
     context.setBaseResource(resources)
     context.setInitParameter(ScalatraListener.LifeCycleKey, classOf[ScalatraBootstrap].getCanonicalName)
+    context.setInitParameter(org.scalatra.EnvironmentKey, "production")
+    context.setInitParameter(org.scalatra.CorsSupport.EnableKey, "false")
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
     context

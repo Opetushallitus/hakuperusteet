@@ -21,11 +21,9 @@ object Urls {
   val urls = initUrls()
 
   def initUrls() = {
-    val u = new OphProperties()
-    u.debugMode()
+    new OphProperties()
       .addFiles("/hakuperusteet-oph.properties")
       .addOptionalFiles(Paths.get(sys.props.getOrElse("user.home", ""), "/oph-configuration/common.properties").toString)
-      .defaults.put("baseUrl", Configuration.props.getString("host.lb"))
-    u
+      .addDefault("baseUrl", Configuration.props.getString("host.lb"))
   }
 }
