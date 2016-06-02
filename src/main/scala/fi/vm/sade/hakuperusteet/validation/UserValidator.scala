@@ -4,19 +4,20 @@ import fi.vm.sade.hakuperusteet.domain.{AbstractUser, IDPEntityId}
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Languages}
 import fi.vm.sade.hakuperusteet.util.ValidationUtil
 
-import scalaz.syntax.applicative._
+import scalaz.Apply
 import scalaz.syntax.validation._
 
 case class UserValidator(countries: Countries, languages: Languages) extends ValidationUtil {
 
-  def parseUserDataWithoutEmailAndIdpentityid(params: Params): ValidationResult[(String,String, String) => User] = {
-    (parseNonEmpty("firstName")(params)
-      |@| parseNonEmpty("lastName")(params)
-      |@| parseIdentification(params)
-      |@| parseExists("gender")(params).flatMap(validateGender)
-      |@| parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage)
-      |@| parseExists("nationality")(params).flatMap(validateCountry)
-      ) { (firstName, lastName, identification, gender, nativeLanguage, nationality) =>
+  def parseUserDataWithoutEmailAndIdpentityid(params: Params): ValidationResult[(String, String, String) => User] = {
+    Apply[ValidationResult].apply6(
+      parseNonEmpty("firstName")(params),
+      parseNonEmpty("lastName")(params),
+      parseIdentification(params),
+      parseExists("gender")(params).flatMap(validateGender),
+      parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage),
+      parseExists("nationality")(params).flatMap(validateCountry)
+    ) { (firstName, lastName, identification, gender, nativeLanguage, nationality) =>
       (email: String, idpEntityId: String, uiLang: String) => AbstractUser.user(None, None, email, Some(firstName), Some(lastName),
         Some(java.sql.Date.valueOf(identification.birthDate)), identification.personalId, IDPEntityId.withName(idpEntityId),
         Some(gender), Some(nativeLanguage), Some(nationality), uiLang)
@@ -24,24 +25,27 @@ case class UserValidator(countries: Countries, languages: Languages) extends Val
   }
 
   def parseUserData(params: Params): ValidationResult[User] = {
-    (parseOptionalInt("id")(params)
-      |@| parseOptional("personOid")(params)
-      |@| parseNonEmpty("email")(params)
-      |@| parseValidName("firstName")(params)
-      |@| parseValidName("lastName")(params)
-      |@| parseIdentification(params)
-      |@| parseIDPEntityId(params)
-      |@| parseExists("gender")(params).flatMap(validateGender)
-      |@| parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage)
-      |@| parseExists("nationality")(params).flatMap(validateCountry)
-      |@| parseExists("uiLang")(params)
-      ) { (id, personOid, email, firstName, lastName, identification, idpentityid, gender, nativeLanguage, nationality, uiLang) =>
+    Apply[ValidationResult].apply11(
+      parseOptionalInt("id")(params),
+      parseOptional("personOid")(params),
+      parseNonEmpty("email")(params),
+      parseValidName("firstName")(params),
+      parseValidName("lastName")(params),
+      parseIdentification(params),
+      parseIDPEntityId(params),
+      parseExists("gender")(params).flatMap(validateGender),
+      parseExists("nativeLanguage")(params).flatMap(validateNativeLanguage),
+      parseExists("nationality")(params).flatMap(validateCountry),
+      parseExists("uiLang")(params)
+    ) { (id, personOid, email, firstName, lastName, identification, idpentityid, gender, nativeLanguage, nationality, uiLang) =>
       AbstractUser.user(id, personOid, email, Some(firstName), Some(lastName), Some(java.sql.Date.valueOf(identification.birthDate)), identification.personalId, idpentityid, Some(gender), Some(nativeLanguage), Some(nationality), uiLang)
     }
   }
 
   def parseEmailToken(params: Params): ValidationResult[(String, String)] = {
-    (parseNonEmpty("email")(params).flatMap(validateEmail) |@| parseExists("hakukohdeOid")(params)) { (email, hakukohdeOid) => (email, hakukohdeOid) }
+    Apply[ValidationResult].apply2(
+      parseNonEmpty("email")(params).flatMap(validateEmail),
+      parseExists("hakukohdeOid")(params)) { (email, hakukohdeOid) => (email, hakukohdeOid) }
   }
 
   private def validateGender(gender: String): ValidationResult[String] =

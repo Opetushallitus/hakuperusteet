@@ -1,33 +1,34 @@
 package fi.vm.sade.hakuperusteet.validation
 
 import fi.vm.sade.hakuperusteet.domain.ApplicationObject
-import fi.vm.sade.hakuperusteet.domain.ApplicationObject._
-import fi.vm.sade.hakuperusteet.koodisto.{Educations, Countries}
-import scalaz._
-import scalaz.syntax.applicative._
-import scalaz.syntax.validation._
+import fi.vm.sade.hakuperusteet.koodisto.{Countries, Educations}
 import fi.vm.sade.hakuperusteet.util.ValidationUtil
+
+import scalaz._
+import scalaz.syntax.validation._
 
 case class ApplicationObjectValidator(countries: Countries, educations: Educations) extends ValidationUtil {
 
   def parseApplicationObjectWithoutPersonOid(params: Params): ValidationResult[(String) => ApplicationObject] = {
-    (parseNonEmpty("hakukohdeOid")(params)
-      |@| parseNonEmpty("hakuOid")(params)
-      |@| parseExists("educationLevel")(params).flatMap(validateEducationLevel)
-      |@| parseExists("educationCountry")(params).flatMap(validateCountry)
-      ) { (hakukohdeOid, hakuOid, educationLevel, educationCountry) =>
+    Apply[ValidationResult].apply4(
+      parseNonEmpty("hakukohdeOid")(params),
+      parseNonEmpty("hakuOid")(params),
+      parseExists("educationLevel")(params).flatMap(validateEducationLevel),
+      parseExists("educationCountry")(params).flatMap(validateCountry)
+    ) { (hakukohdeOid, hakuOid, educationLevel, educationCountry) =>
       ApplicationObject(None, _:String, hakukohdeOid, hakuOid, educationLevel, educationCountry)
     }
   }
 
   def parseApplicationObject(params: Params): ValidationResult[ApplicationObject] = {
-    (parseOptionalInt("id")(params)
-      |@| parseNonEmpty("hakukohdeOid")(params)
-      |@| parseNonEmpty("personOid")(params)
-      |@| parseNonEmpty("hakuOid")(params)
-      |@| parseExists("educationLevel")(params).flatMap(validateEducationLevel)
-      |@| parseExists("educationCountry")(params).flatMap(validateCountry)
-      ) { (id, hakukohdeOid, personOid, hakuOid, educationLevel, educationCountry) =>
+    Apply[ValidationResult].apply6(
+      parseOptionalInt("id")(params),
+      parseNonEmpty("hakukohdeOid")(params),
+      parseNonEmpty("personOid")(params),
+      parseNonEmpty("hakuOid")(params),
+      parseExists("educationLevel")(params).flatMap(validateEducationLevel),
+      parseExists("educationCountry")(params).flatMap(validateCountry)
+    ) { (id, hakukohdeOid, personOid, hakuOid, educationLevel, educationCountry) =>
       ApplicationObject(id, personOid, hakukohdeOid, hakuOid, educationLevel, educationCountry)
     }
   }
