@@ -25,7 +25,7 @@ case class PaymentValidator() extends ValidationUtil {
     }
   }
 
-  def parsePaymentStatus(key: String)(params: Params) = params.get(key) match { case Some(a) => Try(PaymentStatus.withName(a).successNel).recover {
+  def parsePaymentStatus(key: String)(params: Params) = params.get(key) match { case Some(a) => Try(PaymentStatus.withName(a).successNel[String]).recover {
     case e => e.getMessage.failureNel
   }.get
   case _ => s"Parameter $key does not exist".failureNel

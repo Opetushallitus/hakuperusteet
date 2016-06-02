@@ -13,7 +13,7 @@ object HakuperusteetBuild extends Build {
   val Name = "Hakuperusteet"
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.7"
-  val ScalatraVersion = "2.3.1"
+  val ScalatraVersion = "2.4.1"
   val http4sVersion = "0.10.0"
   val jettyVersion = "9.3.6.v20151106"
   val slickVersion = "3.1.0"
@@ -76,7 +76,7 @@ object HakuperusteetBuild extends Build {
         "javax.servlet" % "javax.servlet-api" % "3.1.0",
         "com.typesafe" % "config" % "1.3.0",
         "org.json4s" %% "json4s-jackson" % "3.3.0",
-        "org.scalaz" %% "scalaz-core" % "7.1.3",
+        "org.scalaz" %% "scalaz-core" % "7.2.3",
         "com.netaporter" %% "scala-uri" % "0.4.7" exclude("org.parboiled", "parboiled_2.11"),
         "commons-codec" % "commons-codec" % "1.6",
         "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
@@ -86,8 +86,8 @@ object HakuperusteetBuild extends Build {
         "org.flywaydb" % "flyway-core" % "3.2.1",
         "com.google.api-client" % "google-api-client" % "1.20.0",
         "org.apache.httpcomponents" % "fluent-hc" % "4.5",
-        "fi.vm.sade" %% "scala-cas" % "0.3.2-SNAPSHOT",
-        "fi.vm.sade" %% "scala-utils-validator" % "0.3.0-SNAPSHOT",
+        "fi.vm.sade" %% "scala-cas" % "0.4.0-SNAPSHOT",
+        "fi.vm.sade" %% "scala-utils-validator" % "0.4.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-ldap-client" % "1.0.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT",

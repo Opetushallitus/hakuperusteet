@@ -83,7 +83,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
     }
   }
 
-  def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list)))
+  def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list.toList)))
 
   def orderEmailToken(email: String, hakukohdeOid: String, uiLang: String) =
     Try(oppijanTunnistus.createToken(email, hakukohdeOid, uiLang)) match {

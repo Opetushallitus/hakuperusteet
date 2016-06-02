@@ -255,5 +255,5 @@ class AdminServlet(val resourcePath: String,
       halt(500)
   }
 
-  def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list)))
+  def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list.toList)))
 }

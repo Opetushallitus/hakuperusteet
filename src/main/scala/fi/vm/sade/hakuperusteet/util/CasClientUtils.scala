@@ -7,16 +7,17 @@ import org.json4s.Formats
 import org.json4s.jackson.Serialization._
 
 import scala.util.control.NoStackTrace
+import scalaz.\/
 import scalaz.\/._
 import scalaz.concurrent.{Future, Task}
 
 trait CasClientUtils extends LazyLogging {
   def urlToUri(url: String) = new Task(Future.now(Uri.fromString(url).leftMap((fail: ParseFailure) => new IllegalArgumentException(fail.sanitized)))).run
 
-  def parseJson4s[A](json: String)(implicit formats: Formats, mf: Manifest[A]) = scala.util.Try(read[A](json)).map(right).recover {
+  private def parseJson4s[A](json: String)(implicit formats: Formats, mf: Manifest[A]): \/[DecodeFailure, A] = scala.util.Try(read[A](json)).map(right).recover {
     case t =>
       logger.error("json decoding failed " + json, t)
-      left(ParseFailure("json decoding failed", t.getMessage))
+      left(MalformedMessageBodyFailure("json decoding failed", Some(t)))
   }.get
 
   def json4sEncoderOf[A <: AnyRef](implicit formats: Formats, mf: Manifest[A]): EntityEncoder[A] = EntityEncoder.stringEncoder(Charset.`UTF-8`).contramap[A](item => write[A](item))

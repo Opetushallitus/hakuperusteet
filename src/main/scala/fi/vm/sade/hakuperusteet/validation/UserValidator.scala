@@ -6,6 +6,8 @@ import fi.vm.sade.hakuperusteet.util.ValidationUtil
 
 import scalaz.Apply
 import scalaz.syntax.validation._
+import scalaz.Validation.FlatMap._
+import scalaz.syntax._
 
 case class UserValidator(countries: Countries, languages: Languages) extends ValidationUtil {
 

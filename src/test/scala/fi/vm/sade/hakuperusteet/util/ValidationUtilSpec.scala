@@ -4,8 +4,6 @@ import java.time.LocalDate
 
 import org.scalatest.{FlatSpec, Matchers}
 
-class Util extends ValidationUtil
-
 class ValidationUtilSpec extends FlatSpec with Matchers with ValidationUtil {
   it should "Get translated text" in {
     val person1800 = "161242+955M"

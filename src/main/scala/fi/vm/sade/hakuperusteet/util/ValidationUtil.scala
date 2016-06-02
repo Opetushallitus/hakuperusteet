@@ -9,29 +9,34 @@ import fi.vm.sade.utils.validator.{HenkilotunnusValidator, InputNameValidator}
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
+import scalaz.Validation.FlatMap._
 
 trait ValidationUtil {
   type ValidationResult[A] = ValidationNel[String, A]
   type Params = Map[String, String]
 
-  def parseExists(key: String)(params: Params) = params.get(key).map(_.successNel)
-    .getOrElse(s"Parameter $key does not exist".failureNel)
+  def parseExists(key: String)(params: Params) = {
+    params.get(key).map(x => {
+      x.successNel[String]
+    })
+      .getOrElse(s"Parameter $key does not exist".failureNel)
+  }
 
   def parseNonEmpty(key: String)(params: Params) = parseExists(key)(params)
-    .flatMap(a => if (a.nonEmpty) a.successNel else s"Parameter $key is empty".failureNel)
+    .flatMap(a => if (a.nonEmpty) a.successNel[String] else s"Parameter $key is empty".failureNel)
 
   def parseValidName(key: String)(params: Params) = parseNonEmpty(key)(params)
     .flatMap(a => InputNameValidator.validate(a))
 
-  def parseOptional(key: String)(params: Params) = params.get(key) match { case e => e.successNel }
+  def parseOptional(key: String)(params: Params) = params.get(key) match { case e => e.successNel[String] }
 
-  def parseOptionalInt(key: String)(params: Params) = (params.get(key): @unchecked) match {  case None => None.successNel
-  case Some(i) => Try(Option(i).map(_.toInt).successNel).recover{
+  def parseOptionalInt(key: String)(params: Params) = (params.get(key): @unchecked) match {  case None => None.successNel[String]
+  case Some(i) => Try(Option(i).map(_.toInt).successNel[String]).recover{
     case e => e.getMessage.failureNel
   }.get}
 
   def parseLocalDate(input: String): ValidationResult[LocalDate] =
-    Try(LocalDate.parse(input, DateTimeFormatter.ofPattern("ddMMyyyy")).successNel).recover {
+    Try(LocalDate.parse(input, DateTimeFormatter.ofPattern("ddMMyyyy")).successNel[String]).recover {
       case e => e.getMessage.failureNel
     }.get
 
@@ -69,5 +74,5 @@ trait ValidationUtil {
     }
 
   def parseIDPEntityId(params: Params): ValidationResult[IDPEntityId] = parseNonEmpty("idpentityid")(params) flatMap
-    (name => Try(IDPEntityId withName name) map (_.successNel) getOrElse s"invalid idpentityid $name".failureNel)
+    (name => Try(IDPEntityId withName name) map (_.successNel[String]) getOrElse s"invalid idpentityid $name".failureNel)
 }
