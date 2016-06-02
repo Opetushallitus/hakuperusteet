@@ -22,7 +22,11 @@ class RSASigner(config: Config) extends LazyLogging {
   }
 
   private def sourceToBytes(is: InputStream) =
-    Stream.continually(is.read).takeWhile(_ != -1).map(_.toByte).toArray
+    Stream
+      .continually(is.read)
+      .takeWhile(_ != -1)
+      .map(_.toByte)
+      .toArray
 
   private def bytesFromUrl(url: String): Array[Byte] = {
     Try(sourceToBytes(new FileInputStream(url))) match {
