@@ -11,7 +11,7 @@ hakuperusteet.port.http={{palvelu_portti}}
 hakuperusteet.port.https={{palvelu_portti_https}}
 hakuperusteetadmin.port.http={{palvelu_portti}}
 hakuperusteetadmin.port.https={{palvelu_portti_https}}
-rsa.sign.key=${user.home}/oph-configuration/rsaSignKey.der
+rsa.sign.key=/data00/oph/{{palvelu}}/oph-configuration/rsaSignKey.der
 
 hakuperusteet.cas.url=https://{{host_cas}}
 hakuperusteet.user={{hakuperusteet_cas_user}}
