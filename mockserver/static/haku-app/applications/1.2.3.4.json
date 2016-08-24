@@ -1,0 +1,877 @@
+{
+  "applicationSystemId": "1.2.246.562.29.80171652938",
+  "answers": {
+    "henkilotiedot": {
+      "koulusivistyskieli": "EN",
+      "lahiosoite": "Hanhikatu 2",
+      "turvakielto": "false",
+      "kansalaisuus": "AFG",
+      "asuinmaa": "FIN",
+      "syntymaaika": "20.04.1986",
+      "Kutsumanimi": "Hannu",
+      "Henkilotunnus_digest": "a6aced1a6ce58c26eb7e9f0619c8af76aeaf99bc9f8fefeed2043ede6b1fc4f3",
+      "kotikunta": "091",
+      "Henkilotunnus": "200486-869B",
+      "aidinkieli": "AB",
+      "Etunimet": "Hannu",
+      "onkosinullakaksoiskansallisuus": "false",
+      "sukupuoli": "1",
+      "matkapuhelinnumero1": "",
+      "Sukunimi": "Hanhi",
+      "onkoSinullaSuomalainenHetu": "true",
+      "Postinumero": "00100",
+      "Sähköposti": "hannu@hanhi.fi"
+    },
+    "koulutustausta": {
+      "pohjakoulutus_ulk": "true",
+      "pohjakoulutus_ulk_nimike": "1",
+      "pohjakoulutus_ulk_vuosi": "2012",
+      "suoritusoikeus_tai_aiempi_tutkinto": "false",
+      "pohjakoulutus_ulk_suoritusmaa": "AFG",
+      "pohjakoulutus_ulk_oppilaitos": "1"
+    },
+    "hakutoiveet": {
+      "preference4-Koulutus-id-educationcode": "",
+      "preference5-Koulutus-id-kaksoistutkinto": "",
+      "preference3-Koulutus-id-discretionary": "",
+      "preference2-Koulutus-id-attachmentgroups": "",
+      "preference4-Koulutus-requiredBaseEducations": "",
+      "preference6-Koulutus-id-vocational": "",
+      "preference4-Koulutus-id-attachmentgroups": "",
+      "preference6-Koulutus-id-ao-groups": "",
+      "preference3-Koulutus-id-attachmentgroups": "",
+      "preference2-Koulutus-id-athlete": "",
+      "preference3-Koulutus-id-athlete": "",
+      "preference5-Koulutus-id-discretionary": "",
+      "preference3-Koulutus-id-attachments": "",
+      "preference2-Koulutus-id-educationcode": "",
+      "preference4-Opetuspiste-id": "",
+      "preference2-Koulutus-educationDegree": "",
+      "preference6-Koulutus-educationDegree": "",
+      "preference6-Koulutus-id-attachmentgroups": "",
+      "preference1-Koulutus-id-sora": "false",
+      "preference5-Koulutus-educationDegree": "",
+      "preference1-Koulutus-id-kaksoistutkinto": "false",
+      "preference5-Koulutus-requiredBaseEducations": "",
+      "preference5-Koulutus-id-attachments": "",
+      "preference4-Koulutus-id-kaksoistutkinto": "",
+      "preference1-Koulutus-id-attachmentgroups": "1.2.246.562.28.73315409214",
+      "preference6-Koulutus-id-sora": "",
+      "preference2-Koulutus-id-sora": "",
+      "preference2-Koulutus-requiredBaseEducations": "",
+      "preference2-Koulutus-id-ao-groups": "",
+      "preference3-Koulutus-id-lang": "",
+      "preference1-Koulutus-educationDegree": "koulutusasteoph2002_63",
+      "preference4-Koulutus-id-vocational": "",
+      "preference1-Koulutus-id-educationcode": "koulutus_655501",
+      "preference6-Koulutus-id-lang": "",
+      "preferencesVisible": "6",
+      "preference3-Koulutus-id-kaksoistutkinto": "",
+      "preference5-Koulutus-id-sora": "",
+      "preference1-Koulutus-id-discretionary": "false",
+      "preference4-Koulutus-id-ao-groups": "",
+      "preference5-Koulutus-id-attachmentgroups": "",
+      "preference2-Opetuspiste-id": "",
+      "preference3-Koulutus-requiredBaseEducations": "",
+      "preference5-Koulutus-id-vocational": "",
+      "preference4-Koulutus-id-attachments": "",
+      "preference1-Koulutus-id-athlete": "false",
+      "preference1-Koulutus-id-attachments": "true",
+      "preference2-Koulutus-id-vocational": "",
+      "preference1-Opetuspiste": "Aalto-yliopisto, Insinööritieteiden korkeakoulu",
+      "preference5-Opetuspiste": "",
+      "preference2-Opetuspiste": "",
+      "preference6-Opetuspiste": "",
+      "preference2-Koulutus-id-kaksoistutkinto": "",
+      "preference3-Opetuspiste": "",
+      "preference1-Koulutus-requiredBaseEducations": "pohjakoulutusvaatimuskorkeakoulut_123",
+      "preference2-Koulutus-id-discretionary": "",
+      "preference5-Koulutus-id-educationcode": "",
+      "preference4-Opetuspiste": "",
+      "preference3-Koulutus-educationDegree": "",
+      "preference1-Koulutus-id-lang": "FI",
+      "preference3-Koulutus-id-educationcode": "",
+      "preference3-Koulutus-id-vocational": "",
+      "preference5-Opetuspiste-id": "",
+      "preference4-Koulutus-id-discretionary": "",
+      "preference4-Koulutus-educationDegree": "",
+      "preference6-Koulutus-id": "",
+      "preference4-Koulutus-id-lang": "",
+      "preference1-yoLiite": "true",
+      "preference5-Koulutus-id": "",
+      "preference3-Koulutus-id": "",
+      "preference4-Koulutus-id-athlete": "",
+      "preference2-Koulutus-id": "",
+      "preference4-Koulutus-id": "",
+      "preference6-Opetuspiste-id": "",
+      "preference5-Koulutus-id-lang": "",
+      "preference3-Koulutus-id-sora": "",
+      "preference1-Koulutus-id": "1.2.246.562.20.14326014835",
+      "preference6-Koulutus-id-discretionary": "",
+      "preference2-Koulutus-id-attachments": "",
+      "preference1-Koulutus": "Energia- ja ympäristötekniikka, tekniikan kandidaatti ja diplomi-insinööri, DIA-yhteisvalinta",
+      "preference2-Koulutus-id-lang": "",
+      "preference4-Koulutus-id-sora": "",
+      "preference6-Koulutus-id-kaksoistutkinto": "",
+      "preference6-Koulutus-id-aoIdentifier": "",
+      "preference3-Opetuspiste-id": "",
+      "preference4-Koulutus-id-aoIdentifier": "",
+      "preference6-Koulutus-requiredBaseEducations": "",
+      "preference5-Koulutus-id-ao-groups": "",
+      "preference1-Koulutus-id-vocational": "false",
+      "preference5-Koulutus-id-aoIdentifier": "",
+      "preference1-Koulutus-id-ao-groups": "1.2.246.562.28.73315409214,1.2.246.562.28.70142948556,1.2.246.562.28.22210028309",
+      "preference3-Koulutus-id-aoIdentifier": "",
+      "preference6-Koulutus-id-attachments": "",
+      "preference6-Koulutus-id-athlete": "",
+      "preference6-Koulutus-id-educationcode": "",
+      "preference5-Koulutus-id-athlete": "",
+      "preference1-Koulutus-id-aoIdentifier": "",
+      "preference2-Koulutus-id-aoIdentifier": "",
+      "preference3-Koulutus-id-ao-groups": "",
+      "preference1-Opetuspiste-id": "1.2.246.562.10.72985435253"
+    },
+    "osaaminen": {},
+    "lisatiedot": {
+      "lupatiedot-sahkoinen-viestinta": "false",
+      "asiointikieli": "englanti"
+    }
+  },
+  "paymentDueDate": 1483707647012,
+  "requiredPaymentState": "NOTIFIED",
+  "oid": "1.2.246.562.11.00000003146",
+  "state": "DRAFT",
+  "personOid": "1.2.246.562.24.80700550841",
+  "lastAutomatedProcessingTime": 1471332760656,
+  "received": 1471332608730,
+  "updated": 1471332760656,
+  "redoPostProcess": "DONE",
+  "fullName": "hanhi hannu",
+  "searchNames": [
+    "hanhi",
+    "hannu"
+  ],
+  "authorizationMeta": {
+    "opoAllowed": false,
+    "aoOrganizations": {
+      "1": [
+        "1.2.246.562.10.56753942459",
+        "1.2.246.562.10.00000000001",
+        "1.2.246.562.10.82388989657",
+        "1.2.246.562.10.72985435253"
+      ]
+    },
+    "allAoOrganizations": [
+      "1.2.246.562.10.56753942459",
+      "1.2.246.562.10.00000000001",
+      "1.2.246.562.10.82388989657",
+      "1.2.246.562.10.72985435253"
+    ],
+    "applicationPreferences": [
+      {
+        "ordinal": 1,
+        "preferenceData": {
+          "Opetuspiste-id": "1.2.246.562.10.72985435253",
+          "Koulutus-id-ao-groups": "1.2.246.562.28.73315409214,1.2.246.562.28.70142948556,1.2.246.562.28.22210028309",
+          "Koulutus": "Energia- ja ympäristötekniikka, tekniikan kandidaatti ja diplomi-insinööri, DIA-yhteisvalinta",
+          "Koulutus-id-attachmentgroups": "1.2.246.562.28.73315409214",
+          "Koulutus-id-educationcode": "koulutus_655501",
+          "Koulutus-id-athlete": "false",
+          "Koulutus-id-attachments": "true",
+          "Koulutus-id-kaksoistutkinto": "false",
+          "Koulutus-id-discretionary": "false",
+          "Koulutus-id-sora": "false",
+          "Opetuspiste": "Aalto-yliopisto, Insinööritieteiden korkeakoulu",
+          "Koulutus-educationDegree": "koulutusasteoph2002_63",
+          "Koulutus-requiredBaseEducations": "pohjakoulutusvaatimuskorkeakoulut_123",
+          "yoLiite": "true",
+          "Koulutus-id-lang": "FI",
+          "Koulutus-id-vocational": "false",
+          "Koulutus-id": "1.2.246.562.20.14326014835"
+        }
+      }
+    ]
+  },
+  "overriddenAnswers": {
+    "Henkilotunnus": "(hidden)",
+    "aidinkieli": "PS",
+    "Etunimet": "Hanhi",
+    "sukupuoli": "1",
+    "turvakielto": "(null)",
+    "Sukunimi": "Hannu",
+    "syntymaaika": "20.04.1986",
+    "onkoSinullaSuomalainenHetu": "true",
+    "Kutsumanimi": "Hanhi"
+  },
+  "notes": [
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakija maksuvelvollinen: hakukohde 1.2.246.562.20.14326014835 vaatii hakumaksun pohjakoulutusten '1' johdosta",
+      "added": 1471332752097,
+      "user": "järjestelmä"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Päivitetty vaihetta 'lisatiedot'",
+      "added": 1471332748298,
+      "user": "1.2.246.562.24.72453542949"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakemuksen jälkikäsittely epäonnistui: Typed value cannot be initialized to null",
+      "added": 1471332737946,
+      "user": "järjestelmä"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Päivitetty vaihetta 'osaaminen'",
+      "added": 1471332737218,
+      "user": "1.2.246.562.24.72453542949"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakemuksen jälkikäsittely epäonnistui: Typed value cannot be initialized to null",
+      "added": 1471332729280,
+      "user": "järjestelmä"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Päivitetty vaihetta 'hakutoiveet'",
+      "added": 1471332728475,
+      "user": "1.2.246.562.24.72453542949"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Päivitetty vaihetta 'koulutustausta'",
+      "added": 1471332701374,
+      "user": "1.2.246.562.24.72453542949"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Päivitetty vaihetta 'henkilotiedot'",
+      "added": 1471332678799,
+      "user": "1.2.246.562.24.72453542949"
+    },
+    {
+      "type": "ApplicationNote",
+      "noteText": "Hakemus vastaanotettu",
+      "added": 1471332608810,
+      "user": "1.2.246.562.24.72453542949"
+    }
+  ],
+  "history": [
+    {
+      "type": "Change",
+      "modified": 1471332760656,
+      "modifier": "järjestelmä",
+      "reason": "Post Processing",
+      "changes": [
+        {
+          "field": "aidinkieli",
+          "old value": "PS",
+          "new value": "AB"
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332752100,
+      "modifier": "järjestelmä",
+      "reason": "Post Processing",
+      "changes": [
+        {
+          "field": "requiredPaymentState",
+          "old value": "",
+          "new value": "NOTIFIED"
+        },
+        {
+          "field": "Sukunimi",
+          "old value": "Hannu",
+          "new value": "Hanhi"
+        },
+        {
+          "field": "Etunimet",
+          "old value": "Hanhi",
+          "new value": "Hannu"
+        },
+        {
+          "field": "paymentDueDate",
+          "old value": "",
+          "new value": "1483707647012"
+        },
+        {
+          "field": "turvakielto",
+          "new value": "false"
+        },
+        {
+          "field": "Kutsumanimi",
+          "old value": "Hanhi",
+          "new value": "Hannu"
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332748632,
+      "modifier": "jälkikäsittely",
+      "reason": "personOid modified",
+      "changes": [
+        {
+          "personOid": "null -> 1.2.246.562.24.80700550841"
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332748349,
+      "modifier": "1.2.246.562.24.72453542949",
+      "reason": "update",
+      "changes": [
+        {
+          "field": "lupatiedot-sahkoinen-viestinta",
+          "new value": "false"
+        },
+        {
+          "field": "asiointikieli",
+          "new value": "englanti"
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332728554,
+      "modifier": "1.2.246.562.24.72453542949",
+      "reason": "update",
+      "changes": [
+        {
+          "field": "preference6-Koulutus-id-lang",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-discretionary",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-vocational",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-kaksoistutkinto",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-attachments",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-lang",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-sora",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-educationcode",
+          "new value": "koulutus_655501"
+        },
+        {
+          "field": "preferencesVisible",
+          "new value": "6"
+        },
+        {
+          "field": "preference5-Koulutus-id-sora",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-educationDegree",
+          "new value": "koulutusasteoph2002_63"
+        },
+        {
+          "field": "preference5-Opetuspiste-id",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-vocational",
+          "new value": "false"
+        },
+        {
+          "field": "preference4-Koulutus-id-discretionary",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-vocational",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-vocational",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-requiredBaseEducations",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-educationcode",
+          "new value": ""
+        },
+        {
+          "field": "preference1-yoLiite",
+          "new value": "true"
+        },
+        {
+          "field": "preference6-Opetuspiste",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-ao-groups",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-discretionary",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-sora",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-discretionary",
+          "new value": "false"
+        },
+        {
+          "field": "preference6-Koulutus-id-kaksoistutkinto",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-lang",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-ao-groups",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Opetuspiste-id",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-ao-groups",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-vocational",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-educationDegree",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-lang",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-educationcode",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-aoIdentifier",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-attachments",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-lang",
+          "new value": "FI"
+        },
+        {
+          "field": "preference5-Koulutus-id-athlete",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-kaksoistutkinto",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-attachments",
+          "new value": "true"
+        },
+        {
+          "field": "preference4-Koulutus-id-athlete",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-ao-groups",
+          "new value": "1.2.246.562.28.73315409214,1.2.246.562.28.70142948556,1.2.246.562.28.22210028309"
+        },
+        {
+          "field": "preference2-Koulutus-id",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Opetuspiste-id",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Opetuspiste",
+          "new value": "Aalto-yliopisto, Insinööritieteiden korkeakoulu"
+        },
+        {
+          "field": "preference2-Koulutus-id-athlete",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id",
+          "new value": "1.2.246.562.20.14326014835"
+        },
+        {
+          "field": "preference3-Koulutus-id-athlete",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-requiredBaseEducations",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-sora",
+          "new value": "false"
+        },
+        {
+          "field": "preference3-Koulutus-requiredBaseEducations",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-athlete",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-educationcode",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-kaksoistutkinto",
+          "new value": "false"
+        },
+        {
+          "field": "preference2-Koulutus-educationDegree",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-attachments",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-sora",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-educationDegree",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-athlete",
+          "new value": "false"
+        },
+        {
+          "field": "preference2-Koulutus-id-attachmentgroups",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-discretionary",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-educationcode",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-kaksoistutkinto",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-attachmentgroups",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-requiredBaseEducations",
+          "new value": "pohjakoulutusvaatimuskorkeakoulut_123"
+        },
+        {
+          "field": "preference5-Koulutus-id-attachmentgroups",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Opetuspiste-id",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Opetuspiste",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-id-ao-groups",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Opetuspiste",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Opetuspiste",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-sora",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Opetuspiste",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-attachmentgroups",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-educationcode",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-discretionary",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-attachments",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-requiredBaseEducations",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Opetuspiste-id",
+          "new value": "1.2.246.562.10.72985435253"
+        },
+        {
+          "field": "preference3-Koulutus-id-kaksoistutkinto",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Opetuspiste-id",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus-id-attachmentgroups",
+          "new value": "1.2.246.562.28.73315409214"
+        },
+        {
+          "field": "eligibility_1_2_246_562_20_14326014835",
+          "new value": "NOT_CHECKED:UNKNOWN:null"
+        },
+        {
+          "field": "preference6-Koulutus-educationDegree",
+          "new value": ""
+        },
+        {
+          "field": "preference6-Koulutus-id-attachmentgroups",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-id-attachments",
+          "new value": ""
+        },
+        {
+          "field": "preference1-Koulutus",
+          "new value": "Energia- ja ympäristötekniikka, tekniikan kandidaatti ja diplomi-insinööri, DIA-yhteisvalinta"
+        },
+        {
+          "field": "preference3-Koulutus-id-vocational",
+          "new value": ""
+        },
+        {
+          "field": "preference5-Koulutus-requiredBaseEducations",
+          "new value": ""
+        },
+        {
+          "field": "preference4-Koulutus-educationDegree",
+          "new value": ""
+        },
+        {
+          "field": "preference2-Koulutus-id-ao-groups",
+          "new value": ""
+        },
+        {
+          "field": "preference3-Koulutus-id-lang",
+          "new value": ""
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332701376,
+      "modifier": "1.2.246.562.24.72453542949",
+      "reason": "update",
+      "changes": [
+        {
+          "field": "pohjakoulutus_ulk_nimike",
+          "new value": "1"
+        },
+        {
+          "field": "pohjakoulutus_ulk_suoritusmaa",
+          "new value": "AFG"
+        },
+        {
+          "field": "pohjakoulutus_ulk_vuosi",
+          "new value": "2012"
+        },
+        {
+          "field": "suoritusoikeus_tai_aiempi_tutkinto",
+          "new value": "false"
+        },
+        {
+          "field": "pohjakoulutus_ulk",
+          "new value": "true"
+        },
+        {
+          "field": "pohjakoulutus_ulk_oppilaitos",
+          "new value": "1"
+        }
+      ]
+    },
+    {
+      "type": "Change",
+      "modified": 1471332678894,
+      "modifier": "1.2.246.562.24.72453542949",
+      "reason": "update",
+      "changes": [
+        {
+          "field": "koulusivistyskieli",
+          "new value": "EN"
+        },
+        {
+          "field": "asuinmaa",
+          "new value": "FIN"
+        },
+        {
+          "field": "aidinkieli",
+          "new value": "PS"
+        },
+        {
+          "field": "matkapuhelinnumero1",
+          "new value": ""
+        },
+        {
+          "field": "Sähköposti",
+          "new value": "hannu@hanhi.fi"
+        },
+        {
+          "field": "Sukunimi",
+          "new value": "Hannu"
+        },
+        {
+          "field": "onkoSinullaSuomalainenHetu",
+          "new value": "true"
+        },
+        {
+          "field": "lahiosoite",
+          "new value": "Hanhikatu 2"
+        },
+        {
+          "field": "Henkilotunnus",
+          "new value": "200486-869B"
+        },
+        {
+          "field": "sukupuoli",
+          "new value": "1"
+        },
+        {
+          "field": "Kutsumanimi",
+          "new value": "Hanhi"
+        },
+        {
+          "field": "kansalaisuus",
+          "new value": "AFG"
+        },
+        {
+          "field": "Postinumero",
+          "new value": "00100"
+        },
+        {
+          "field": "onkosinullakaksoiskansallisuus",
+          "new value": "false"
+        },
+        {
+          "field": "Etunimet",
+          "new value": "Hanhi"
+        },
+        {
+          "field": "kotikunta",
+          "new value": "091"
+        }
+      ]
+    }
+  ],
+  "version": 7,
+  "modelVersion": 7,
+  "preferenceEligibilities": [
+    {
+      "aoId": "1.2.246.562.20.14326014835",
+      "status": "NOT_CHECKED",
+      "source": "REGISTER"
+    }
+  ],
+  "preferencesChecked": [
+    {
+      "preferenceAoOid": "1.2.246.562.20.14326014835",
+      "checked": false
+    }
+  ],
+  "_id": {
+    "inc": 386925544,
+    "timeSecond": 1471332608,
+    "machine": -458203901,
+    "time": 1471332608000,
+    "date": 1471332608000,
+    "timestamp": 1471332608,
+    "new": false
+  }
+}

@@ -22,7 +22,7 @@ object Payments {
         Payment(None, user.personOid.get,
           Date.from(
             LocalDate.now().minusYears(value).atStartOfDay(ZoneId.systemDefault()).toInstant()),
-          generateNumSeq, generateNumSeq, generateNumSeq, PaymentStatus.ok, None))
+          generateNumSeq, generateNumSeq, generateNumSeq, PaymentStatus.ok, Hakukausi.s2016, None))
     }
   }
 }

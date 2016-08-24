@@ -62,6 +62,7 @@ object HakuperusteetBuild extends Build {
         "org.http4s" %% "http4s-dsl"         % http4sVersion,
         "org.http4s" %% "http4s-argonaut"    % http4sVersion,
         "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+        "org.http4s" %% "http4s-json4s-native" % http4sVersion,
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-auth" % ScalatraVersion,
         "org.scalatra" %% "scalatra-json" % ScalatraVersion,

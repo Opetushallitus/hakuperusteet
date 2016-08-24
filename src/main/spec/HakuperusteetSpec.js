@@ -230,6 +230,62 @@ describe('Page with email session - no new ao but two existing', () => {
   it('should show hakuList', assertOneFound(".hakuList"))
 })
 
+describe('Page with email session - new ao for different hakukausi', () => {
+  before(openPage("/hakuperusteet/ao/1.2.246.562.20.69046715544#/token/mochaTestToken", hakuperusteetLoaded))
+
+  it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+  it('should not show userDataForm', assertNotFound("#userDataForm"))
+  it('should show educationForm', assertOneFound("#educationForm"))
+  it('should not show vetuma start', assertNotFound(".vetumaStart"))
+  it('should not show hakuList', assertNotFound(".hakuList"))
+
+  describe('Insert data', () => {
+    it('initially submit should be disabled', assertSubmitDisabled())
+    it('initially show all missing errors', assertElementsFound("#educationForm .error", 2))
+
+    it('select educationLevel', setField("#educationLevel", "102"))
+    it('submit should be disabled', assertSubmitDisabled())
+
+    it('select educationCountry - Finland', setField("#educationCountry", "246"))
+    it('submit should be enabled', assertSubmitEnabled())
+    it('should not show missing errors', assertNotFound("#educationForm .error"))
+    it('noPaymentRequired should be visible', assertOneFound(".noPaymentRequired"))
+    it('paymentRequired should be hidden', assertNotFound(".paymentRequired"))
+    it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
+
+    it('select educationCountry - Solomin Islands', setField("#educationCountry", "090"))
+    it('submit should be enabled', assertSubmitEnabled())
+    it('should not show missing errors', assertNotFound("#educationForm .error"))
+    it('noPaymentRequired should be hidden', assertNotFound(".noPaymentRequired"))
+    it('paymentRequired should be displayd', assertOneFound(".paymentRequired"))
+    it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
+
+    describe('Submit educationForm', () => {
+      it('click submit should post educationdata', clickField("input[name='submit']"))
+      it('should show vetuma startpage after submit', assertOneFound(".vetumaStart"))
+      it('should not show hakuList', assertNotFound(".hakuList"))
+      it('initially submit should be enabled', assertEnabled("input[name='submitVetuma']"))
+
+      describe('Submit vetumaForm', () => {
+        it('click submit should go to vetuma and return back with successful payment', clickField("input[name='submitVetuma']"))
+        it('should show successful payment as result', assertOneFound(".vetumaResult"))
+        it('redirectForm should be visible', assertOneFound(".redirectToForm"))
+      })
+    })
+  })
+})
+
+describe('Page with email session - no new ao but three existing for two different hakukausi', () => {
+  before(openPage("/hakuperusteet/#/token/mochaTestToken", hakuperusteetLoaded))
+
+  it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+  it('should not show userDataForm', assertNotFound("#userDataForm"))
+  it('should not show educationForm', assertNotFound("#educationForm"))
+  it('should not show vetuma start', assertNotFound(".vetumaStart"))
+  it('should show hakuList', assertOneFound(".hakuList"))
+  it('should show three application objects on hakulist page', assertElementsFound(".redirectToForm", 3))
+})
+
 describe('Haku-application landing page', () => {
   before(openPage("/hakuperusteet/app/1.2.3#/token/hakuApp", hakuperusteetLoaded))
 
@@ -242,6 +298,30 @@ describe('Haku-application landing page', () => {
   describe('Submit vetumaForm', () => {
     it('click submit should go to vetuma and return back with successful payment', clickField("input[name='submitVetuma']"))
     it('should show already paid', assertOneFound(".alreadyPaid"))
+  })
+
+  describe('Another application - payment exists for hakukausi', () => {
+    before(openPage("/hakuperusteet/app/1.2.3.4#/token/hakuApp", hakuperusteetLoaded))
+    it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+    it('should not show userDataForm', assertNotFound("#userDataForm"))
+    it('should not show educationForm', assertNotFound("#educationForm"))
+    it('should not show vetuma start', assertNotFound(".vetumaStart"))
+    it('should show alreadyPaid', assertOneFound(".alreadyPaid"))
+  })
+
+  describe('Another application - no payment for hakukausi', () => {
+    before(openPage("/hakuperusteet/app/1.2.3.5#/token/hakuApp", hakuperusteetLoaded))
+
+    it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+    it('should not show userDataForm', assertNotFound("#userDataForm"))
+    it('should not show educationForm', assertNotFound("#educationForm"))
+    it('should show vetuma start', assertOneFound(".vetumaStart"))
+    it('should not show alreadyPaid', assertNotFound(".alreadyPaid"))
+
+    describe('Submit vetumaForm', () => {
+      it('click submit should go to vetuma and return back with successful payment', clickField("input[name='submitVetuma']"))
+      it('should show already paid', assertOneFound(".alreadyPaid"))
+    })
   })
 })
 

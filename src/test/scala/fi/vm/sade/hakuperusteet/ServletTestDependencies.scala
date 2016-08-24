@@ -7,9 +7,11 @@ import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.email.EmailSender
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
+import fi.vm.sade.hakuperusteet.hakuapp.HakuAppClient
 import fi.vm.sade.hakuperusteet.koodisto._
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
+import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import org.joda.time.DateTime
 
 trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
@@ -24,7 +26,6 @@ trait ServletTestDependencies extends DBSupport with DummyDataTestDependency {
   val oppijanTunnistus: OppijanTunnistus = new DummyOppijanTunnistus(config)
   val emailSender = EmailSender.init(config)
   val signer = new DummyRSASigner(config)
-
 }
 
 trait DummyDataTestDependency {
@@ -42,7 +43,7 @@ trait DummyDataTestDependency {
     val reference = generateNumSeq
     val orderNumber = generateNumSeq
     val paymCallId = generateNumSeq
-    Payment(None, u.personOid.get, new Date(), reference, orderNumber, paymCallId, PaymentStatus.started, None)
+    Payment(None, u.personOid.get, new Date(), reference, orderNumber, paymCallId, PaymentStatus.started, Hakukausi.s2016, None)
   }
 }
 
@@ -59,3 +60,5 @@ class DummyRSASigner(c: Config) extends RSASigner(c) {
     "dummySignedString"
   }
 }
+
+
