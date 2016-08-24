@@ -17,7 +17,8 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
-
+/src/main/*.iml
+/src/test/*.iml
 .idea
 
 #npm build stuff
