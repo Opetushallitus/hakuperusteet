@@ -265,25 +265,32 @@ describe('Page with email session - new ao for different hakumaksukausi', () => 
       it('should show vetuma startpage after submit', assertOneFound(".vetumaStart"))
       it('should not show hakuList', assertNotFound(".hakuList"))
       it('initially submit should be enabled', assertEnabled("input[name='submitVetuma']"))
-
-      describe('Submit vetumaForm', () => {
-        it('click submit should go to vetuma and return back with successful payment', clickField("input[name='submitVetuma']"))
-        it('should show successful payment as result', assertOneFound(".vetumaResult"))
-        it('redirectForm should be visible', assertOneFound(".redirectToForm"))
-      })
+      it('should show vetuma start', assertOneFound(".vetumaStart"))
+      it('should not show alreadyPaid', assertNotFound(".alreadyPaid"))
     })
   })
 })
 
 describe('Page with email session - no new ao but three existing for two different hakumaksukausi', () => {
   before(openPage("/hakuperusteet/#/token/mochaTestToken", hakuperusteetLoaded))
+    it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+    it('should not show userDataForm', assertNotFound("#userDataForm"))
+    it('should not show educationForm', assertNotFound("#educationForm"))
+    it('should not show hakuList', assertNotFound(".hakuList"))
+    it('should show vetuma start', assertOneFound(".vetumaStart"))
+    it('initially submit should be enabled', assertEnabled("input[name='submitVetuma']"))
+    it('should not show alreadyPaid', assertNotFound(".alreadyPaid"))
 
-  it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
-  it('should not show userDataForm', assertNotFound("#userDataForm"))
-  it('should not show educationForm', assertNotFound("#educationForm"))
-  it('should not show vetuma start', assertNotFound(".vetumaStart"))
-  it('should show hakuList', assertOneFound(".hakuList"))
-  it('should show three application objects on hakulist page', assertElementsFound(".redirectToForm", 3))
+    describe('Submit vetumaForm', () => {
+      it('click submit should go to vetuma and return back with successful payment', clickField("input[name='submitVetuma']"))
+      it('should show successful payment as result', assertOneFound(".vetumaResult"))
+
+      it('should not show userDataForm', assertNotFound("#userDataForm"))
+      it('should not show educationForm', assertNotFound("#educationForm"))
+      it('should not show vetuma start', assertNotFound(".vetumaStart"))
+      it('should show hakuList', assertOneFound(".hakuList"))
+      it('should show three application objects on hakulist page', assertElementsFound(".redirectToForm", 3))
+    })
 })
 
 describe('Haku-application landing page', () => {

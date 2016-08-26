@@ -20,7 +20,7 @@ import scala.util.{Failure, Success, Try}
 
 class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta, hakumaksukausiService: HakumaksukausiService) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
-  get("/openvetuma/:hakemusoid/with_hakemus") {
+  get("/openvetuma/hakemus/:hakemusoid") {
     failUnlessAuthenticated()
     val hakemusOidOption = params.get("hakemusoid")
     val hakemusOidParam = hakemusOidOption.map(app => s"&app=$app")
@@ -29,12 +29,12 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
       hakumaksukausiService.getHakumaksukausiForHakemus(hakemusOidOption.get))
   }
 
-  get("/openvetuma") {
+  get("/openvetuma/hakumaksukausi/:hakumaksukausi") {
     failUnlessAuthenticated()
-    createVetumaWithHref(getHref, None, None, Hakumaksukausi.s2016) //TODO kausi
+    createVetumaWithHref(getHref, None, None, Hakumaksukausi.withName(params.get("hakumaksukausi").get))
   }
 
-  get("/openvetuma/:hakukohdeoid") {
+  get("/openvetuma/hakukohde/:hakukohdeoid") {
     failUnlessAuthenticated()
     val hakukohdeOidOption = params.get("hakukohdeoid")
     val hakukohdeOidParam = hakukohdeOidOption.map(ao => s"&ao=$ao")

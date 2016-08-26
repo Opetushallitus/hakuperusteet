@@ -101,12 +101,16 @@ function hakumaksukausiNotRequirePayment(state, hakumaksukausi) {
       !_.some(getApplicationObjectsForHakumaksukausi(state, hakumaksukausi), function(ao) {return paymentRequiredWithCurrentHakukohdeOid(state, ao)})
 }
 
+export function getHakumaksukausiThatRequiresPaymentWhenNoHakukohdeSelected(state) {
+  return _.find(getUniqueHakukaudet(state), function(hk) {return !hakumaksukausiNotRequirePayment(state, hk)})
+}
+
 function getApplicationObjectsForHakumaksukausi(state, hakumaksukausi) {
-  return state.sessionData ? [] : _.filter(state.sessionData.applicationObject, function(ao) {return ao.hakumaksukausi == hakumaksukausi})
+  return state.sessionData ? _.filter(state.sessionData.applicationObject, function(ao) {return ao.hakumaksukausi == hakumaksukausi}) : []
 }
 
 function hasValidPaymentForGivenHakumaksukausi(state, hakumaksukausi) {
-  return state.sessionData && _.some(state.sessionData.payment, function(p) {return p.hakumaksukausi == hakumaksukausi && p.status == "ok"})
+  return state.sessionData && _.some(state.sessionData.payment, function(p) {return p.kausi == hakumaksukausi && p.status == "ok"})
 }
 
 export function hasValidPayment(state) {

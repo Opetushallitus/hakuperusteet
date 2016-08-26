@@ -5,20 +5,23 @@ import _ from 'lodash'
 import AjaxLoader from '../util/AjaxLoader.jsx'
 import {fetchUrlParamsAndRedirectPost} from '../util/FormUtils.js'
 import {translation} from '../../assets-common/translations/translations.js'
+import {getHakumaksukausiThatRequiresPaymentWhenNoHakukohdeSelected} from '../AppLogic.js'
 
 export default class VetumaStart extends React.Component {
 
   prepareVetumaUrl(state) {
-    const createVetumaUrlPostfix = function() {
-      if(_.isEmpty(state.hakukohdeOid)) {
-        return _.isEmpty(state.hakemusOid) ? "" : "/" + state.hakemusOid + "/with_hakemus"
+    const createVetumaUrlPostfix = function () {
+      if (!_.isEmpty(state.hakemusOid)) {
+        return "/hakemus/" + state.hakemusOid;
+      } else if (!_.isEmpty(state.hakukohdeOid)) {
+        return "/hakukohde/" + state.hakukohdeOid;
       } else {
-        return "/" + state.hakukohdeOid
+        return "/hakumaksukausi/" + getHakumaksukausiThatRequiresPaymentWhenNoHakukohdeSelected(state);
       }
     }
 
     return state.properties.vetumaStartUrl + createVetumaUrlPostfix()
-      + "?href=" + encodeURIComponent(location.href.replace(/ao.*/, "").replace(/app.*/, ""))
+      + "?href=" + encodeURIComponent(location.href.replace(/ao.*/, "").replace(/app.*/, "").replace("#", ""))
   }
 
   render() {
