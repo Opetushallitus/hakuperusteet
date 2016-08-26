@@ -46,27 +46,6 @@ describe('Admin UI front', () => {
     it('should have tila Maksettu', assertOneFound("span:contains('Maksettu')"))
     it('should have maksuloki button', assertOneFound("#s2016TogglePaymentGroup"))
     it('click maksulogi button should open maksuloki', clickField("#s2016TogglePaymentGroup"))
-
-    it('should have 1st payment button disabled', assertDisabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('change valud of 1st payment status', setField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(3) > select[name='status']", "started"))
-    it('should have 1st payment button enabled', assertEnabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('click submit for 1st payment should post changes', clickField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-
-    it('click maksulogi button should open maksuloki', clickField("#s2016TogglePaymentGroup"))
-
-    it('should have 1st payment button disabled', assertDisabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('change valud of 1st payment status', setField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(3) > select[name='status']", "started"))
-    it('should have 1st payment button enabled', assertEnabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('click submit for 1st payment should post changes', clickField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-
-    it('click maksulogi button should open maksuloki', clickField("#s2016TogglePaymentGroup"))
-
-    it('should have 1st payment button disabled', assertDisabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('change valud of 1st payment status', setField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(3) > select[name='status']", "started"))
-    it('should have 1st payment button enabled', assertEnabled("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-    it('click submit for 1st payment should post changes', clickField("#paymentsGroups2016 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
-
-    it('should have tila Kesken', assertOneFound("span:contains('Kesken')"))
   })
   describe('Payments for both hakumaksukausi', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001000", pageLoaded(form => form.find("input[value='Annilainen']").length == 1)))
