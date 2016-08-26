@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
-import fi.vm.sade.hakuperusteet.domain.Hakukausi.Hakukausi
+import fi.vm.sade.hakuperusteet.domain.Hakumaksukausi.Hakumaksukausi
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus._
 import fi.vm.sade.hakuperusteet.domain._
@@ -18,7 +18,7 @@ import org.json4s.jackson.Serialization._
 
 import scala.util.{Failure, Success, Try}
 
-class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta, hakukausiService: HakukausiService) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
+class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta, hakumaksukausiService: HakumaksukausiService) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
   get("/openvetuma/:hakemusoid/with_hakemus") {
     failUnlessAuthenticated()
@@ -26,12 +26,12 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     val hakemusOidParam = hakemusOidOption.map(app => s"&app=$app")
 
     createVetumaWithHref(getHref, hakemusOidParam, params.get("hakemusoid"),
-      hakukausiService.getHakukausiForHakemus(hakemusOidOption.get))
+      hakumaksukausiService.getHakumaksukausiForHakemus(hakemusOidOption.get))
   }
 
   get("/openvetuma") {
     failUnlessAuthenticated()
-    createVetumaWithHref(getHref, None, None, Hakukausi.s2016) //TODO kausi
+    createVetumaWithHref(getHref, None, None, Hakumaksukausi.s2016) //TODO kausi
   }
 
   get("/openvetuma/:hakukohdeoid") {
@@ -40,12 +40,12 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     val hakukohdeOidParam = hakukohdeOidOption.map(ao => s"&ao=$ao")
 
     createVetumaWithHref(getHref, hakukohdeOidParam, None,
-      hakukausiService.getHakukausiForHakukohde(hakukohdeOidOption.get))
+      hakumaksukausiService.getHakumaksukausiForHakukohde(hakukohdeOidOption.get))
   }
 
   private def getHref = params.get("href").getOrElse(halt(409))
 
-  private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String], kausi: Hakukausi) = {
+  private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String], kausi: Hakumaksukausi) = {
     val userData = userDataFromSession
     val language = userData.lang
     val referenceNumber = referenceNumberFromPersonOid(userData.personOid.getOrElse(halt(500)))

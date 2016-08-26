@@ -1,7 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 
-import PaymentForm from './PaymentForm.jsx'
+import PaymentFormForKausi from './PaymentFormForKausi.jsx'
 
 export default class PaymentGroup extends React.Component {
   constructor(props) {
@@ -12,35 +12,17 @@ export default class PaymentGroup extends React.Component {
   render() {
     const state = this.props.state
     const controller = this.props.controller
-    const applicationObjects = _.isEmpty(state.applicationObjects) ? [] : state.applicationObjects
     const payments = _.isEmpty(state.payments) ? [] : state.payments
-    const paymentsStatus = state.hasPaid ? "Maksettu" : "Kesken"
-    const disabled = payments.length > 0 ? undefined : "disabled"
-    return payments.length > 0 ? <div>
-          <h3>Maksut</h3>
-              <div className="userDataFormRow">
-                <label htmlFor={this.id}>Tila</label>
-                <span>{paymentsStatus}</span>
-              </div>
-          <div className="userDataFormRow">
-            <label>Viitenumero</label>
-            <span>{payments[0].reference}</span>
-          </div>
-            <div className="userDataFormRow">
-              <input type="submit" value="Näytä maksuloki" onClick={controller.pushTogglePaymentGroup} disabled={disabled}/>
-            </div>
-            <div id="paymentsGroup" className={state.showPaymentGroup?'':'hidden'} >
-            {payments.map((payment,i) => {
-              return <PaymentForm key={i} state={state} controller={controller} payment={payment}/>
-              })}
-            </div>
-        </div>
-        :
+    const s2016 = _.filter(payments, function(p) {return p.kausi == 's2016'})
+    const k2017 = _.filter(payments, function(p) {return p.kausi == 'k2017'})
+
+    return payments.length == 0 ?
         <div>
-          <h3>Hakijalla ei ole maksuja</h3>
-        </div>
-
-
+            <h3>Hakijalla ei ole maksuja</h3>
+        </div> :
+        <div>
+      <PaymentFormForKausi key="s2016Payments" state={state} controller={controller} payments={s2016} kausi="s2016"/>
+      <PaymentFormForKausi key="k2017Payments" state={state} controller={controller} payments={k2017} kausi="k2017"/>
+      </div>
   }
-
 }

@@ -6,7 +6,6 @@ import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 import java.util.{Date, TimeZone}
 
 import fi.vm.sade.hakuperusteet.domain.IDPEntityId
-import fi.vm.sade.hakuperusteet.domain.PaymentStatus.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain._
 import org.json4s.JsonAST.{JInt, JNull, JString}
 import org.json4s.jackson.Serialization
@@ -52,14 +51,19 @@ package object hakuperusteet {
       df.setTimeZone(TimeZone.getDefault)
       df
     }
-  } + UiDateSerializer + PaymentStatusSerializer + IDPEntityIdSerializer
+  } + UiDateSerializer + IDPEntityIdSerializer + EnumerationSerializer
 
-  case object PaymentStatusSerializer extends CustomSerializer[PaymentStatus](format => (
-    { case JString(s) => PaymentStatus.withName(s) },
-    { case x: PaymentStatus => JString(x.toString) })
+  //There cannot be separate serializers for different enumerations due to this bug: https://github.com/json4s/json4s/issues/142
+  case object EnumerationSerializer extends CustomSerializer[Enumeration#Value](format => (
+    {case JString(s) =>
+      if(s == Hakumaksukausi.s2016.toString || s == Hakumaksukausi.k2017.toString) Hakumaksukausi.withName(s)
+      else PaymentStatus.withName(s)
+    },
+    {case x: Enumeration#Value => JString(x.toString)
+    })
   )
 
-  implicit val formats = org.json4s.DefaultFormats + PaymentStatusSerializer + IDPEntityIdSerializer
+  implicit val formats = org.json4s.DefaultFormats + EnumerationSerializer + IDPEntityIdSerializer
   val UIDateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
   val personIdDateFormatter = DateTimeFormatter.ofPattern("ddMMyy")
 

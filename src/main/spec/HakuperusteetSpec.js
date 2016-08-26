@@ -230,7 +230,7 @@ describe('Page with email session - no new ao but two existing', () => {
   it('should show hakuList', assertOneFound(".hakuList"))
 })
 
-describe('Page with email session - new ao for different hakukausi', () => {
+describe('Page with email session - new ao for different hakumaksukausi', () => {
   before(openPage("/hakuperusteet/ao/1.2.246.562.20.69046715544#/token/mochaTestToken", hakuperusteetLoaded))
 
   it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
@@ -275,7 +275,7 @@ describe('Page with email session - new ao for different hakukausi', () => {
   })
 })
 
-describe('Page with email session - no new ao but three existing for two different hakukausi', () => {
+describe('Page with email session - no new ao but three existing for two different hakumaksukausi', () => {
   before(openPage("/hakuperusteet/#/token/mochaTestToken", hakuperusteetLoaded))
 
   it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
@@ -300,7 +300,7 @@ describe('Haku-application landing page', () => {
     it('should show already paid', assertOneFound(".alreadyPaid"))
   })
 
-  describe('Another application - payment exists for hakukausi', () => {
+  describe('Another application - payment exists for hakumaksukausi', () => {
     before(openPage("/hakuperusteet/app/1.2.3.4#/token/hakuApp", hakuperusteetLoaded))
     it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
     it('should not show userDataForm', assertNotFound("#userDataForm"))
@@ -309,7 +309,7 @@ describe('Haku-application landing page', () => {
     it('should show alreadyPaid', assertOneFound(".alreadyPaid"))
   })
 
-  describe('Another application - no payment for hakukausi', () => {
+  describe('Another application - no payment for hakumaksukausi', () => {
     before(openPage("/hakuperusteet/app/1.2.3.5#/token/hakuApp", hakuperusteetLoaded))
 
     it('should show email as loggedIn user', assertOneFound(".loggedInAs"))

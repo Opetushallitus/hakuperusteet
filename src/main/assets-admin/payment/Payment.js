@@ -12,7 +12,8 @@ export function submitPaymentDataToServer(state, payment, form) {
     personOid: payment.personOid,
     reference: payment.reference,
     status: payment.status,
-    timestamp: payment.timestamp
+    timestamp: payment.timestamp,
+    kausi: payment.kausi
   }
   const promise = Bacon.fromPromise(HttpUtil.post(state.paymentUpdateUrl, paymentData))
   promise.onError((error) => {

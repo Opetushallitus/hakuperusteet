@@ -43,7 +43,7 @@ trait DummyDataTestDependency {
     val reference = generateNumSeq
     val orderNumber = generateNumSeq
     val paymCallId = generateNumSeq
-    Payment(None, u.personOid.get, new Date(), reference, orderNumber, paymCallId, PaymentStatus.started, Hakukausi.s2016, None)
+    Payment(None, u.personOid.get, new Date(), reference, orderNumber, paymCallId, PaymentStatus.started, Hakumaksukausi.s2016, None)
   }
 }
 

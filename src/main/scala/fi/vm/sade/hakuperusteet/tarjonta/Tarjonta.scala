@@ -2,7 +2,7 @@ package fi.vm.sade.hakuperusteet.tarjonta
 
 import java.util.Date
 
-import fi.vm.sade.hakuperusteet.domain.Hakukausi._
+import fi.vm.sade.hakuperusteet.domain.Hakumaksukausi._
 import fi.vm.sade.hakuperusteet.util.ServerException
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
@@ -10,7 +10,7 @@ import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 
 case class ApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, hakuaikaId: String, status: String)
-case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika], hakukausi: Hakukausi)
+case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, hakuaikas: List[HakuAika], hakumaksukausi: Hakumaksukausi)
 
 case class HakuAika(hakuaikaId: String, alkuPvm: Long, loppuPvm: Long)
 case class EnrichedApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, julkaistu: Boolean, maksumuuriKaytossa: Boolean, startDate: Date, endDate: Date)
@@ -35,7 +35,7 @@ case class Tarjonta() {
   private def tarjontaUrisToKoodis(tarjontaUri: List[String]) = tarjontaUri.map(_.split("_")(1))
 
   private def hakukohdeToApplicationObject(r: Hakukohde) = ApplicationObject(r.oid, r.hakuOid, Nimi2(r.hakukohteenNimet), r.tarjoajaNimet, tarjontaUrisToKoodis(r.hakukelpoisuusvaatimusUris), Nimi2(r.lisatiedot), r.hakuaikaId, r.tila)
-  private def hakuToApplicationSystem(r: Haku) = ApplicationSystem(r.oid, r.hakulomakeUri, r.maksumuuriKaytossa, r.hakuaikas, koulutuksenAlkamiskausiToHakukausi(r.koulutuksenAlkamisVuosi, r.koulutuksenAlkamiskausiUri))
+  private def hakuToApplicationSystem(r: Haku) = ApplicationSystem(r.oid, r.hakulomakeUri, r.maksumuuriKaytossa, r.hakuaikas, koulutuksenAlkamiskausiToHakumaksukausi(r.koulutuksenAlkamisVuosi, r.koulutuksenAlkamiskausiUri))
 }//1.2.246.562.29.82177631379
 
 object Tarjonta {

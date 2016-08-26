@@ -1,1 +1,0 @@
-ALTER TABLE payment ADD COLUMN koulutuksen_alkamiskausi character varying(255) DEFAULT 's2016' NOT NULL;

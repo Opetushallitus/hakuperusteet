@@ -191,7 +191,7 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
     PaymentEvent(Some(r.id), r.paymentId, r.created, r.timestamp, r.checkSucceeded, r.paymentStatus, r.newStatus.map(s => PaymentStatus.withName(s)), r.oldStatus.map(s => PaymentStatus.withName(s)))
 
   private def paymentRowToPayment(r: PaymentRow) =
-    Payment(Some(r.id), r.henkiloOid, r.tstamp, r.reference, r.orderNumber, r.paymCallId, PaymentStatus.withName(r.status), Hakukausi.withName(r.kausi), r.hakemusOid)
+    Payment(Some(r.id), r.henkiloOid, r.tstamp, r.reference, r.orderNumber, r.paymCallId, PaymentStatus.withName(r.status), Hakumaksukausi.withName(r.kausi), r.hakemusOid)
 
   private def aoRowToAo(r: ApplicationObjectRow) = ApplicationObject(Some(r.id), r.henkiloOid, r.hakukohdeOid, r.hakuOid, r.educationLevel, r.educationCountry)
 
