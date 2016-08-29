@@ -33,7 +33,8 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
   val emailSender = EmailSender.init(config)
-  Synchronization(config, database, tarjonta, countries, signer).start
+  val hakumaksukausiService = HakumaksukausiService(config, tarjonta)
+  Synchronization(config, database, tarjonta, countries, signer, hakumaksukausiService).start
   val paymentSynchronization = new PaymentSynchronization(config, database, emailSender)
   paymentSynchronization.start
 

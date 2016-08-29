@@ -1,6 +1,7 @@
 package fi.vm.sade.hakuperusteet.admin
 
 import java.util.concurrent.Executors
+import fi.vm.sade.hakuperusteet.HakumaksukausiService
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
@@ -23,7 +24,7 @@ import scala.concurrent.duration._
 import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
-class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner) extends LazyLogging {
+class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner, hakumaksukausiService: HakumaksukausiService) extends LazyLogging {
   import fi.vm.sade.hakuperusteet._
   val hakuAppClient = HakuAppClient.init(config)
   val scheduler = Executors.newScheduledThreadPool(1)
@@ -44,7 +45,9 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   }
 
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
-    val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments).getOrElse(Seq())).headOption
+    val hakumaksukausi = hakumaksukausiService.getHakumaksukausiForHakemus(row.hakemusOid)
+    val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments)
+      .map(_.filter(_.kausi == hakumaksukausi)).getOrElse(Seq())).headOption
     (payments match {
       case Some(payment) => paymentStatusToPaymentState(payment.status)
       case _ => None
@@ -95,7 +98,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
       u match {
         case u:User =>
           db.run(db.findApplicationObjectByHakukohdeOid(u, row.hakukohdeOid))
-            .foreach(synchronizeWithData(row, as, u, db.findPayments(u)))
+            .foreach(synchronizeWithData(row, as, u, db.findPayments(u).filter(_.kausi == as.hakumaksukausi)))
         case u: PartialUser =>
           logger.error("PartialUser in user sync loop!")
       }
@@ -145,7 +148,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 }
 
 object Synchronization {
-  def apply(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner) = new Synchronization(config, db, tarjonta, countries, signer)
+  def apply(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner, hakumaksukausiService: HakumaksukausiService) = new Synchronization(config, db, tarjonta, countries, signer, hakumaksukausiService)
 }
 
 object SynchronizationStatus extends Enumeration {
