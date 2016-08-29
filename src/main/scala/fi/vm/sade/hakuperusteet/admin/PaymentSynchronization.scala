@@ -39,6 +39,9 @@ class PaymentSynchronization(config: Config,
     }
   }
   private def handleUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
+      payments.groupBy(_.kausi).values.map(groupedPayments => handleGroupedUserPayments(u, groupedPayments))
+  }
+  private def handleGroupedUserPayments(u: AbstractUser, payments: Seq[Payment]) = {
     val hadPaid = PaymentUtil.hasPaid(payments)
     val paymentAndCheckOption = payments.map(payment => (payment, vetumaCheck.doVetumaCheck(payment.paymCallId, new Date(), u.uiLang)))
     .filter(_._2.isDefined)
