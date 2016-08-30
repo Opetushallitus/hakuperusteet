@@ -10,6 +10,7 @@ import fi.vm.sade.hakuperusteet.admin.SynchronizationStatus
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase.DB
 import fi.vm.sade.hakuperusteet.db.generated.Tables
 import fi.vm.sade.hakuperusteet.db.generated.Tables._
+import fi.vm.sade.hakuperusteet.domain.Hakumaksukausi.Hakumaksukausi
 import fi.vm.sade.hakuperusteet.domain.{ApplicationObject, Payment, PaymentEvent, _}
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.PartialUser
@@ -57,17 +58,23 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
   def newestPaymentStatuses(p: Payment) = p.history.flatMap(_.sorted(Ordering.by((_:PaymentEvent).created).reverse).headOption.flatMap(_.new_status)).getOrElse(p.status)
 
   def findAllUsersAndPaymentsWithDrasticallyChangedPaymentStates: List[(AbstractUser, Vector[Payment])] = {
-    val potentiallyChangedPersonOids = findPotentiallyChangedPersonOidsAfterVetumaCheck
-    potentiallyChangedPersonOids.flatMap(personOid => {
-      val paymentsWithHistory = findPaymentsWithEventsByPersonOid(personOid)
-      val isSomeOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(oldestPaymentStatuses))
-      val isSomeOtherOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(newestPaymentStatuses))
-      if(isSomeOk != isSomeOtherOk) {
-        Some(paymentsWithHistory)
-      } else {
-        None
-      }
-    }).flatten.groupBy(_.personOid).toList.map(e => (findUserByOid(e._1).get, e._2))
+    val potentiallyChangedPaymentsGroupedByPersonAndKausi = findPotentiallyChangedPersonOidsAfterVetumaCheck.map(personOid => {
+      findPaymentsWithEventsByPersonOid(personOid).groupBy(p => (p.personOid, p.kausi))
+    }).flatten
+
+    val drasticallyChangedPayments = potentiallyChangedPaymentsGroupedByPersonAndKausi.flatMap(
+      entry => checkPaymentsWithHistoryAboutDrasticallyChangedPaymentStates(entry._2))
+
+    drasticallyChangedPayments.flatten.groupBy(p=>(p.personOid, p.kausi)).toList.map(t => (findUserByOid(t._1._1).get, t._2))
+  }
+  private def checkPaymentsWithHistoryAboutDrasticallyChangedPaymentStates(paymentsWithHistory: Seq[Payment]): Option[Seq[Payment]] = {
+    val isSomeOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(oldestPaymentStatuses))
+    val isSomeOtherOk = PaymentUtil.hasPaidWithTheseStatuses(paymentsWithHistory.map(newestPaymentStatuses))
+    if(isSomeOk != isSomeOtherOk) {
+      Some(paymentsWithHistory)
+    } else {
+      None
+    }
   }
   private def findPotentiallyChangedPersonOidsAfterVetumaCheck = sql"select distinct henkilo_oid from payment where exists (select null from payment_event as pe where payment.id = pe.payment_id and (pe.old_status = 'ok' and pe.new_status != 'ok')  or (pe.new_status = 'ok' and pe.old_status != 'ok'))".as[String].run
   private def findPaymentEventsForPayments(ids: Seq[Int]) = Tables.PaymentEvent.filter(p => p.paymentId inSet ids).result.run.map(paymentEventRowToPaymentEvent)

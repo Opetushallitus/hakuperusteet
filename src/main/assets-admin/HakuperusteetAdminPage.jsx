@@ -39,12 +39,12 @@ export default class HakuperusteetPage extends React.Component {
                 <section className="main-content oppija">
                     <table>
                         <thead>
-                        <tr><th>Email</th><th>Linkki käyttäjään</th><th>Maksun tilan muutos</th></tr>
+                        <tr><th>Email</th><th>Linkki käyttäjään</th><th>Maksun tilan muutos</th><th>Hakumaksukausi</th></tr>
                         </thead>
                         <tbody>
                         {state.changesView.map(row => {
 
-                          return <tr><td>{row.user.email}</td><td><a href="#" onClick={this.selectUser.bind(this, row.user.personOid)}>{row.user.personOid}</a></td><td>{row.old_state ? "Maksettu" :"Kesken"}&rarr;{row.new_state  ? "Maksettu" :"Kesken"}</td></tr>
+                          return <tr><td>{row.user.email}</td><td><a href="#" onClick={this.selectUser.bind(this, row.user.personOid)}>{row.user.personOid}</a></td><td>{row.old_state ? "Maksettu" :"Kesken"}&rarr;{row.new_state  ? "Maksettu" :"Kesken"}</td><td>{row.payments[0].kausi}</td></tr>
                           })}
                         </tbody>
                     </table>
