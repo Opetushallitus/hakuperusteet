@@ -27,10 +27,10 @@ echo "********************* npm install for hakuperusteet mockserver"
 
 echo "********************* ./sbt test"
 
-./sbt clean compile admin:compile test -J-Dembedded=true
+./sbt -batch clean compile admin:compile test -J-Dembedded=true
 
 echo "********************* Starting test servers"
-./sbt "test:run-main fi.vm.sade.hakuperusteet.HakuperusteetTestServer" -J-Dembedded=true &
+./sbt -batch "test:run-main fi.vm.sade.hakuperusteet.HakuperusteetTestServer" -J-Dembedded=true &
 PID=$!
 while ! nc -z localhost 8081; do
   sleep 1
