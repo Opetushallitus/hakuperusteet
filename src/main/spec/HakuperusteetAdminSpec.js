@@ -1,6 +1,6 @@
 import {expect, done} from 'chai'
 import {commandServer, openPage, pageLoaded, S, S2, select, wait, focusAndBlur, click} from './testUtil.js'
-import {assertSubmitDisabled, assertSubmitEnabled, assertEnabled, assertDisabled, assertChecked, assertUnchecked, assertValueEmpty, assertValueEqual} from './assertions'
+import {assertSubmitDisabled, assertSubmitEnabled, assertEnabled, assertDisabled, assertChecked, assertUnchecked, assertValueEmpty, assertValueEqual, assertOneFound, assertNotFound, assertElementsFound} from './assertions'
 
 describe('Admin UI front', () => {
   before(commandServer.resetAdmin)
@@ -33,6 +33,39 @@ describe('Admin UI front', () => {
     it('submit should be enabled', assertSubmitEnabled(escape("#educationForm_1.2.246.562.20.69046715533")))
     it('click submit should post changes', clickField(escape("#educationForm_1.2.246.562.20.69046715533") + " input[name='submit']"))
     it('submit should be disabled', assertSubmitDisabled(escape("#educationForm_1.2.246.562.20.69046715533")))
+  })
+  describe('No payments', () => {
+    before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001008", pageLoaded(form => form.find("input[value='Maksuton']").length == 1)))
+    it('should have ei maksuja text', assertOneFound("h3:contains('Hakijalla ei ole maksuja')"))
+  })
+  describe('S2016 payments', () => {
+    before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001001", pageLoaded(form => form.find("input[value='Ossilainen']").length == 1)))
+    it('should have ei maksuja hakumaksukaudelle k2017 text', assertOneFound("h3:contains('Hakijalla ei ole maksuja hakumaksukaudelle k2017')"))
+    it('should not have maksut k2017 text', assertNotFound("h3:contains('Maksut hakumaksukaudella k2017')"))
+    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut hakumaksukaudella s2016')"))
+    it('should have tila Maksettu', assertOneFound("span:contains('Maksettu')"))
+    it('should have maksuloki button', assertOneFound("#s2016TogglePaymentGroup"))
+    it('click maksulogi button should open maksuloki', clickField("#s2016TogglePaymentGroup"))
+  })
+  describe('Payments for both hakumaksukausi', () => {
+    before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001000", pageLoaded(form => form.find("input[value='Annilainen']").length == 1)))
+    it('should have maksut k2017 text', assertOneFound("h3:contains('Maksut hakumaksukaudella k2017')"))
+    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut hakumaksukaudella s2016')"))
+    it('should have tila Maksettu', assertOneFound("span:contains('Maksettu')"))
+    it('should have tila Kesken', assertOneFound("span:contains('Kesken')"))
+
+    it('should have maksuloki button', assertOneFound("#k2017TogglePaymentGroup"))
+    it('click maksulogi button should open maksuloki', clickField("#k2017TogglePaymentGroup"))
+
+    it('should open maksuloki for k2017 hakumaksukausi', assertOneFound("#paymentsGroupk2017[class!=hidden]"))
+    it('should not open maksuloki for s2016 hakumaksukausi', assertOneFound("#paymentsGroups2016.hidden"))
+
+    it('change valud of 1st payment status', setField("#paymentsGroupk2017 > form:nth-child(1) > div:nth-child(3) > select[name='status']", "ok"))
+    it('click submit for 1st payment should post changes', clickField("#paymentsGroupk2017 > form:nth-child(1) > div:nth-child(4) > div:nth-child(1) > input[type='submit']"))
+
+    it('should have tila Maksettu twice', assertElementsFound("span:contains('Maksettu')", 2))
+    it('should not have tila Kesken', assertNotFound("span:contains('Kesken')"))
+
   })
 })
 

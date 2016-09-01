@@ -4,12 +4,12 @@ import java.util.Date
 
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
+import fi.vm.sade.hakuperusteet.domain.Hakumaksukausi.Hakumaksukausi
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus
 import fi.vm.sade.hakuperusteet.domain.PaymentStatus._
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.email.{ReceiptValues, EmailTemplate, EmailSender}
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
-import fi.vm.sade.hakuperusteet.hakuapp.HakuAppClient
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.util.{Translate, AuditLog}
@@ -18,34 +18,40 @@ import org.json4s.jackson.Serialization._
 
 import scala.util.{Failure, Success, Try}
 
-class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
+class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, emailSender: EmailSender, tarjonta: Tarjonta, hakumaksukausiService: HakumaksukausiService) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) {
 
-  get("/openvetuma/:hakemusoid/with_hakemus") {
+  get("/openvetuma/hakemus/:hakemusoid") {
     failUnlessAuthenticated()
-    val hakemusOid = params.get("hakemusoid").map(app => s"&app=$app")
-    createVetumaWithHref(getHref, hakemusOid, params.get("hakemusoid"))
+    val hakemusOidOption = params.get("hakemusoid")
+    val hakemusOidParam = hakemusOidOption.map(app => s"&app=$app")
+
+    createVetumaWithHref(getHref, hakemusOidParam, params.get("hakemusoid"),
+      hakumaksukausiService.getHakumaksukausiForHakemus(hakemusOidOption.get))
   }
 
-  get("/openvetuma") {
+  get("/openvetuma/hakumaksukausi/:hakumaksukausi") {
     failUnlessAuthenticated()
-    createVetumaWithHref(getHref, None, None)
+    createVetumaWithHref(getHref, None, None, Hakumaksukausi.withName(params.get("hakumaksukausi").get))
   }
 
-  get("/openvetuma/:hakukohdeoid") {
+  get("/openvetuma/hakukohde/:hakukohdeoid") {
     failUnlessAuthenticated()
-    val hakukohdeOid = params.get("hakukohdeoid").map(ao => s"&ao=$ao")
-    createVetumaWithHref(getHref, hakukohdeOid, None)
+    val hakukohdeOidOption = params.get("hakukohdeoid")
+    val hakukohdeOidParam = hakukohdeOidOption.map(ao => s"&ao=$ao")
+
+    createVetumaWithHref(getHref, hakukohdeOidParam, None,
+      hakumaksukausiService.getHakumaksukausiForHakukohde(hakukohdeOidOption.get))
   }
 
   private def getHref = params.get("href").getOrElse(halt(409))
 
-  private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String]) = {
+  private def createVetumaWithHref(href: String, params: Option[String], hakemusOid: Option[String], kausi: Hakumaksukausi) = {
     val userData = userDataFromSession
     val language = userData.lang
     val referenceNumber = referenceNumberFromPersonOid(userData.personOid.getOrElse(halt(500)))
     val orderNro = referenceNumber + db.nextOrderNumber()
     val paymCallId = "PCID" + orderNro
-    val paymentWithId = db.upsertPayment(Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, hakemusOid)).getOrElse(halt(500))
+    val paymentWithId = db.upsertPayment(Payment(None, userData.personOid.get, new Date(), referenceNumber, orderNro, paymCallId, PaymentStatus.started, kausi, hakemusOid)).getOrElse(halt(500))
     val vetuma = Vetuma(config, paymentWithId, language, href, params.getOrElse("")).toParams
     AuditLog.auditPayment(userData, paymentWithId)
     write(Map("url" -> config.getString("vetuma.host"), "params" -> vetuma))

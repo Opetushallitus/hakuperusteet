@@ -28,15 +28,17 @@ class ScalatraBootstrap extends LifeCycle {
   val emailSender = EmailSender.init(config)
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
+  val hakumaksukausiService = HakumaksukausiService(config, tarjonta)
 
   override def init(context: ServletContext) {
     context.initParameters("org.scalatra.cors.enable") = "false"
     context mount(new IndexServlet, "/app")
     context mount(new IndexServlet, "/ao")
-    context mount(new VetumaServlet(config, database, oppijanTunnistus, verifier, emailSender, tarjonta), "/api/v1/vetuma")
+    context mount(new VetumaServlet(config, database, oppijanTunnistus, verifier, emailSender, tarjonta, hakumaksukausiService), "/api/v1/vetuma")
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
-    context mount(new SessionServlet(config, database, oppijanTunnistus, verifier, userValidator, applicationObjectValidator, emailSender), "/api/v1/session")
+    context mount(new SessionServlet(config, database, oppijanTunnistus, verifier, userValidator, applicationObjectValidator, emailSender, hakumaksukausiService), "/api/v1/session")
     context mount(new FormRedirectServlet(config, database, oppijanTunnistus, verifier, signer, countries, tarjonta), "/api/v1/form")
+    context mount(new HakumaksukausiServlet(config, database, oppijanTunnistus, verifier, hakumaksukausiService), "/api/v1/hakumaksukausi")
   }
 }

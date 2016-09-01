@@ -21,7 +21,7 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val testUser = AbstractUser.user(None, userOid, email, Some("firstName"), Some("lastName"),
     Some(new Date(100)), None, Google, Some("1"), Some("1"), Some("fi"), "fi")
   val appObject = ApplicationObject(None, userOid.get, "hakukohdeOid", "hakuOid", "educationLevel", "fi")
-  val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, List())
+  val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, List(), Hakumaksukausi.s2016)
 
   override def beforeAll = {
     super.beforeAll()
@@ -39,9 +39,16 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     res should equal(Left(409))
   }
 
+  test("it should halt on hakumaksukausi conflict") {
+    database.upsertUser(testUser)
+    database.upsertPayment(Payment(None, userOid.get, new Date(1000000), "", "", "", PaymentStatus.ok, Hakumaksukausi.k2017, None))
+    val res = formRedirect.doRedirect(testUser, appObject, appSystem, "educationLevel")
+    res should equal(Left(409))
+  }
+
   test("it should redirect on valid payment") {
     database.upsertUser(testUser)
-    database.upsertPayment(Payment(None, userOid.get, new Date(1000000), "", "", "", PaymentStatus.ok, None))
+    database.upsertPayment(Payment(None, userOid.get, new Date(1000000), "", "", "", PaymentStatus.ok, Hakumaksukausi.s2016, None))
     val res = formRedirect.doRedirect(testUser, appObject, appSystem, "educationLevel")
     res.isRight shouldBe(true)
   }

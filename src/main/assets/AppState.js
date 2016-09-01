@@ -25,7 +25,7 @@ export function changeListeners() {
 }
 
 export function initAppState(props) {
-  const {hakuperusteet:{tarjontaUrl, propertiesUrl, sessionUrl, authenticationUrl}} = props
+  const {hakuperusteet:{tarjontaUrl, propertiesUrl, sessionUrl, authenticationUrl, hakumaksukausiUrl}} = props
   const initialState = {}
 
   const gapiLoading = Bacon.fromPoll(10, checkGapiStatus).filter(skipLoadingMessages)
@@ -58,6 +58,10 @@ export function initAppState(props) {
   const logOutS = dispatcher.stream(events.logOut)
   const changeLangS = dispatcher.stream(events.changeLang)
 
+  const hakumaksukausiHakukohdeS = Bacon.once(parseAoId()).filter(isNotEmpty).flatMap(fetchHakukohdeHakumaksukausi)
+  const hakumaksukausiHakemusS = Bacon.once(parseAppId()).filter(isNotEmpty).flatMap(fetchHakukohdeHakemus)
+  const hakumaksukausi = Bacon.mergeAll(hakumaksukausiHakemusS, hakumaksukausiHakukohdeS)
+
   const stateP = Bacon.update(initialState,
     [propertiesS, hakukohdeS, hakemusS], onStateInit,
     [tarjontaS], onTarjontaValue,
@@ -67,7 +71,8 @@ export function initAppState(props) {
     [logOutS], onLogOut,
     [fieldValidationS], onFieldValidation,
     [changeLangS], onChangeLang,
-    [hashS], onChangeHash)
+    [hashS], onChangeHash,
+    [hakumaksukausi], onHakumaksukausi)
 
   const formSubmittedS = stateP.sampledBy(dispatcher.stream(events.submitForm), (state, form) => ({state, form}))
 
@@ -114,6 +119,10 @@ export function initAppState(props) {
     return {...state, ['lang']: lang}
   }
 
+  function onHakumaksukausi(state, hakumaksukausi) {
+    return {...state, hakumaksukausi}
+  }
+
   function onChangeHash(state, newHash) {
     return {...state, isLogoutPage: newHash === '#logoutPage'}
   }
@@ -155,6 +164,15 @@ export function initAppState(props) {
   function notCurrentHakukohde(x) { return x != parseAoId() }
   function fetchFromTarjonta(hakukohde) {
     return Bacon.fromPromise(HttpUtil.get(tarjontaUrl + "/" + hakukohde)).doError(handleTarjontaError).skipErrors()
+  }
+  function fetchHakukohdeHakumaksukausi(hakukohde) {
+    return fetchHakumaksukausi(hakumaksukausiUrl + "/hakukohde/" + hakukohde)
+  }
+  function fetchHakukohdeHakemus(hakemus) {
+    return fetchHakumaksukausi(hakumaksukausiUrl + "/hakemus/" + hakemus)
+  }
+  function fetchHakumaksukausi(url) {
+    return Bacon.fromPromise(HttpUtil.get(url))
   }
 }
 

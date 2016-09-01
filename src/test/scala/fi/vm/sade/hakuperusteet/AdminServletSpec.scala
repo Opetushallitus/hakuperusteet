@@ -53,7 +53,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     "status")
   val aoCountryArgentina = ApplicationObject(None, user.personOid.get, "1.2.246.562.20.00000000000", "1.2.246.562.5.00000000000", bachelors, argentina)
   val aoCountryFinland = aoCountryArgentina.copy(educationCountry = finland)
-  val okPayment = Payment(None, user.personOid.get, new Date(), "reference", "orderNumber", "paymentCallId", PaymentStatus.ok, None)
+  val okPayment = Payment(None, user.personOid.get, new Date(), "reference", "orderNumber", "paymentCallId", PaymentStatus.ok, Hakumaksukausi.s2016, None)
   val s = new AdminServlet("/webapp-admin/index.html",config, UserValidator(countries,languages), ApplicationObjectValidator(countries,educations), userServiceMock, paymentServiceMock, applicationObjectServiceMock) {
     override protected def registerAuthStrategies = {
       scentry.register("CAS", app => new CasBasicAuthStrategy(app, cfg) {
@@ -130,6 +130,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
     dbSpy.upsertPayment(okPayment)
     post("/api/v1/admin/applicationobject", write(aoCountryArgentina.copy(id = ao.id)), contentTypeJson) {
       status should equal(200)
+      println(body)
       read[UserData](body).applicationObject.head.educationCountry should equal(aoCountryArgentina.educationCountry)
       val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)

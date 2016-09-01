@@ -14,15 +14,24 @@ object Payments {
 
   def generateNumSeq = "%09d".format(Math.abs(rnd.nextInt()))
 
-  def generatePayments(user:User, noPaymentNames: List[String]) = {
+  def generatePayments(user:User, noPaymentNames: List[String], noK2017Names: List[String]) = {
     if(noPaymentNames.exists(name => name.equals(user.lastName.get))) {
       List()
     } else {
-      Range(1, 4).map(value =>
+      val s2016 = Range(1, 4).map(value =>
         Payment(None, user.personOid.get,
           Date.from(
             LocalDate.now().minusYears(value).atStartOfDay(ZoneId.systemDefault()).toInstant()),
-          generateNumSeq, generateNumSeq, generateNumSeq, PaymentStatus.ok, None))
+          generateNumSeq, generateNumSeq, generateNumSeq, PaymentStatus.ok, Hakumaksukausi.s2016, None))
+      if(noK2017Names.exists(name => name.equals(user.lastName.get))) {
+        s2016
+      } else {
+        s2016 ++ Range(1, 2).map(value =>
+          Payment(None, user.personOid.get,
+            Date.from(
+              LocalDate.now().minusYears(value).atStartOfDay(ZoneId.systemDefault()).toInstant()),
+            generateNumSeq, generateNumSeq, generateNumSeq, PaymentStatus.cancel, Hakumaksukausi.k2017, None))
+      }
     }
   }
 }

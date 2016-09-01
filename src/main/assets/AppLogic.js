@@ -59,19 +59,23 @@ export function showUserDataForm(state) {
 export function showEducationForm(state) {
   return !fatalError(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
 }
-function hasNoValidPayment(state) {
-  return _.all(state.sessionData.payment, function(p) { return p.status != "ok"})
+function hasNoValidPaymentForHakemus(state) {
+  return _.all(paymentsForHakumaksukausi(state), function(p) { return p.status != "ok"})
 }
 export function showVetumaStartForHakemus(state) {
-  return !fatalError(state) && hasUserData(state) && hasNoValidPayment(state)
+  return !fatalError(state) && hasUserData(state) && hasNoValidPaymentForHakemus(state)
 }
 export function isPartialUser(state) {
   return hasUserData(state) && state.sessionData.user.partialUser
 }
 export function showVetumaStart(state) {
-  return !fatalError(state) && hasUserData(state) && hasNoValidPayment(state) && (
-      (!hasSelectedHakukohde(state) && paymentRequired(state)) ||
-      (hasEducationForSelectedHakukohdeOid(state) && paymentRequiredWithCurrentHakukohdeOid(state)))
+  return !fatalError(state) && hasUserData(state) && (
+      (!hasSelectedHakukohde(state) && !paymentsOkWhenNoHakukohdeSelected(state)) ||
+      (hasEducationForSelectedHakukohdeOid(state) && paymentRequiredWithCurrentHakukohdeOid(state) && !hasValidPaymentForHakumaksukausi(state)))
+}
+
+function paymentsForHakumaksukausi(state) {
+  return _.filter(state.sessionData.payment, function(p) { return !_.isUndefined(state.hakumaksukausi) && p.kausi == state.hakumaksukausi.hakumaksukausi })
 }
 
 export function isHakuAppView(state) {
@@ -80,12 +84,41 @@ export function isHakuAppView(state) {
 
 export function showHakuList(state) {
   return !fatalError(state) && hasUserData(state) && (
-      (!hasSelectedHakukohde(state) && (hasValidPayment(state) || !paymentRequired(state))) ||
-      (hasEducationForSelectedHakukohdeOid(state) && (hasValidPayment(state) || !paymentRequiredWithCurrentHakukohdeOid(state))))
+      (!hasSelectedHakukohde(state) && paymentsOkWhenNoHakukohdeSelected(state)) ||
+      (hasEducationForSelectedHakukohdeOid(state) && (hasValidPaymentForHakumaksukausi(state) || !paymentRequiredWithCurrentHakukohdeOid(state))))
+}
+
+function paymentsOkWhenNoHakukohdeSelected(state) {
+  return _.all(getUniqueHakukaudet(state), function(hk) {return hakumaksukausiNotRequirePayment(state, hk) })
+}
+
+function getUniqueHakukaudet(state) {
+  return _.uniq(_.map(state.sessionData.applicationObject, function(ao){return ao.hakumaksukausi}))
+}
+
+function hakumaksukausiNotRequirePayment(state, hakumaksukausi) {
+  return hasValidPaymentForGivenHakumaksukausi(state, hakumaksukausi) ||
+      !_.some(getApplicationObjectsForHakumaksukausi(state, hakumaksukausi), function(ao) {return paymentRequiredWithCurrentHakukohdeOid(state, ao)})
+}
+
+export function getHakumaksukausiThatRequiresPaymentWhenNoHakukohdeSelected(state) {
+  return _.find(getUniqueHakukaudet(state), function(hk) {return !hakumaksukausiNotRequirePayment(state, hk)})
+}
+
+function getApplicationObjectsForHakumaksukausi(state, hakumaksukausi) {
+  return state.sessionData ? _.filter(state.sessionData.applicationObject, function(ao) {return ao.hakumaksukausi == hakumaksukausi}) : []
+}
+
+function hasValidPaymentForGivenHakumaksukausi(state, hakumaksukausi) {
+  return state.sessionData && _.some(state.sessionData.payment, function(p) {return p.kausi == hakumaksukausi && p.status == "ok"})
 }
 
 export function hasValidPayment(state) {
   return state.sessionData && _.some(state.sessionData.payment, function(p) { return p.status == "ok"})
+}
+
+export function hasValidPaymentForHakumaksukausi(state) {
+  return state.sessionData && _.some(paymentsForHakumaksukausi(state), function(p) { return p.status == "ok"})
 }
 
 export function showVetumaResultOk(state) {

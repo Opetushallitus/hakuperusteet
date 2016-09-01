@@ -19,7 +19,9 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz._
 
-class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, userValidator: UserValidator, applicationObjectValidator: ApplicationObjectValidator, emailSender: EmailSender) extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) with ValidationUtil {
+class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus, verifier: GoogleVerifier, userValidator: UserValidator,
+                     applicationObjectValidator: ApplicationObjectValidator, emailSender: EmailSender, hakumaksukausiService: HakumaksukausiService)
+  extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) with ValidationUtil {
   case class UserDataResponse(field: String, value: SessionData)
 
   val henkiloClient = HenkiloClient.init(config)
@@ -73,7 +75,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   private def returnUserData = {
     db.findUser(user.email) match {
       case Some(u : User) =>
-        val educations = db.run(db.findApplicationObjects(u)).toList
+        val educations = enrichEducationsWithHakumaksukausi(db.run(db.findApplicationObjects(u)).toList)
         val payments = db.findPayments(u).toList
         write(SessionData(user, Some(u), educations, payments))
       case Some(u : PartialUser) =>
@@ -82,6 +84,11 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
       case _ => write(SessionData(user, None, List.empty, List.empty))
     }
   }
+
+  private def enrichEducationsWithHakumaksukausi(educations: List[ApplicationObject]): List[ApplicationObjectWithHakumaksukausi] =
+    educations.map(e => ApplicationObjectWithHakumaksukausi.tupled(e.id, e.personOid, e.hakukohdeOid, e.hakuOid, e.educationLevel,
+      e.educationCountry, hakumaksukausiService.getHakumaksukausiForHakukohde(e.hakukohdeOid)))
+
 
   def renderConflictWithErrors(errors: NonEmptyList[String]) = halt(status = 409, body = compact(render("errors" -> errors.list.toList)))
 
@@ -116,7 +123,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   def addNewEducation(session: Session, userData: User, education: ApplicationObject) = {
     logger.info(s"Updating education: $education")
     db.run(db.upsertApplicationObject(education))
-    val educations = db.run(db.findApplicationObjects(userData)).toList
+    val educations = enrichEducationsWithHakumaksukausi(db.run(db.findApplicationObjects(userData)).toList)
     val payments = db.findPayments(userData).toList
     AuditLog.auditPostEducation(userData, education)
     halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, Some(userData), educations, payments))))

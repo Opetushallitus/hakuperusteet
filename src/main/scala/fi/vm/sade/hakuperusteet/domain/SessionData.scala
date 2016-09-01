@@ -1,3 +1,3 @@
 package fi.vm.sade.hakuperusteet.domain
 
-case class SessionData(session: Session, user: Option[AbstractUser], applicationObject: List[ApplicationObject], payment: List[Payment])
+case class SessionData(session: Session, user: Option[AbstractUser], applicationObject: List[ApplicationObjectWithHakumaksukausi], payment: List[Payment])

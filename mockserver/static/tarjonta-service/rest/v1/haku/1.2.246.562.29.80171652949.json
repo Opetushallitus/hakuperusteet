@@ -1,0 +1,56 @@
+{
+  "result": {
+    "modified": 1444719135123,
+    "modifiedBy": "1.2.246.562.24.18542484257",
+    "oid": "1.2.246.562.29.82177631379",
+    "hakukausiUri": "kausi_k#1",
+    "hakukausiVuosi": 2015,
+    "hakutapaUri": "hakutapa_02#1",
+    "hakulomakeUri": "http://localhost:3001/formredirect",
+    "hakutyyppiUri": "hakutyyppi_01#1",
+    "kohdejoukkoUri": "haunkohdejoukko_12#1",
+    "koulutuksenAlkamisVuosi": 2017,
+    "koulutuksenAlkamiskausiUri": "kausi_k#1",
+    "tila": "JULKAISTU",
+    "ylioppilastutkintoAntaaHakukelpoisuuden": false,
+    "hakukohdeOidsYlioppilastutkintoAntaaHakukelpoisuuden": [],
+    "sijoittelu": false,
+    "jarjestelmanHakulomake": false,
+    "hakuaikas": [
+      {
+        "hakuaikaId": "579942",
+        "alkuPvm": 1445558400000,
+        "loppuPvm": 1508716800000,
+        "nimet": {
+          "kieli_sv": "",
+          "kieli_en": "",
+          "kieli_fi": "hakuaika 1"
+        }
+      }
+    ],
+    "hakukohdeOids": [],
+    "nimi": {
+      "kieli_sv": "",
+      "kieli_en": "",
+      "kieli_fi": "Maksumuuri testi"
+    },
+    "maxHakukohdes": 0,
+    "organisaatioOids": [
+      "1.2.246.562.10.00000000001"
+    ],
+    "tarjoajaOids": [
+      "1.2.246.562.10.00000000001"
+    ],
+    "usePriority": false,
+    "sisaltyvatHaut": [],
+    "organisaatioryhmat": [],
+    "koulutusmoduuliTyyppi": "TUTKINTO",
+    "maksumuuriKaytossa": true
+  },
+  "accessRights": {
+    "update": false,
+    "delete": false,
+    "create": false
+  },
+  "status": "OK"
+}

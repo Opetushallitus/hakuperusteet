@@ -1,0 +1,1 @@
+ALTER TABLE payment ADD COLUMN hakumaksukausi character varying(255) DEFAULT 's2016' NOT NULL;

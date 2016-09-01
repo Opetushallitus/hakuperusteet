@@ -122,7 +122,11 @@ export function initAppState(props) {
         return {...state, ['users']: users, ['isSearching']: false}
     }
     function onTogglePaymentGroup(state, paymentGroup) {
-        return {...state, ['showPaymentGroup']: !state.showPaymentGroup}
+        if(paymentGroup.target.id == 's2016TogglePaymentGroup') {
+            return {...state, ['showPaymentGroupS2016']: !state.showPaymentGroupS2016}
+        } else {
+            return {...state, ['showPaymentGroupK2017']: !state.showPaymentGroupK2017}
+        }
     }
     function onUpdateEducationForm(state, newAo) {
         if(newAo == null) {
@@ -174,8 +178,9 @@ export function initAppState(props) {
         const applicationObjects = {['applicationObjects']: _.map(user.applicationObject, withNoChanges)}
         const referenceUserWithNoChanges = withNoChanges(referenceUser)
         const hasPaid = {['hasPaid']:user.hasPaid}
-        const showPaymentGroup = {['showPaymentGroup']:false}
-        return {...state, ['sessionData']: user.session, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroup}
+        const showPaymentGroupS2016 = {['showPaymentGroupS2016']:false}
+        const showPaymentGroupK2017 = {['showPaymentGroupK2017']:false}
+        return {...state, ['sessionData']: user.session, ...referenceUserWithNoChanges, ...payments, ...applicationObjects, ...fromServer, ...hasPaid, ...showPaymentGroupS2016, ...showPaymentGroupK2017}
     }
     function onUpdatePaymentForm(state, payment) {
         function decorateWithErrors(pp) {

@@ -26,7 +26,8 @@ import scalaz.Failure
 class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDependencies with BeforeAndAfterAll {
   val hakuAppMock = Mockito.mock(classOf[HakuAppClient])
   val tarjonta = Mockito.mock(classOf[Tarjonta])
-  val synchronization = new Synchronization(config, database, tarjonta, countries, null) {
+  val hakumaksukausiServiceMock = Mockito.mock(classOf[HakumaksukausiService])
+  val synchronization = new Synchronization(config, database, tarjonta, countries, null, hakumaksukausiServiceMock) {
     override val hakuAppClient = hakuAppMock
     def publicCheckForId(id: Int) = checkSynchronizationForId(id)
   }
@@ -40,10 +41,24 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     val hakemusOid = "1.1.1.1"
     val email = "e@mail.com"
     val user = database.upsertPartialUser(AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "en")).get
-    val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error,Some(hakemusOid))).get
+    val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error, Hakumaksukausi.s2016, Some(hakemusOid))).get
     val sync = database.insertPaymentSyncRequest(user, payment1).get
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
+    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Hakumaksukausi.s2016)
     synchronization.publicCheckForId(sync.id)
-    Mockito.verify(hakuAppMock, Mockito.times(1)).updateHakemusWithPaymentState(anyString(), any[PaymentState])
+    Mockito.verify(hakuAppMock, Mockito.times(1)).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
+  }
+
+  test("haku-app synchronization - conflicting hakumaksukausi") {
+    val personOid = "5.5.5.5"
+    val hakemusOid = "2.2.2.2"
+    val email = "f@mail.com"
+    val user = database.upsertPartialUser(AbstractUser.partialUser(None, Some(personOid), email, OppijaToken, "en")).get
+    val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "4567", "4567", "4567", PaymentStatus.error, Hakumaksukausi.k2017, Some(hakemusOid))).get
+    val sync = database.insertPaymentSyncRequest(user, payment1).get
+    Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
+    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Hakumaksukausi.s2016)
+    synchronization.publicCheckForId(sync.id)
+    Mockito.verify(hakuAppMock, Mockito.never()).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
   }
 }

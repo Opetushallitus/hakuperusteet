@@ -14,7 +14,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(ApplicationObject.schema, Payment.schema, PaymentEvent.schema, SchemaVersion.schema, Synchronization.schema, User.schema, UserDetails.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(ApplicationObject.schema, Jettysessionids.schema, Jettysessions.schema, Payment.schema, PaymentEvent.schema, SchemaVersion.schema, Synchronization.schema, User.schema, UserDetails.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -61,6 +61,87 @@ trait Tables {
   /** Collection-like TableQuery object for table ApplicationObject */
   lazy val ApplicationObject = new TableQuery(tag => new ApplicationObject(tag))
 
+  /** Entity class storing rows of table Jettysessionids
+   *  @param id Database column id SqlType(varchar), PrimaryKey, Length(120,true) */
+  case class JettysessionidsRow(id: String)
+  /** GetResult implicit for fetching JettysessionidsRow objects using plain SQL queries */
+  implicit def GetResultJettysessionidsRow(implicit e0: GR[String]): GR[JettysessionidsRow] = GR{
+    prs => import prs._
+    JettysessionidsRow(<<[String])
+  }
+  /** Table description of table jettysessionids. Objects of this class serve as prototypes for rows in queries. */
+  class Jettysessionids(_tableTag: Tag) extends Table[JettysessionidsRow](_tableTag, "jettysessionids") {
+    def * = id <> (JettysessionidsRow, JettysessionidsRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = Rep.Some(id).shaped.<>(r => r.map(_=> JettysessionidsRow(r.get)), (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(varchar), PrimaryKey, Length(120,true) */
+    val id: Rep[String] = column[String]("id", O.PrimaryKey, O.Length(120,varying=true))
+  }
+  /** Collection-like TableQuery object for table Jettysessionids */
+  lazy val Jettysessionids = new TableQuery(tag => new Jettysessionids(tag))
+
+  /** Entity class storing rows of table Jettysessions
+   *  @param rowid Database column rowid SqlType(varchar), PrimaryKey, Length(120,true)
+   *  @param sessionid Database column sessionid SqlType(varchar), Length(120,true), Default(None)
+   *  @param contextpath Database column contextpath SqlType(varchar), Length(60,true), Default(None)
+   *  @param virtualhost Database column virtualhost SqlType(varchar), Length(60,true), Default(None)
+   *  @param lastnode Database column lastnode SqlType(varchar), Length(60,true), Default(None)
+   *  @param accesstime Database column accesstime SqlType(int8), Default(None)
+   *  @param lastaccesstime Database column lastaccesstime SqlType(int8), Default(None)
+   *  @param createtime Database column createtime SqlType(int8), Default(None)
+   *  @param cookietime Database column cookietime SqlType(int8), Default(None)
+   *  @param lastsavedtime Database column lastsavedtime SqlType(int8), Default(None)
+   *  @param expirytime Database column expirytime SqlType(int8), Default(None)
+   *  @param maxinterval Database column maxinterval SqlType(int8), Default(None)
+   *  @param map Database column map SqlType(bytea), Default(None) */
+  case class JettysessionsRow(rowid: String, sessionid: Option[String] = None, contextpath: Option[String] = None, virtualhost: Option[String] = None, lastnode: Option[String] = None, accesstime: Option[Long] = None, lastaccesstime: Option[Long] = None, createtime: Option[Long] = None, cookietime: Option[Long] = None, lastsavedtime: Option[Long] = None, expirytime: Option[Long] = None, maxinterval: Option[Long] = None, map: Option[Array[Byte]] = None)
+  /** GetResult implicit for fetching JettysessionsRow objects using plain SQL queries */
+  implicit def GetResultJettysessionsRow(implicit e0: GR[String], e1: GR[Option[String]], e2: GR[Option[Long]], e3: GR[Option[Array[Byte]]]): GR[JettysessionsRow] = GR{
+    prs => import prs._
+    JettysessionsRow.tupled((<<[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Array[Byte]]))
+  }
+  /** Table description of table jettysessions. Objects of this class serve as prototypes for rows in queries. */
+  class Jettysessions(_tableTag: Tag) extends Table[JettysessionsRow](_tableTag, "jettysessions") {
+    def * = (rowid, sessionid, contextpath, virtualhost, lastnode, accesstime, lastaccesstime, createtime, cookietime, lastsavedtime, expirytime, maxinterval, map) <> (JettysessionsRow.tupled, JettysessionsRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (Rep.Some(rowid), sessionid, contextpath, virtualhost, lastnode, accesstime, lastaccesstime, createtime, cookietime, lastsavedtime, expirytime, maxinterval, map).shaped.<>({r=>import r._; _1.map(_=> JettysessionsRow.tupled((_1.get, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column rowid SqlType(varchar), PrimaryKey, Length(120,true) */
+    val rowid: Rep[String] = column[String]("rowid", O.PrimaryKey, O.Length(120,varying=true))
+    /** Database column sessionid SqlType(varchar), Length(120,true), Default(None) */
+    val sessionid: Rep[Option[String]] = column[Option[String]]("sessionid", O.Length(120,varying=true), O.Default(None))
+    /** Database column contextpath SqlType(varchar), Length(60,true), Default(None) */
+    val contextpath: Rep[Option[String]] = column[Option[String]]("contextpath", O.Length(60,varying=true), O.Default(None))
+    /** Database column virtualhost SqlType(varchar), Length(60,true), Default(None) */
+    val virtualhost: Rep[Option[String]] = column[Option[String]]("virtualhost", O.Length(60,varying=true), O.Default(None))
+    /** Database column lastnode SqlType(varchar), Length(60,true), Default(None) */
+    val lastnode: Rep[Option[String]] = column[Option[String]]("lastnode", O.Length(60,varying=true), O.Default(None))
+    /** Database column accesstime SqlType(int8), Default(None) */
+    val accesstime: Rep[Option[Long]] = column[Option[Long]]("accesstime", O.Default(None))
+    /** Database column lastaccesstime SqlType(int8), Default(None) */
+    val lastaccesstime: Rep[Option[Long]] = column[Option[Long]]("lastaccesstime", O.Default(None))
+    /** Database column createtime SqlType(int8), Default(None) */
+    val createtime: Rep[Option[Long]] = column[Option[Long]]("createtime", O.Default(None))
+    /** Database column cookietime SqlType(int8), Default(None) */
+    val cookietime: Rep[Option[Long]] = column[Option[Long]]("cookietime", O.Default(None))
+    /** Database column lastsavedtime SqlType(int8), Default(None) */
+    val lastsavedtime: Rep[Option[Long]] = column[Option[Long]]("lastsavedtime", O.Default(None))
+    /** Database column expirytime SqlType(int8), Default(None) */
+    val expirytime: Rep[Option[Long]] = column[Option[Long]]("expirytime", O.Default(None))
+    /** Database column maxinterval SqlType(int8), Default(None) */
+    val maxinterval: Rep[Option[Long]] = column[Option[Long]]("maxinterval", O.Default(None))
+    /** Database column map SqlType(bytea), Default(None) */
+    val map: Rep[Option[Array[Byte]]] = column[Option[Array[Byte]]]("map", O.Default(None))
+
+    /** Index over (expirytime) (database name idx_jettysessions_expiry) */
+    val index1 = index("idx_jettysessions_expiry", expirytime)
+    /** Index over (sessionid,contextpath) (database name idx_jettysessions_session) */
+    val index2 = index("idx_jettysessions_session", (sessionid, contextpath))
+  }
+  /** Collection-like TableQuery object for table Jettysessions */
+  lazy val Jettysessions = new TableQuery(tag => new Jettysessions(tag))
+
   /** Entity class storing rows of table Payment
    *  @param id Database column id SqlType(serial), AutoInc, PrimaryKey
    *  @param henkiloOid Database column henkilo_oid SqlType(varchar), Length(255,true)
@@ -69,18 +150,19 @@ trait Tables {
    *  @param orderNumber Database column order_number SqlType(varchar), Length(255,true)
    *  @param status Database column status SqlType(varchar), Length(255,true)
    *  @param paymCallId Database column paym_call_id SqlType(varchar), Length(255,true)
+   *  @param kausi Database column hakumaksukausi SqlType(varchar), Length(255,true)
    *  @param hakemusOid Database column hakemus_oid SqlType(varchar), Length(255,true), Default(None) */
-  case class PaymentRow(id: Int, henkiloOid: String, tstamp: java.sql.Timestamp, reference: String, orderNumber: String, status: String, paymCallId: String, hakemusOid: Option[String] = None)
+  case class PaymentRow(id: Int, henkiloOid: String, tstamp: java.sql.Timestamp, reference: String, orderNumber: String, status: String, paymCallId: String, kausi: String, hakemusOid: Option[String] = None)
   /** GetResult implicit for fetching PaymentRow objects using plain SQL queries */
   implicit def GetResultPaymentRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Option[String]]): GR[PaymentRow] = GR{
     prs => import prs._
-    PaymentRow.tupled((<<[Int], <<[String], <<[java.sql.Timestamp], <<[String], <<[String], <<[String], <<[String], <<?[String]))
+    PaymentRow.tupled((<<[Int], <<[String], <<[java.sql.Timestamp], <<[String], <<[String], <<[String], <<[String], <<[String], <<?[String]))
   }
   /** Table description of table payment. Objects of this class serve as prototypes for rows in queries. */
   class Payment(_tableTag: Tag) extends Table[PaymentRow](_tableTag, "payment") {
-    def * = (id, henkiloOid, tstamp, reference, orderNumber, status, paymCallId, hakemusOid) <> (PaymentRow.tupled, PaymentRow.unapply)
+    def * = (id, henkiloOid, tstamp, reference, orderNumber, status, paymCallId, kausi, hakemusOid) <> (PaymentRow.tupled, PaymentRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(henkiloOid), Rep.Some(tstamp), Rep.Some(reference), Rep.Some(orderNumber), Rep.Some(status), Rep.Some(paymCallId), hakemusOid).shaped.<>({r=>import r._; _1.map(_=> PaymentRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(id), Rep.Some(henkiloOid), Rep.Some(tstamp), Rep.Some(reference), Rep.Some(orderNumber), Rep.Some(status), Rep.Some(paymCallId), Rep.Some(kausi), hakemusOid).shaped.<>({r=>import r._; _1.map(_=> PaymentRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(serial), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -98,6 +180,8 @@ trait Tables {
     val paymCallId: Rep[String] = column[String]("paym_call_id", O.Length(255,varying=true))
     /** Database column hakemus_oid SqlType(varchar), Length(255,true), Default(None) */
     val hakemusOid: Rep[Option[String]] = column[Option[String]]("hakemus_oid", O.Length(255,varying=true), O.Default(None))
+    /** Database column hakumaksukausi SqlType(varchar), Length(255,true) */
+    val kausi: Rep[String] = column[String]("hakumaksukausi", O.Length(255,varying=true))
 
     /** Foreign key referencing User (database name payment_henkilo_oid_fkey) */
     lazy val userFk = foreignKey("payment_henkilo_oid_fkey", Rep.Some(henkiloOid), User)(r => r.henkiloOid, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
@@ -113,8 +197,8 @@ trait Tables {
   /** Entity class storing rows of table PaymentEvent
    *  @param id Database column id SqlType(serial), AutoInc, PrimaryKey
    *  @param paymentId Database column payment_id SqlType(int4)
-   *  @param created Database column created SqlType(timestamp)
-   *  @param timestamp Database column timestamp SqlType(timestamp), Default(None)
+   *  @param created Database column created SqlType(timestamptz)
+   *  @param timestamp Database column timestamp SqlType(timestamptz), Default(None)
    *  @param paymentStatus Database column payment_status SqlType(varchar), Length(255,true)
    *  @param checkSucceeded Database column check_succeeded SqlType(bool)
    *  @param newStatus Database column new_status SqlType(varchar), Length(255,true), Default(None)
@@ -135,9 +219,9 @@ trait Tables {
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
     /** Database column payment_id SqlType(int4) */
     val paymentId: Rep[Int] = column[Int]("payment_id")
-    /** Database column created SqlType(timestamp) */
+    /** Database column created SqlType(timestamptz) */
     val created: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created")
-    /** Database column timestamp SqlType(timestamp), Default(None) */
+    /** Database column timestamp SqlType(timestamptz), Default(None) */
     val timestamp: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("timestamp", O.Default(None))
     /** Database column payment_status SqlType(varchar), Length(255,true) */
     val paymentStatus: Rep[String] = column[String]("payment_status", O.Length(255,varying=true))
