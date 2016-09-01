@@ -41,16 +41,16 @@ describe('Admin UI front', () => {
   describe('S2016 payments', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001001", pageLoaded(form => form.find("input[value='Ossilainen']").length == 1)))
     it('should have ei maksuja hakumaksukaudelle k2017 text', assertOneFound("h3:contains('Hakijalla ei ole maksuja hakumaksukaudelle k2017')"))
-    it('should not have maksut k2017 text', assertNotFound("h3:contains('Maksut k2017')"))
-    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut s2016')"))
+    it('should not have maksut k2017 text', assertNotFound("h3:contains('Maksut hakumaksukaudella k2017')"))
+    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut hakumaksukaudella s2016')"))
     it('should have tila Maksettu', assertOneFound("span:contains('Maksettu')"))
     it('should have maksuloki button', assertOneFound("#s2016TogglePaymentGroup"))
     it('click maksulogi button should open maksuloki', clickField("#s2016TogglePaymentGroup"))
   })
   describe('Payments for both hakumaksukausi', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001000", pageLoaded(form => form.find("input[value='Annilainen']").length == 1)))
-    it('should have maksut k2017 text', assertOneFound("h3:contains('Maksut k2017')"))
-    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut s2016')"))
+    it('should have maksut k2017 text', assertOneFound("h3:contains('Maksut hakumaksukaudella k2017')"))
+    it('should have maksut s2016 text', assertOneFound("h3:contains('Maksut hakumaksukaudella s2016')"))
     it('should have tila Maksettu', assertOneFound("span:contains('Maksettu')"))
     it('should have tila Kesken', assertOneFound("span:contains('Kesken')"))
 

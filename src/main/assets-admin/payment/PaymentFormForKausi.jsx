@@ -18,7 +18,7 @@ export default class PaymentFormForKausi extends React.Component {
         const disabled = payments.length > 0 ? undefined : "disabled"
         const showPaymentGroup = "s2016" == this.props.kausi ? state.showPaymentGroupS2016 : state.showPaymentGroupK2017
         return payments.length > 0 ? <div>
-            <h3>Maksut {this.props.kausi}</h3>
+            <h3>Maksut hakumaksukaudella {this.props.kausi}</h3>
             <div className="userDataFormRow">
                 <label htmlFor={this.id + this.props.kausi}>Tila</label>
                 <span>{paymentsStatus}</span>
