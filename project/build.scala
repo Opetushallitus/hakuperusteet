@@ -14,7 +14,7 @@ object HakuperusteetBuild extends Build {
   val Version = "0.1.0-SNAPSHOT"
   val ScalaVersion = "2.11.7"
   val ScalatraVersion = "2.4.1"
-  val http4sVersion = "0.10.0"
+  val http4sVersion = "0.13.2a"
   val jettyVersion = "9.3.6.v20151106"
   val slickVersion = "3.1.0"
 
