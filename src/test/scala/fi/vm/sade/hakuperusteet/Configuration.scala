@@ -17,6 +17,6 @@ object Configuration extends LazyLogging {
 
   lazy val props = ConfigFactory
     .parseFile(conffile)
-    .withFallback(ConfigFactory.parseResources("reference.conf"))
+    .withFallback(ConfigFactory.parseResources("test.conf"))
     .resolve
 }
