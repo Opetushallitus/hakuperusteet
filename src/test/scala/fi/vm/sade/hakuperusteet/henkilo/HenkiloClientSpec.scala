@@ -3,6 +3,7 @@ package fi.vm.sade.hakuperusteet.henkilo
 import java.net.URLEncoder
 import java.util.Date
 
+import fi.vm.sade.hakuperusteet.DBSupport
 import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Henkilo, OppijaToken}
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
@@ -14,7 +15,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scalaz.concurrent.Task
 
-class HenkiloClientSpec extends FlatSpec with Matchers {
+class HenkiloClientSpec extends FlatSpec with Matchers with DBSupport {
   val virkailijaUrl = "https://localhost"
   val virkailijaUri: Uri = Uri(path = virkailijaUrl)
 
