@@ -23,7 +23,6 @@ object HakuAppClient {
 
 class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasClientUtils {
   import fi.vm.sade.hakuperusteet._
-  implicit val formats = Serialization.formats(NoTypeHints)
 
   def url(hakemusOid: String): String = {
     Urls.urls.url("haku-app.updatePaymentStatus", hakemusOid)
@@ -31,6 +30,8 @@ class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasC
 
   def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = client.prepare(updateRequest(hakemusOid, status)).runFor(timeoutInMillis = timeout)
   def getApplicationSystemId(hakemusOid:String) = {
+
+    implicit val formats = Serialization.formats(NoTypeHints)
 
     implicit val applicationReader = new Reader[Application] {
       override def read(v: JValue): Application = {
