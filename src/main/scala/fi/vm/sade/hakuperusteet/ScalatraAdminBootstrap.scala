@@ -29,7 +29,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   val paymentService = PaymentService(database)
   val languages = Koodisto.initLanguages(config)
   val educations = Koodisto.initBaseEducation(config)
-  val signer = RSASigner.init(config)
+  val signer = RSASigner.init(config, "hakuperusteetadmin")
   val applicationObjectValidator = ApplicationObjectValidator(countries, educations)
   val userValidator = UserValidator(countries, languages)
   val emailSender = EmailSender.init(config)

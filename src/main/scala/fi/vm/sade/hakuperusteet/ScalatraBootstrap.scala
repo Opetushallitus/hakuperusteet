@@ -19,7 +19,7 @@ class ScalatraBootstrap extends LifeCycle {
   val config = Configuration.props
   val database = HakuperusteetDatabase(config)
   val verifier = GoogleVerifier.init(config)
-  val signer = RSASigner.init(config)
+  val signer = RSASigner.init(config, "hakuperusteet")
   val countries = Koodisto.initCountries(config)
   val languages = Koodisto.initLanguages(config)
   val educations = Koodisto.initBaseEducation(config)

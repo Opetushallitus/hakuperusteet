@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.{Failure, Success, Try}
 
-class RSASigner(config: Config) extends LazyLogging {
+class RSASigner(config: Config, serviceName: String) extends LazyLogging {
   val key = readPrivateKey()
 
   def signData(dataString: String) = {
@@ -42,7 +42,7 @@ class RSASigner(config: Config) extends LazyLogging {
     }
   }
   private def readPrivateKey(): RSAPrivateKey = {
-    val keyPath = config.getString("rsa.sign.key")
+    val keyPath = config.getString(s"rsa.sign.key.$serviceName")
     val bs = bytesFromUrl(keyPath)
     KeyFactory.getInstance("RSA")
       .generatePrivate(new PKCS8EncodedKeySpec(bs))
@@ -51,7 +51,7 @@ class RSASigner(config: Config) extends LazyLogging {
 }
 
 object RSASigner {
-  def init(config: Config) = {
-    new RSASigner(config)
+  def init(config: Config, serviceName: String) = {
+    new RSASigner(config, serviceName)
   }
 }

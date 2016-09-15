@@ -55,7 +55,7 @@ class DummyOppijanTunnistus(c: Config) extends OppijanTunnistus(c) {
   override def createToken(email: String, hakukohdeOid: String, uiLang: String) = "dummyLoginToken"
 }
 
-class DummyRSASigner(c: Config) extends RSASigner(c) {
+class DummyRSASigner(c: Config) extends RSASigner(c, "hakuperusteet") {
   override def signData(dataString: String) = {
     "dummySignedString"
   }
