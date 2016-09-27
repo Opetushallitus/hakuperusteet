@@ -13,3 +13,5 @@ package: test
 
 source-to-image: npm-install
 	./sbt compile assembly admin:assembly
+	rm -rf target/streams
+	rm -rf target/resolution-cache
