@@ -12,19 +12,28 @@ describe('Admin UI front', () => {
   describe('Modifying user data', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001000", pageLoaded(form => form.find("input[value='Annilainen']").length == 1)))
 
-    // Pre-check that identification selection is correctly populated
-    it('should have personId option checked', assertChecked("#personal-id-yes"))
-    it('should have birthday option unchecked', assertUnchecked("#personal-id-no"))
-    it('should have personId field enabled', assertEnabled("#personId"))
-    it('should have birthday field disabled', assertDisabled("#birthDate"))
-    it('should have personId set', assertValueEqual("#personId", "261095-910P"))
-    it('should have birthday empty', assertValueEmpty("#birthDate"))
+    describe('Pre-check that identification selection is correctly populated', () => {
+      it('should have personId option checked', assertChecked("#personal-id-yes"))
+      it('should have birthday option unchecked', assertUnchecked("#personal-id-no"))
+      it('should have personId field enabled', assertEnabled("#personId"))
+      it('should have birthday field disabled', assertDisabled("#birthDate"))
+      it('should have personId set', assertValueEqual("#personId", "261095-910P"))
+      it('should have birthday empty', assertValueEmpty("#birthDate"))
+    })
 
-    it('should change name', setField("#firstName", "Emmi " + getRandomName()))
-    it('should change mother tongue', setField("#nativeLanguage", "AB"))
-    it('submit should be enabled', assertSubmitEnabled("#userDataForm"))
-    it('click submit should post changes', clickField("#userDataForm input[name='submit']"))
-    it('submit should be disabled after post', assertSubmitDisabled("#userDataForm"))
+    describe('Do modifications', () => {
+      before(function() {
+        setField("#firstName", "Emmi " + getRandomName())()
+        setField("#nativeLanguage", "AF")()
+      })
+      describe('Before submit', () => {
+        it('submit should be enabled', assertSubmitEnabled("#userDataForm"))
+      })
+      describe('After submit', () => {
+        before(clickField("#userDataForm input[name='submit']"))
+        it('submit should be disabled after post', assertSubmitDisabled("#userDataForm"))
+      })
+    })
   })
   describe('Modifying application object', () => {
     before(openPage("/hakuperusteetadmin/oppija/1.2.246.562.24.00000001001", pageLoaded(form => form.find("input[value='Ossilainen']").length == 1)))
