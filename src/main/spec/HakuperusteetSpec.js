@@ -73,33 +73,36 @@ describe('Page with email session - userdata', () => {
   it('should not show hakuList', assertNotFound(".hakuList"))
 
   describe('Insert data', () => {
-    it('initially submit should be disabled', assertSubmitDisabled())
-    it('initially show all missing errors', assertElementsFound("#userDataForm .error", 7))
+    describe('Initially', () => {
+      it('initially submit should be disabled', assertSubmitDisabled())
+      it('initially show all missing errors', assertElementsFound("#userDataForm .error", 7))
+    })
+    describe('Inserting all data', () => {
+      it('insert firstName', setField("#firstName", "John"))
+      it('submit should be disabled', assertSubmitDisabled())
 
-    it('insert firstName', setField("#firstName", "John"))
-    it('submit should be disabled', assertSubmitDisabled())
+      it('insert lastName', setField("#lastName", "Doe"))
+      it('submit should be disabled', assertSubmitDisabled())
 
-    it('insert lastName', setField("#lastName", "Doe"))
-    it('submit should be disabled', assertSubmitDisabled())
+      it('select gender', clickField("#gender-male"))
+      it('submit should be disabled', assertSubmitDisabled())
 
-    it('select gender', clickField("#gender-male"))
-    it('submit should be disabled', assertSubmitDisabled())
+      it('select nativeLanguage', setField("#nativeLanguage", "FI"))
+      it('submit should be disabled', assertSubmitDisabled())
 
-    it('select nativeLanguage', setField("#nativeLanguage", "FI"))
-    it('submit should be disabled', assertSubmitDisabled())
+      it('select nationality', setField("#nationality", "246"))
+      it('submit should be disabled', assertSubmitDisabled())
 
-    it('select nationality', setField("#nationality", "246"))
-    it('submit should be disabled', assertSubmitDisabled())
+      it('should have person ID field disabled', assertDisabled("#personId"))
+      it('should have birthday field disabled', assertDisabled("#birthDate"))
+      it('select personId input', clickField("#personal-id-yes"))
+      it('should have person ID field enabled', assertEnabled("#personId"))
+      it('should still have birthday field disabled', assertDisabled("#birthDate"))
 
-    it('should have person ID field disabled', assertDisabled("#personId"))
-    it('should have birthday field disabled', assertDisabled("#birthDate"))
-    it('select personId input', clickField("#personal-id-yes"))
-    it('should have person ID field enabled', assertEnabled("#personId"))
-    it('should still have birthday field disabled', assertDisabled("#birthDate"))
-
-    it('insert personId', setField("#personId", "011295-9693"))
-    it('submit should be enabled', assertSubmitEnabled())
-    it('should not show missing errors', assertNotFound("#userDataForm .error"))
+      it('insert personId', setField("#personId", "011295-9693"))
+      it('submit should be enabled', assertSubmitEnabled())
+      it('should not show missing errors', assertNotFound("#userDataForm .error"))
+    })
   })
 
   describe('Submit userDataForm', () => {
