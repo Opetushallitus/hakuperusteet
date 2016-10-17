@@ -214,9 +214,6 @@ export function focusAndBlur(elem) {
   triggerEvent(elem.first(), "focus")
   triggerEvent(elem.first(), "blur")
 }
-export function click(elem) {
-  triggerEvent(elem.first(), "click")
-}
 
 function triggerEvent(element, eventName) {
   const evt = testFrame().document.createEvent('HTMLEvents');

@@ -108,7 +108,7 @@ function clickField(field) {
   return wait.until(() => {
     const e = select(field)
     if(e.length == 1 && e.attr("disabled") === undefined) {
-      click(e)
+      e[0].click()
       return true
     } else {
       return false
