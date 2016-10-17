@@ -80,7 +80,7 @@ object HakuperusteetBuild extends Build {
         "org.scalaz" %% "scalaz-core" % "7.2.3",
         "com.netaporter" %% "scala-uri" % "0.4.7" exclude("org.parboiled", "parboiled_2.11"),
         "commons-codec" % "commons-codec" % "1.6",
-        "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
+        "org.postgresql" % "postgresql" % "9.4.1211",
         "com.typesafe.slick" %% "slick" % slickVersion,
         "com.typesafe.slick" %% "slick-codegen" % slickVersion,
         "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
