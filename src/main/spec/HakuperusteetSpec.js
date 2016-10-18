@@ -138,7 +138,7 @@ describe('Page with email session', () => {
                     })
                   })
 
-                  describe('select educationLevel Bachelor', () => {
+                  describe('select educationLevel Foreign Bachelor', () => {
                     before(setField("#educationLevel", "116"))
 
                     describe('select educationCountry - Finland', () => {
@@ -203,7 +203,7 @@ describe('Page with email session', () => {
                               it('initially submit should be disabled', assertSubmitDisabled())
                               it('initially show all missing errors', assertElementsFound("#educationForm .error", 2))
 
-                              describe('select educationLevel 100 and educationCountry Finland', () => {
+                              describe('select educationLevel General eligibility and educationCountry Finland', () => {
                                 before(() => {
                                   setField("#educationLevel", "100")()
                                   setField("#educationCountry", "246")()
@@ -215,7 +215,7 @@ describe('Page with email session', () => {
                                 it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
                               })
 
-                              describe('select educationLevel 100 and educationCountry Solomin Islands', () => {
+                              describe('select educationLevel General eligibility and educationCountry Solomin Islands', () => {
                                 before(() => {
                                   setField("#educationLevel", "100")()
                                   setField("#educationCountry", "090")()
@@ -254,7 +254,7 @@ describe('Page with email session', () => {
                                     it('initially submit should be disabled', assertSubmitDisabled())
                                     it('initially show all missing errors', assertElementsFound("#educationForm .error", 2))
 
-                                    describe('select educationLevel 102 and educationCountry Finland', () => {
+                                    describe('select educationLevel University Bachelor and educationCountry Finland', () => {
                                       before(() => {
                                         setField("#educationLevel", "102")()
                                         setField("#educationCountry", "246")()
@@ -267,7 +267,7 @@ describe('Page with email session', () => {
                                       it('alreadyPaid should be hidden', assertNotFound(".alreadyPaid"))
                                     })
 
-                                    describe('select educationLevel 102 and educationCountry Solomin Islands', () => {
+                                    describe('select educationLevel University Bachelor and educationCountry Solomin Islands', () => {
                                       before(() => {
                                         setField("#educationLevel", "102")()
                                         setField("#educationCountry", "090")()
