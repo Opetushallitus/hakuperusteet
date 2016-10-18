@@ -45,7 +45,8 @@
     "sisaltyvatHaut": [],
     "organisaatioryhmat": [],
     "koulutusmoduuliTyyppi": "TUTKINTO",
-    "maksumuuriKaytossa": false
+    "maksumuuriKaytossa": false,
+    "tunnistusKaytossa": false
   },
   "accessRights": {
     "update": false,
