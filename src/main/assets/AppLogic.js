@@ -61,7 +61,7 @@ export function showUserDataForm(state) {
 }
 
 export function showEducationForm(state) {
-  return !fatalError(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
+  return !fatalError(state) && maksumuuriInUseWithSelectedHakukohdeOid(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
 }
 function hasNoValidPaymentForHakemus(state) {
   return _.all(paymentsForHakumaksukausi(state), function(p) { return p.status != "ok"})
