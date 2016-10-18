@@ -5,7 +5,7 @@ export function sessionInit(state) {
 }
 
 export function fatalError(state) {
-  return serverError(state) || !maksumuuriInUseWithSelectedHakukohdeOid(state) || !hakuForSelectedHakukohdeOidIsOpen(state) || !hakuForSelectedHakukohdeOidIsJulkaistu(state)
+  return serverError(state) || !hakuperusteetInUseWithSelectedHakukohdeOid(state) || !hakuForSelectedHakukohdeOidIsOpen(state) || !hakuForSelectedHakukohdeOidIsJulkaistu(state)
 }
 
 export function serverError(state) {
@@ -14,6 +14,10 @@ export function serverError(state) {
 
 export function maksumuuriInUseWithSelectedHakukohdeOid(state) {
   return _.isEmpty(state.hakukohdeOid) || tarjontaForHakukohdeOid(state, state.hakukohdeOid).maksumuuriKaytossa
+}
+
+export function hakuperusteetInUseWithSelectedHakukohdeOid(state) {
+  return maksumuuriInUseWithSelectedHakukohdeOid(state) || tarjontaForHakukohdeOid(state, state.hakukohdeOid).tunnistusKaytossa
 }
 
 export function hakuForSelectedHakukohdeOidIsOpen(state) {

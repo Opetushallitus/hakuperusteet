@@ -78,9 +78,9 @@
     "tarjonta": {
       "invalid": {
         "hakukohde": {
-          "en": "This programme does not use application fees.",
-          "fi": "Tässä koulutuksessa ei ole hakijamaksuja.",
-          "sv": "Denna utbildning har ingen ansökningsavgift."
+          "en": "This programme does not use application fees or identification.",
+          "fi": "Tässä koulutuksessa ei ole hakijamaksuja tai tunnistusta.",
+          "sv": "Denna utbildning har ingen ansökningsavgift eller identification."
         },
         "hakuaika": {
           "en": "This programme is not open for applying at the moment.",
