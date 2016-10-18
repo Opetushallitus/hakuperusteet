@@ -1,5 +1,5 @@
 import {expect, done} from 'chai'
-import {commandServer, openPage, hakuperusteetLoaded, testFrame, logout, takeScreenshot, S, S2, directLogout} from './testUtil.js'
+import {commandServer, openPage, hakuperusteetLoaded, testFrame, logout, takeScreenshot, S, S2, wait, select, directLogout} from './testUtil.js'
 import {assertDisabled, assertElementsFound, assertEnabled, assertNotFound, assertOneFound, assertSubmitDisabled, assertSubmitEnabled} from './assertions'
 
 function delete_cookie( name ) {
@@ -391,4 +391,14 @@ describe('Creating "ulkolomake" with partially generated user', () => {
 
 function setVal(val) { return (e) => { $(e).val(val).focus().blur() }}
 function setField(field, val) { return () => { S2(field).then(setVal(val)).then(done).catch(done) }}
-function clickField(field) { return () => { S2(field).then((e) => { $(e).click() }).then(done).catch(done) }}
+function clickField(field) {
+  return wait.until(() => {
+    const e = select(field)
+    if(e.length == 1 && e.attr("disabled") === undefined) {
+      e[0].click()
+      return true
+    } else {
+      return false
+    }
+  })
+}
