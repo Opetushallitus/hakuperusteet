@@ -48,7 +48,7 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
   def doRedirect(userData: User, applicationObjectForThisHakukohde: ApplicationObject, as: ApplicationSystem, educationLevel : String) : Either[Int, Map[String, Any]] = {
     val formUrl = as.formUrl
     val payments = db.findPayments(userData)
-    val shouldPay = countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
+    val shouldPay = as.maksumuuriKaytossa && countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
     val hasPaid = payments.exists(p => (p.status.equals(PaymentStatus.ok) && p.kausi.equals(as.hakumaksukausi)))
 
     if (shouldPay && !hasPaid) {

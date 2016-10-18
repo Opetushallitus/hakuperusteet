@@ -150,7 +150,7 @@ function hasEducationForSelectedHakukohdeOid(state) {
 
 export function paymentRequiredWithCurrentHakukohdeOid(state, dataForAo) {
   const educationForCurrentHakukohdeOid = dataForAo || _.findWhere(state.sessionData.applicationObject, {hakukohdeOid: state.hakukohdeOid})
-  if (!educationForCurrentHakukohdeOid.educationCountry) {
+  if (!maksumuuriInUseWithSelectedHakukohdeOid(state) || !educationForCurrentHakukohdeOid.educationCountry) {
     return false
   } else {
     const eeaCountries = (state.properties && state.properties.eeaCountries) ? state.properties.eeaCountries : []
