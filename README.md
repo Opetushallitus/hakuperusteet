@@ -17,16 +17,13 @@ MacOS users install docker with command `brew cask install dockertoolbox`.
 
 1. Create new docker-machine `docker-machine create --driver virtualbox dockerVM`
 2. Run `docker-machine env dockerVM` and check DOCKER_HOST variable
-4. Edit /etc/hosts. Add line `<docker-host-ip-goes-here> hakuperusteetdb`
-5. `eval "$(docker-machine env dockerVM)"`
-6. `docker run -d -p 5432:5432 postgres`
-7. `psql -hhakuperusteetdb -p5432 -Upostgres postgres -c "CREATE ROLE OPH;"`
-8. `psql -hhakuperusteetdb -p5432 -Upostgres postgres -c "CREATE DATABASE hakuperusteet;"`
-9. `psql -hhakuperusteetdb -p5432 -Upostgres postgres -c "CREATE DATABASE hakuperusteettest;"`
+3. Edit /etc/hosts. Add line `<docker-host-ip-goes-here> hakuperusteetdb`
+4. `. init_docker_postgres.sh`
 
-To start docker again (e.g. after boot), run the following command and continue from step 2 above.
+To start docker again (e.g. after boot), run the following commands:
 
 1. `docker-machine start dockerVM`
+2. `. init_docker_postgres.sh`
 
 ### Run
 
@@ -60,7 +57,7 @@ Test servers can be accessed from urls:
 1. Access hakuperusteet at [https://localhost:18081/hakuperusteet/](https://localhost:18081/hakuperusteet/)
 2. Access hakuperusteet-admin at [https://localhost:18091/hakuperusteetadmin/](https://localhost:18091/hakuperusteetadmin/)
 
-By default test setup uses database from Docker. Embedded Postgres can be used with embedded=true env variable. 
+By default test setup uses database from Docker. Embedded Postgres can be used with embedded=true env variable.
 
 Docker database is empty at start, if needed, create test users by running at project root:
 
