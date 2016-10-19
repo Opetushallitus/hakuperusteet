@@ -49,7 +49,7 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
     val formUrl = as.formUrl
     val payments = db.findPayments(userData)
     val shouldPay = as.maksumuuriKaytossa && countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
-    val hasPaid = payments.exists(p => (p.status.equals(PaymentStatus.ok) && p.kausi.equals(as.hakumaksukausi)))
+    val hasPaid = shouldPay && payments.exists(p => (p.status.equals(PaymentStatus.ok) && Some(p.kausi).equals(as.hakumaksukausi)))
 
     if (shouldPay && !hasPaid) {
       Left(409)

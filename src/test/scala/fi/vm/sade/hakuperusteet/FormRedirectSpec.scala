@@ -21,8 +21,8 @@ class FormRedirectSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val testUser = AbstractUser.user(None, userOid, email, Some("firstName"), Some("lastName"),
     Some(new Date(100)), None, Google, Some("1"), Some("1"), Some("fi"), "fi")
   val appObject = ApplicationObject(None, userOid.get, "hakukohdeOid", "hakuOid", "educationLevel", "fi")
-  val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, true, List(), Hakumaksukausi.s2016)
-  val appSystemWithJustTunnistus = ApplicationSystem("hakuOid", Some("formUri"), false, true, List(), Hakumaksukausi.s2016)
+  val appSystem = ApplicationSystem("hakuOid", Some("formUri"), true, true, List(), Some(Hakumaksukausi.s2016))
+  val appSystemWithJustTunnistus = ApplicationSystem("hakuOid", Some("formUri"), false, true, List(), None)
 
   override def beforeAll = {
     super.beforeAll()

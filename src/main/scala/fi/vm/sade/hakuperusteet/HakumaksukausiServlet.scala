@@ -12,14 +12,14 @@ class HakumaksukausiServlet(config: Config, db: HakuperusteetDatabase, oppijanTu
 
   get("/hakukohde/:hakukohdeoid") {
     failUnlessAuthenticated()
-    write(HakumaksukausiRespone(hakumaksukausiService.getHakumaksukausiForHakukohde(params.get("hakukohdeoid").get)))
+    write(HakumaksukausiResponse(hakumaksukausiService.getHakumaksukausiForHakukohde(params.get("hakukohdeoid").get)))
   }
 
   get("/hakemus/:hakemusoid") {
     failUnlessAuthenticated()
-    write(HakumaksukausiRespone(hakumaksukausiService.getHakumaksukausiForHakemus(params.get("hakemusoid").get)))
+    write(HakumaksukausiResponse(hakumaksukausiService.getHakumaksukausiForHakemus(params.get("hakemusoid").get)))
   }
 
-  case class HakumaksukausiRespone(hakumaksukausi:Hakumaksukausi)
+  case class HakumaksukausiResponse(hakumaksukausi: Option[Hakumaksukausi])
 
 }

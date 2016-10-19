@@ -47,7 +47,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
     val hakumaksukausi = hakumaksukausiService.getHakumaksukausiForHakemus(row.hakemusOid)
     val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments)
-      .map(_.filter(_.kausi == hakumaksukausi)).getOrElse(Seq())).headOption
+      .map(_.filter(payment => Some(payment.kausi).equals(hakumaksukausi))).getOrElse(Seq())).headOption
     (payments match {
       case Some(payment) => paymentStatusToPaymentState(payment.status)
       case _ => None

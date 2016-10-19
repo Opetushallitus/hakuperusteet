@@ -10,7 +10,7 @@ import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 
 case class ApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, hakuaikaId: String, status: String)
-case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], hakumaksukausi: Hakumaksukausi)
+case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], hakumaksukausi: Option[Hakumaksukausi])
 
 case class HakuAika(hakuaikaId: String, alkuPvm: Long, loppuPvm: Long)
 case class EnrichedApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, julkaistu: Boolean, maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, startDate: Date, endDate: Date)
@@ -60,4 +60,4 @@ private object Nimi2 {
 }
 
 private case class Result2(result: Haku)
-private case class Haku(oid: String, hakulomakeUri: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], koulutuksenAlkamisVuosi:Int, koulutuksenAlkamiskausiUri: String)
+private case class Haku(oid: String, hakulomakeUri: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], koulutuksenAlkamisVuosi: Option[Int], koulutuksenAlkamiskausiUri: Option[String])
