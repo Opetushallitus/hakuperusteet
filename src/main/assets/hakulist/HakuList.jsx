@@ -12,7 +12,7 @@ export default class HakuList extends React.Component {
   render() {
     const state = this.props.state
     const aoList = !_.isEmpty(state.hakukohdeOid)
-        ? [_.findWhere(state.sessionData.applicationObject, {hakukohdeOid: state.hakukohdeOid})]
+        ? [{hakukohdeOid: state.hakukohdeOid}]
         : [...state.sessionData.applicationObject]
 
     return <div className="hakuList">

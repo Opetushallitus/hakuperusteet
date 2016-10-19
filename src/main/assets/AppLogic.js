@@ -88,6 +88,7 @@ export function isHakuAppView(state) {
 
 export function showHakuList(state) {
   return !fatalError(state) && hasUserData(state) && (
+      !maksumuuriInUseWithSelectedHakukohdeOid(state) ||
       (!hasSelectedHakukohde(state) && paymentsOkWhenNoHakukohdeSelected(state)) ||
       (hasEducationForSelectedHakukohdeOid(state) && (hasValidPaymentForHakumaksukausi(state) || !paymentRequiredWithCurrentHakukohdeOid(state))))
 }
