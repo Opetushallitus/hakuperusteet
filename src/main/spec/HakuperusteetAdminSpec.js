@@ -21,6 +21,11 @@ describe('Admin UI front', () => {
       it('should have birthday empty', assertValueEmpty("#birthDate"))
     })
 
+    describe('Check that non maksumuuri application has not education for visible', () => {
+      it('should have 3 application option', assertElementsFound("label:contains(Hakukohde)", 3))
+      it('should have only 2 editable application options', assertElementsFound("[id^=educationForm]", 2))
+    })
+
     describe('Do modifications', () => {
       before(function() {
         setField("#firstName", "Emmi " + getRandomName())()
