@@ -50,6 +50,7 @@ trait UserService extends LazyLogging {
       db.findUserByOid(user.personOid.getOrElse(throw new IllegalArgumentException("user must contain person oid"))) match {
         case Some(oldUser: User) =>
           val updatedUser = oldUser.copy(
+            email = user.email,
             firstName = user.firstName,
             lastName = user.lastName,
             birthDate = user.birthDate,

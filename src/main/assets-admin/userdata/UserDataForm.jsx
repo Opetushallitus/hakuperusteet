@@ -26,10 +26,7 @@ export default class UserDataForm extends React.Component {
     return <form id="userDataForm" onSubmit={controller.formSubmits}>
       <h2>{state.firstName}&nbsp;{state.lastName}</h2>
       <hr/>
-      <div className="userDataFormRow">
-        <label>{translation("title.email")}</label>
-        <span>{state.email}</span>
-      </div>
+      <UserDataInput name="email" translation="title.email" required={true} state={state} controller={controller} />
       <UserDataInput name="firstName" translation="title.first.name" required={true} state={state} controller={controller} />
       <UserDataInput name="lastName" translation="title.last.name" required={true} state={state} controller={controller} />
       <IdentificationInput state={state} controller={controller} />
