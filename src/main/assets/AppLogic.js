@@ -63,6 +63,11 @@ export function showUserDataForm(state) {
 export function showEducationForm(state) {
   return !fatalError(state) && maksumuuriInUseWithSelectedHakukohdeOid(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
 }
+
+export function showEducationWithoutPaymentForm(state) {
+  return !fatalError(state) && !maksumuuriInUseWithSelectedHakukohdeOid(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
+}
+
 function hasNoValidPaymentForHakemus(state) {
   return _.all(paymentsForHakumaksukausi(state), function(p) { return p.status != "ok"})
 }
@@ -88,7 +93,6 @@ export function isHakuAppView(state) {
 
 export function showHakuList(state) {
   return !fatalError(state) && hasUserData(state) && (
-      !maksumuuriInUseWithSelectedHakukohdeOid(state) ||
       (!hasSelectedHakukohde(state) && paymentsOkWhenNoHakukohdeSelected(state)) ||
       (hasEducationForSelectedHakukohdeOid(state) && (hasValidPaymentForHakumaksukausi(state) || !paymentRequiredWithCurrentHakukohdeOid(state))))
 }
