@@ -41,7 +41,7 @@ class AdminServlet(val resourcePath: String,
   def checkOphUser(): CasSession = {
     val casSession = checkAuthentication()
     if(!user.oph) {
-      logger.error(s"User ${user.username} is unauthorized!")
+      logger.warn(s"User ${user.username} is not oph user! Roles: ${user.roles}")
       halt(401)
     }
     casSession
@@ -52,7 +52,7 @@ class AdminServlet(val resourcePath: String,
     failUnlessAuthenticated()
 
     if(!user.roles.contains("APP_HAKUPERUSTEETADMIN_CRUD")) {
-      logger.error(s"User ${user.username} is unauthorized!")
+      logger.warn(s"User ${user.username} is unauthorized to use hakuperusteet! Roles: ${user.roles}")
       halt(401)
     }
     user // return the implicit session for use in ExecutionContexts

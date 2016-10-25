@@ -41,7 +41,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
             None
         }
       case _ =>
-        logger.warn("CAS ticket required")
+        logger.warn("No Cas ticket found -> unauthenticated request")
         None
     }
 
