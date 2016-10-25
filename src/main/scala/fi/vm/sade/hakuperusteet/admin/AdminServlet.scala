@@ -40,7 +40,7 @@ class AdminServlet(val resourcePath: String,
 
   def checkOphUser(): CasSession = {
     val casSession = checkAuthentication()
-    if(!user.roles.contains("APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA")) {
+    if(!user.oph) {
       logger.error(s"User ${user.username} is unauthorized!")
       halt(401)
     }
