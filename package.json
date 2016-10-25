@@ -35,7 +35,7 @@
     "jquery": "^2.1.4",
     "q": "^1.4.1",
     "mocha": "^2.2.5",
-    "mocha-junit-reporter": "^1.5.0",
+    "mocha-junit-reporter": "^1.12.1",
     "mocha-phantomjs": "4.0.1",
     "react-tools": "^0.13.2",
     "style-loader": "^0.12.3",
@@ -49,6 +49,8 @@
     "dev-build": "webpack -d --progress --colors",
     "watch": "webpack -d --progress --colors --watch",
     "test-ui": "mocha-phantomjs --ignore-resource-errors --setting webSecurityEnabled=false http://localhost:8081/hakuperusteet/spec/testRunner.html",
-    "admin:test-ui": "mocha-phantomjs --ignore-resource-errors --setting webSecurityEnabled=false http://localhost:8091/hakuperusteetadmin/spec/testRunner.html"
+    "test-ui-junit": "mocha-phantomjs --ignore-resource-errors -R xunit --setting webSecurityEnabled=false http://localhost:8081/hakuperusteet/spec/testRunner.html | tee target/test-ui.out; egrep '(testcase|testsuite)' target/test-ui.out > target/test-ui-report.xml",
+    "admin:test-ui": "mocha-phantomjs --ignore-resource-errors --setting webSecurityEnabled=false http://localhost:8091/hakuperusteetadmin/spec/testRunner.html",
+    "admin:test-ui-junit": "mocha-phantomjs --ignore-resource-errors -R xunit --setting webSecurityEnabled=false http://localhost:8091/hakuperusteetadmin/spec/testRunner.html | tee target/admin-test-ui.out; egrep '(testcase|testsuite)' target/test-ui.out > target/admin-test-ui-report.xml"
   }
 }
