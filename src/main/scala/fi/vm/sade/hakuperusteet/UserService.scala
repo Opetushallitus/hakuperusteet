@@ -58,6 +58,7 @@ trait UserService extends LazyLogging {
             gender = user.gender,
             nativeLanguage = user.nativeLanguage,
             nationality = user.nationality)
+          saveUserEmail(oldUser.email, user.email)
           saveUpdatedUserData(casSession, updatedUser)
         case _ => throw new NoSuchElementException(s"user ${user.email} not found")
       }
@@ -95,6 +96,15 @@ trait UserService extends LazyLogging {
 
   private def decorateWithPaymentHistory(p: Payment): Payment =
     p.copy(history = Some(db.findStateChangingEventsForPayment(p).sortBy(_.created)))
+
+  private def saveUserEmail(oldEmail: String, newEmail: String) {
+    val u = db.findUser(oldEmail) match {
+      case Some(oldUser : User) =>
+        val newUser = oldUser.copy(email = newEmail)
+        db.upsertUser(newUser)
+      case _ => throw new NoSuchElementException(s"user ${oldEmail} not found")
+    }
+  }
 
   private def saveUpdatedUserData(casSession: CasSession, updatedUserData: AbstractUser): AbstractUserData = updatedUserData match {
     case updatedUserData: User =>
