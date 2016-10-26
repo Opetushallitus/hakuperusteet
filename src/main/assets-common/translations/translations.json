@@ -244,6 +244,16 @@
         "fi": "Etunimi sisältää ei-hyväksyttyjä merkkejä",
         "sv": "Förnamnet innehåller otillåtna tecken"
       },
+      "requiredEmail": {
+        "en": "E-mail is required.",
+        "fi": "Sähköpostiosoite on pakollinen kenttä",
+        "sv": "E-postadress är en obligatorisk uppgift"
+      },
+      "invalidEmail": {
+        "en": "Check the e-email address",
+        "fi": "Tarkista sähköpostiosoite",
+        "sv": "Kontrollera e-postadress"
+      },
       "requiredLastName": {
         "en": "Family name is required.",
         "fi": "Sukunimi on pakollinen kenttä",
