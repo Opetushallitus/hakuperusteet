@@ -23,10 +23,15 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
     userDataFromSession match {
       case userData: User =>
         val hakukohdeOid = params.get("hakukohdeOid").getOrElse(halt(409))
-        val applicationObjectForThisHakukohde = db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid)).getOrElse(halt(409))
-        val educationLevel = Some(applicationObjectForThisHakukohde.educationLevel).getOrElse(halt(409))
-        Try { tarjonta.getApplicationSystem(applicationObjectForThisHakukohde.hakuOid) } match {
-          case Success(as) => doRedirect(userData, applicationObjectForThisHakukohde, as, educationLevel) match {
+        try {
+          val applicationObjectFromTarjonta = tarjonta.getApplicationObject(hakukohdeOid)
+          val applicationSystemFromTarjonta = tarjonta.getApplicationSystem(applicationObjectFromTarjonta.hakuOid)
+          val applicationObjectForThisHakukohde = if(applicationSystemFromTarjonta.maksumuuriKaytossa)
+            db.run(db.findApplicationObjectByHakukohdeOid(userDataFromSession, hakukohdeOid)).getOrElse(halt(409))
+          else
+            ApplicationObject(None, userData.personOid.get, hakukohdeOid, applicationObjectFromTarjonta.hakuOid, "", "")
+          val educationLevel = Some(applicationObjectForThisHakukohde.educationLevel).getOrElse(halt(409))
+          doRedirect(userData, applicationObjectForThisHakukohde, applicationSystemFromTarjonta, educationLevel) match {
             case Left(statusCode) if statusCode == 409 =>
               logger.error("Conflicting payment information on redirect (user: {}, hakukohdeOid: {})", userData.personOid, hakukohdeOid)
               halt(statusCode)
@@ -35,8 +40,9 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
             case Right(body) =>
               write(body)
           }
-          case Failure(f) =>
-            logger.error("FormRedirectServlet throws", f)
+        } catch {
+          case e: Throwable =>
+            logger.error("FormRedirectServlet throws", e)
             halt(500)
         }
       case _ =>
@@ -48,8 +54,8 @@ class FormRedirectServlet(config: Config, db: HakuperusteetDatabase, oppijanTunn
   def doRedirect(userData: User, applicationObjectForThisHakukohde: ApplicationObject, as: ApplicationSystem, educationLevel : String) : Either[Int, Map[String, Any]] = {
     val formUrl = as.formUrl
     val payments = db.findPayments(userData)
-    val shouldPay = countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
-    val hasPaid = payments.exists(p => (p.status.equals(PaymentStatus.ok) && p.kausi.equals(as.hakumaksukausi)))
+    val shouldPay = as.maksumuuriKaytossa && countries.shouldPay(applicationObjectForThisHakukohde.educationCountry, educationLevel)
+    val hasPaid = shouldPay && payments.exists(p => (p.status.equals(PaymentStatus.ok) && Some(p.kausi).equals(as.hakumaksukausi)))
 
     if (shouldPay && !hasPaid) {
       Left(409)

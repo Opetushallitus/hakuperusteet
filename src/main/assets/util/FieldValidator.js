@@ -4,6 +4,7 @@ import {ID_BIRTH_DATE, ID_PERSONAL_IDENTITY_CODE} from '../util/Constants'
 
 export function fieldValidationResults(state) {
   return {
+    "email": validateEmail(state.email),
     "firstName": validateNonEmptyTextField(state.firstName).concat(validateNameField(state.firstName)),
     "lastName": validateNonEmptyTextField(state.lastName).concat(validateNameField(state.lastName)),
     "birthDate": validateBirthDateDDMMYYYY(state.idSelection, state.birthDate),
@@ -19,6 +20,20 @@ export function fieldValidationResults(state) {
 export function validateEmailForm(state) {
   return !_.isEmpty(state.emailToken) && _.contains(state.emailToken, "@")
     && !_.contains(state.emailToken, " ") && !_.contains(state.emailToken, ",") && !_.contains(state.emailToken, "\t")
+}
+
+export function validateEmail(email) {
+  if(email != undefined){
+    if(!_.isEmpty(email) && _.contains(email, "@")
+        && !_.contains(email, " ") && !_.contains(email, ",") && !_.contains(email, "\t")){
+      return [];
+    } else {
+      return ['invalid'];
+    }
+  } else {
+    // if the form does not have this field at all
+    return [];
+  }
 }
 
 export function validateUserDataForm(state) {

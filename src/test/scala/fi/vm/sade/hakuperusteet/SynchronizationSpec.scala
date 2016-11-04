@@ -44,7 +44,7 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "1234", "1234", "1234", PaymentStatus.error, Hakumaksukausi.s2016, Some(hakemusOid))).get
     val sync = database.insertPaymentSyncRequest(user, payment1).get
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
-    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Hakumaksukausi.s2016)
+    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Some(Hakumaksukausi.s2016))
     synchronization.publicCheckForId(sync.id)
     Mockito.verify(hakuAppMock, Mockito.times(1)).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
   }
@@ -57,7 +57,7 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     val payment1 = database.upsertPayment(Payment(None, personOid, new Date(), "4567", "4567", "4567", PaymentStatus.error, Hakumaksukausi.k2017, Some(hakemusOid))).get
     val sync = database.insertPaymentSyncRequest(user, payment1).get
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
-    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Hakumaksukausi.s2016)
+    Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Some(Hakumaksukausi.s2016))
     synchronization.publicCheckForId(sync.id)
     Mockito.verify(hakuAppMock, Mockito.never()).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
   }

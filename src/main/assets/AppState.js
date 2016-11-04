@@ -9,6 +9,7 @@ import {initChangeListeners} from './util/ChangeListeners'
 import {fieldValidationResults} from './util/FieldValidator.js'
 import {submitUserDataToServer} from './userdata/UserDataForm.js'
 import {submitEducationDataToServer} from './education/EducationForm.js'
+import {submitEducationWithoutPaymentDataToServer} from './education/EducationWithoutPaymentForm.js'
 import {resolveLang, setLang} from '../assets-common/translations/translations.js'
 
 const dispatcher = new Dispatcher()
@@ -85,6 +86,11 @@ export function initAppState(props) {
     .filter(({form}) => form === 'educationForm')
     .flatMapLatest(({state}) => submitEducationDataToServer(state))
   serverUpdatesBus.plug(educationFromSubmittedP)
+
+  const educationWithoutPaymentFromSubmittedP = formSubmittedS
+      .filter(({form}) => form === 'educationWithoutPaymentForm')
+      .flatMapLatest(({state}) => submitEducationWithoutPaymentDataToServer(state))
+  serverUpdatesBus.plug(educationWithoutPaymentFromSubmittedP)
 
   return stateP
 

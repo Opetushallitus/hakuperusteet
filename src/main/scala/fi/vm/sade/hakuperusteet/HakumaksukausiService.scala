@@ -12,7 +12,7 @@ trait HakumaksukausiService {
 
   private def applicationSystemIdForHakemus(hakemusOid: String) = hakuAppClient.getApplicationSystemId(hakemusOid)
   private def applicationSystemIdForHakukohde(hakukohdeOid: String) = tarjonta.getApplicationObject(hakukohdeOid).hakuOid
-  private def getPaymentKausi(applicationSystemId: String): Hakumaksukausi = tarjonta.getApplicationSystem(applicationSystemId).hakumaksukausi
+  private def getPaymentKausi(applicationSystemId: String): Option[Hakumaksukausi] = tarjonta.getApplicationSystem(applicationSystemId).hakumaksukausi
 
   def getHakumaksukausiForHakemus(hakemusOid: String) = getPaymentKausi(applicationSystemIdForHakemus(hakemusOid))
   def getHakumaksukausiForHakukohde(hakukohdeOid: String) = getPaymentKausi(applicationSystemIdForHakukohde(hakukohdeOid))

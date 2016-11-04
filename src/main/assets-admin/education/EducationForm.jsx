@@ -28,7 +28,9 @@ export default class EducationForm extends React.Component {
     const levelResult = createSelectOptions(mapAndSortKoodistoByLang(baseEducationOptions, resolveLang()))
 
     const name = getTarjontaNameOrFallback(tarjonta.name)
-    const disabled = (validateApplicationObject(ao) && !requiredField(ao, "noChanges")) ? undefined : "disabled"
+
+    const maksumuuriKaytossa = tarjonta.maksumuuriKaytossa
+    const disabled = (maksumuuriKaytossa && validateApplicationObject(ao) && !requiredField(ao, "noChanges")) ? undefined : "disabled"
 
     const countries = _.isUndefined(state.properties) ? [] : state.properties.countries
     const countriesResult = createSelectOptions(mapAndSortKoodistoByLang(countries, resolveLang()))
@@ -46,29 +48,33 @@ export default class EducationForm extends React.Component {
     const educationLevelId = "educationLevel_" + ao.hakukohdeOid
     const educationCountryId = "educationCountry_" + ao.hakukohdeOid
 
-    return <form id={formId} onSubmit={controller.formSubmits}>
+    return <div>
       <div className="userDataFormRow">
         <label>Hakukohde</label>
         <span>{name}.</span>
       </div>
-      <div className="userDataFormRow">
-        <label htmlFor={educationLevelId}>{translation("title.education.level") + " *"}</label>
-        <select id={educationLevelId} name="educationLevel" onChange={this.changes.bind(this, ao)} onBlur={this.changes.bind(this, ao)} value={ao.educationLevel}>
-                             {levelResult}
-        </select>
-      </div>
-      <div className="userDataFormRow">
-        <label htmlFor={educationCountryId}>{translation("title.education.country") + " *"}</label>
-        <select id={educationCountryId} name="educationCountry" onChange={this.changes.bind(this, ao)} onBlur={this.changes.bind(this, ao)} value={ao.educationCountry}>
-                            {countriesResult}
-        </select>
-      </div>
-      <div className="userDataFormRow">
-        <input type="submit" name="submit" value={translation("educationForm.submit")} disabled={disabled} />
-        <AjaxLoader hide={true} />
-        <span className="serverError general hide">{translation("errors.server.unexpected")}</span>
-      </div>
-      {errors}
-    </form>
+      { maksumuuriKaytossa ?
+      <form id={formId} onSubmit={controller.formSubmits}>
+        <div className="userDataFormRow">
+          <label htmlFor={educationLevelId}>{translation("title.education.level") + " *"}</label>
+          <select id={educationLevelId} name="educationLevel" onChange={this.changes.bind(this, ao)} onBlur={this.changes.bind(this, ao)} value={ao.educationLevel}>
+                               {levelResult}
+          </select>
+        </div>
+        <div className="userDataFormRow">
+          <label htmlFor={educationCountryId}>{translation("title.education.country") + " *"}</label>
+          <select id={educationCountryId} name="educationCountry" onChange={this.changes.bind(this, ao)} onBlur={this.changes.bind(this, ao)} value={ao.educationCountry}>
+                              {countriesResult}
+          </select>
+        </div>
+        <div className="userDataFormRow">
+          <input type="submit" name="submit" value={translation("educationForm.submit")} disabled={disabled} />
+          <AjaxLoader hide={true} />
+          <span className="serverError general hide">{translation("errors.server.unexpected")}</span>
+        </div>
+        {errors}
+      </form> : null
+      }
+    </div>
   }
 }

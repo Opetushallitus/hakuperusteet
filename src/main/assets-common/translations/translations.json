@@ -78,9 +78,9 @@
     "tarjonta": {
       "invalid": {
         "hakukohde": {
-          "en": "This programme does not use application fees.",
-          "fi": "Tässä koulutuksessa ei ole hakijamaksuja.",
-          "sv": "Denna utbildning har ingen ansökningsavgift."
+          "en": "This programme does not use application fees or identification.",
+          "fi": "Tässä koulutuksessa ei ole hakijamaksuja tai tunnistusta.",
+          "sv": "Denna utbildning har ingen ansökningsavgift eller identification."
         },
         "hakuaika": {
           "en": "This programme is not open for applying at the moment.",
@@ -243,6 +243,16 @@
         "en": "Given names contains illegal characters.",
         "fi": "Etunimi sisältää ei-hyväksyttyjä merkkejä",
         "sv": "Förnamnet innehåller otillåtna tecken"
+      },
+      "requiredEmail": {
+        "en": "E-mail is required.",
+        "fi": "Sähköpostiosoite on pakollinen kenttä",
+        "sv": "E-postadress är en obligatorisk uppgift"
+      },
+      "invalidEmail": {
+        "en": "Check the e-email address",
+        "fi": "Tarkista sähköpostiosoite",
+        "sv": "Kontrollera e-postadress"
       },
       "requiredLastName": {
         "en": "Family name is required.",

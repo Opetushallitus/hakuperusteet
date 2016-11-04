@@ -23,7 +23,11 @@ export function initChangeListeners(dispatcher, events) {
     e.preventDefault()
     const form = document.getElementById(e.target.id)
     disableSubmitAndShowBusy(form)
-    dispatcher.push(events.submitForm, e.target.id)
+    dispatchFormSubmitEvent(e.target.id)
+  }
+
+  function dispatchFormSubmitEvent(formId) {
+    dispatcher.push(events.submitForm, formId)
   }
 
   function pushChangeAndValidation(field, value) {
@@ -47,6 +51,7 @@ export function initChangeListeners(dispatcher, events) {
     checkedChanges: checkedChanges,
     radioChanges: radioChanges,
     formSubmits: formSubmits,
+    dispatchFormSubmitEvent: dispatchFormSubmitEvent,
     logOut: logOut,
     changeLang: changeLang
   }

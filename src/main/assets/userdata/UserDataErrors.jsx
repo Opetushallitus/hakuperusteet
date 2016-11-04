@@ -8,6 +8,8 @@ export default class UserDataErrors extends React.Component {
   render() {
     const state = this.props.state
     return <div className="userDataFormRow">
+      { requiredField(state, "email") ? <span className="error">{translation("userdataform.errors.requiredEmail")}</span> : null}
+      { invalidField(state, "email") ? <span className="error">{translation("userdataform.errors.invalidEmail")}</span> : null}
       { requiredField(state, "firstName") ? <span className="error">{translation("userdataform.errors.requiredFirstName")}</span> : null}
       { invalidField(state, "firstName") ? <span className="error">{translation("userdataform.errors.invalidFirstName")}</span> : null}
       { requiredField(state, "lastName") ? <span className="error">{translation("userdataform.errors.requiredLastName")}</span> : null}

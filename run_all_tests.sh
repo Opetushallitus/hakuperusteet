@@ -36,11 +36,11 @@ while ! nc -z localhost 8081; do
   sleep 1
 done
 
-echo "********************* npm run test-ui"
-npm run test-ui
+echo "********************* npm run test-ui-junit"
+npm run test-ui-junit
 
-echo "********************* npm run admin:test-ui"
-npm run admin:test-ui
+echo "********************* npm run admin:test-ui-junit"
+npm run admin:test-ui-junit
 
 killTestServer
 echo "********************* ALL TESTS OK!"

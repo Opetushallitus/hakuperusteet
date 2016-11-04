@@ -35,10 +35,10 @@ case class ApplicationObjectValidator(countries: Countries, educations: Educatio
   }
 
   private def validateCountry(nationality: String): ValidationResult[String] =
-    if (countries.countries.map(_.id).contains(nationality)) nationality.successNel
+    if (countries.countries.map(_.id).contains(nationality) || nationality.isEmpty) nationality.successNel
     else s"unknown country $nationality".failureNel
 
   private def validateEducationLevel(educationLevel: String): ValidationResult[String] =
-    if (educations.educations.map(_.id).contains(educationLevel)) educationLevel.successNel
+    if (educations.educations.map(_.id).contains(educationLevel) || educationLevel.isEmpty) educationLevel.successNel
     else s"unknown educationLevel $educationLevel".failureNel
 }

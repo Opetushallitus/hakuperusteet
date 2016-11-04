@@ -321,6 +321,22 @@ describe('Page with email session', () => {
                       })
                     })
                   })
+                  describe('Page with email session - no maksumuuri, but with tunnistus', () => {
+                    before(openPage("/hakuperusteet/ao/1.2.246.562.20.69046715555#/token/mochaTestToken", hakuperusteetLoaded))
+
+                    describe('initially for haku with no maksumuuri, but with tunnistus', () => {
+                      it('should show email as loggedIn user', assertOneFound(".loggedInAs"))
+                      it('should not show userDataForm', assertNotFound("#userDataForm"))
+                      it('should now show educationForm', assertNotFound("#educationForm"))
+                      it('should not show vetuma start', assertNotFound(".vetumaStart"))
+                      it('should show hakuList', assertOneFound(".hakuList"))
+                    })
+
+                    describe('after hakulist submit', () => {
+                      before(clickField("input[name='redirectToForm']"))
+                      it('should show mock form', assertOneFound(".mockRedirect"))
+                    })
+                  })
                 })
               })
             })

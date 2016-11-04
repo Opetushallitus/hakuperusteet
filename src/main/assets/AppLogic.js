@@ -5,7 +5,7 @@ export function sessionInit(state) {
 }
 
 export function fatalError(state) {
-  return serverError(state) || !maksumuuriInUseWithSelectedHakukohdeOid(state) || !hakuForSelectedHakukohdeOidIsOpen(state) || !hakuForSelectedHakukohdeOidIsJulkaistu(state)
+  return serverError(state) || !hakuperusteetInUseWithSelectedHakukohdeOid(state) || !hakuForSelectedHakukohdeOidIsOpen(state) || !hakuForSelectedHakukohdeOidIsJulkaistu(state)
 }
 
 export function serverError(state) {
@@ -14,6 +14,10 @@ export function serverError(state) {
 
 export function maksumuuriInUseWithSelectedHakukohdeOid(state) {
   return _.isEmpty(state.hakukohdeOid) || tarjontaForHakukohdeOid(state, state.hakukohdeOid).maksumuuriKaytossa
+}
+
+export function hakuperusteetInUseWithSelectedHakukohdeOid(state) {
+  return maksumuuriInUseWithSelectedHakukohdeOid(state) || tarjontaForHakukohdeOid(state, state.hakukohdeOid).tunnistusKaytossa
 }
 
 export function hakuForSelectedHakukohdeOidIsOpen(state) {
@@ -57,8 +61,13 @@ export function showUserDataForm(state) {
 }
 
 export function showEducationForm(state) {
-  return !fatalError(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
+  return !fatalError(state) && maksumuuriInUseWithSelectedHakukohdeOid(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
 }
+
+export function showEducationWithoutPaymentForm(state) {
+  return !fatalError(state) && !maksumuuriInUseWithSelectedHakukohdeOid(state) && !isPartialUser(state) && hasUserData(state) && hasSelectedHakukohde(state) && !hasEducationForSelectedHakukohdeOid(state)
+}
+
 function hasNoValidPaymentForHakemus(state) {
   return _.all(paymentsForHakumaksukausi(state), function(p) { return p.status != "ok"})
 }
@@ -146,7 +155,7 @@ function hasEducationForSelectedHakukohdeOid(state) {
 
 export function paymentRequiredWithCurrentHakukohdeOid(state, dataForAo) {
   const educationForCurrentHakukohdeOid = dataForAo || _.findWhere(state.sessionData.applicationObject, {hakukohdeOid: state.hakukohdeOid})
-  if (!educationForCurrentHakukohdeOid.educationCountry) {
+  if (!maksumuuriInUseWithSelectedHakukohdeOid(state) || !educationForCurrentHakukohdeOid.educationCountry) {
     return false
   } else {
     const eeaCountries = (state.properties && state.properties.eeaCountries) ? state.properties.eeaCountries : []

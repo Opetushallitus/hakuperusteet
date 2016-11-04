@@ -26,7 +26,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     val hakemusOidParam = hakemusOidOption.map(app => s"&app=$app")
 
     createVetumaWithHref(getHref, hakemusOidParam, params.get("hakemusoid"),
-      hakumaksukausiService.getHakumaksukausiForHakemus(hakemusOidOption.get))
+      hakumaksukausiService.getHakumaksukausiForHakemus(hakemusOidOption.get).get)
   }
 
   get("/openvetuma/hakumaksukausi/:hakumaksukausi") {
@@ -40,7 +40,7 @@ class VetumaServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus:
     val hakukohdeOidParam = hakukohdeOidOption.map(ao => s"&ao=$ao")
 
     createVetumaWithHref(getHref, hakukohdeOidParam, None,
-      hakumaksukausiService.getHakumaksukausiForHakukohde(hakukohdeOidOption.get))
+      hakumaksukausiService.getHakumaksukausiForHakukohde(hakukohdeOidOption.get).get)
   }
 
   private def getHref = params.get("href").getOrElse(halt(409))
