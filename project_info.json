@@ -3,5 +3,9 @@
 
   "Makefile": "yes",
 
-  "csrf": "web ja admin-web ok, backend ?"
+  "csrf": "web ja admin-web ok, backend ?",
+  "projects": [{
+    "name": "hakuperusteetadmin",
+    "includes": ["hakuperusteet"]
+  }]
 }
