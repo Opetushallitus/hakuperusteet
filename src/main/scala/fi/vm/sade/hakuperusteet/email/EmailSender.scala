@@ -27,7 +27,7 @@ class EmailSender(emailClient: EmailClient, c: Config) extends LazyLogging {
 
 
   def send(to: String, subject: String, body: String) = {
-    val email = EmailMessage("no-reply@opintopolku.fi", subject, body, isHtml = true)
+    val email = EmailMessage("no-reply@opintopolku.fi", subject, body, html = true)
     val recipients = List(EmailRecipient(to))
     val data = EmailData(email, recipients)
     logger.info(s"Sending email ($subject) to $to")
@@ -40,7 +40,7 @@ class EmailSender(emailClient: EmailClient, c: Config) extends LazyLogging {
 }
 
 case class EmailRecipient(email: String)
-case class EmailMessage(from: String, subject: String, body: String, isHtml: Boolean)
+case class EmailMessage(from: String, subject: String, body: String, html: Boolean)
 case class EmailData(email: EmailMessage, recipient: List[EmailRecipient])
 
 class EmailClient(client: Client) extends LazyLogging with CasClientUtils {
