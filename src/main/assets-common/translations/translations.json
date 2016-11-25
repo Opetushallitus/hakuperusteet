@@ -50,6 +50,11 @@
   },
   "errors": {
     "server": {
+      "ssnAlreadyExistsWithAnotherEmail": {
+        "en": "SSN already in use with another email.",
+        "fi": "Henkilötunnus on jo käytössä toisella sähköpostiosoitteella.",
+        "sv": "SSN already in use with another email."
+      },
       "unexpected": {
         "en": "Unexpected server error. Please try again later.",
         "fi": "Tapahtui odottamaton virhe. Ole hyvä ja yritä myöhemmin uudelleen",

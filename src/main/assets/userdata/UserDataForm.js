@@ -29,6 +29,8 @@ export function submitUserDataToServer(state) {
     enableSubmitAndHideBusy(form)
     if (error.status == 409) {
       form.querySelector("span.invalid").classList.remove("hide")
+    } if (error.status == 412) {
+      form.querySelector("span.alreadyused").classList.remove("hide")
     } else {
       form.querySelector("span.general").classList.remove("hide")
     }
