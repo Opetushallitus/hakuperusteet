@@ -113,10 +113,17 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
         AuditLog.auditPostUserdata(userData)
         halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, userWithId, List.empty, List.empty))))
       case _ =>
-        val userWithId = db.upsertUser(newUser)
-        sendEmail(newUser)
-        AuditLog.auditPostUserdata(userData)
-        halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, userWithId, List.empty, List.empty))))
+        Try(db.upsertUser(newUser)) match {
+          case Success(userWithId) =>
+            sendEmail(newUser)
+            AuditLog.auditPostUserdata(userData)
+            halt(status = 200, body = write(UserDataResponse("sessionData", SessionData(session, userWithId, List.empty, List.empty))))
+          case Failure(e) => {
+            logger.error(s"Something went wrong while upserting new user! ${e.getMessage}")
+            halt(500)
+          }
+        }
+
     }
   }
 
