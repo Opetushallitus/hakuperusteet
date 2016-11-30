@@ -32,6 +32,7 @@ export default class UserDataForm extends React.Component {
           <AjaxLoader hide={true} />
           <span className="serverError invalid hide">{translation("errors.server.invalid.userdata")}</span>
           <span className="serverError general hide">{translation("errors.server.unexpected")}</span>
+          <span className="serverError alreadyused hide">{translation("errors.server.ssnAlreadyExistsWithAnotherEmail")}</span>
         </div>
         <UserDataErrors state={state} controller={controller} />
       </form>

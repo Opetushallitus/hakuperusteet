@@ -50,6 +50,11 @@
   },
   "errors": {
     "server": {
+      "ssnAlreadyExistsWithAnotherEmail": {
+        "en": "Finnish Personal Identity Code is already connected with another email address.",
+        "fi": "Henkilötunnus on jo yhdistetty toiseen sähköpostiosoitteeseen.",
+        "sv": "Personbeteckning har redan kopplats till en annan e-postadress."
+      },
       "unexpected": {
         "en": "Unexpected server error. Please try again later.",
         "fi": "Tapahtui odottamaton virhe. Ole hyvä ja yritä myöhemmin uudelleen",
