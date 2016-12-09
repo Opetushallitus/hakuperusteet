@@ -1,5 +1,7 @@
 package fi.vm.sade.hakuperusteet.util
 
+import java.nio.charset.StandardCharsets
+
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
@@ -14,7 +16,7 @@ object HttpUtil {
     .useExpectContinue()
     .version(HttpVersion.HTTP_1_1)
     .addHeader("clientSubSystemCode", id)
-    .execute().returnContent().asString()
+    .execute().returnContent().asString(StandardCharsets.UTF_8)
 
   def addHeaders(request: Request) = request
     .useExpectContinue()
