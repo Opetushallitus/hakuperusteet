@@ -113,10 +113,10 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
         Try { doPost(formUrl, body) } match {
           case Success(response) => handlePostSuccess(row, response)
-          case Failure(f) => handleSyncError(row.id, "Synchronization POST throws", Some(f))
+          case Failure(f) => if(as.sync){ handleSyncError(row.id, "Synchronization POST throws", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", Some(f)) }
         }
       case None =>
-        handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None)
+        if(as.sync){  handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
     }
   }
 
@@ -145,6 +145,17 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     }
 
   }
+
+  private def handleSyncExpired(id: Int, errorMsg: String, f: Option[Throwable]) = {
+    db.markSyncExpired(id)
+    if(f.isDefined) {
+      logger.error(errorMsg, f.get)
+    } else {
+      logger.error(errorMsg)
+    }
+
+  }
+
 }
 
 object Synchronization {
@@ -153,7 +164,7 @@ object Synchronization {
 
 object SynchronizationStatus extends Enumeration {
   type SynchronizationStatus = Value
-  val todo, active, done, error = Value
+  val todo, active, done, error, expired = Value
 }
 
 object SynchronizationUtil extends LazyLogging {
