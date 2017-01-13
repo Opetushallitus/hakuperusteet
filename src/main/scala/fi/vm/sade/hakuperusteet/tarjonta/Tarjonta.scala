@@ -33,18 +33,9 @@ case class Tarjonta() {
   def enrichHakukohdeWithHaku(ao: ApplicationObject) = EnrichedApplicationObject(ao, hakuToApplicationSystem(read[Result2](urlKeyToString("tarjonta-service.haku", ao.hakuOid)).result))
 
   def syncKoulutus(hakukausiVuosi: Option[Int], hakukausiUri: Option[String]):Boolean = {
-    val hakuVuosi: Int = (hakukausiVuosi match{
-      case Some(hakukausiVuosi:Int) => hakukausiVuosi
-      case _ => 3000
-    })
-
-
-    var year = Calendar.getInstance().get(Calendar.YEAR)
+    val hakuVuosi: Int = hakukausiVuosi.getOrElse(3000)
     val month = Calendar.getInstance().get(Calendar.MONTH)
-
-    if((month < 8)&&hakukausiUri.equals("kausi_s#1")){
-      year = year - 1;
-    }
+    val year = if ((month < 8)&&hakukausiUri.equals("kausi_s#1")) Calendar.getInstance().get(Calendar.YEAR) -1 else Calendar.getInstance().get(Calendar.YEAR)
 
     (year) match {
       case year if year <= hakuVuosi => true

@@ -25,9 +25,12 @@ import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner, hakumaksukausiService: HakumaksukausiService) extends LazyLogging {
+
   import fi.vm.sade.hakuperusteet._
+
   val hakuAppClient = HakuAppClient.init(config)
   val scheduler = Executors.newScheduledThreadPool(1)
+
   def start = scheduler.scheduleWithFixedDelay(checkTodoSynchronizations, 1, config.getDuration("admin.synchronization.interval", SECONDS), SECONDS)
 
   def checkTodoSynchronizations = SynchronizationUtil.asSimpleRunnable { () =>
@@ -113,10 +116,10 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
         Try { doPost(formUrl, body) } match {
           case Success(response) => handlePostSuccess(row, response)
-          case Failure(f) => if(as.sync){ handleSyncError(row.id, "Synchronization POST throws", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", Some(f)) }
+          case Failure(f) => if (as.sync) { handleSyncError(row.id, "Synchronization POST throws", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", Some(f)) }
         }
       case None =>
-        if(as.sync){  handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
+        if (as.sync) { handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
     }
   }
 
@@ -138,24 +141,13 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 
   private def handleSyncError(id: Int, errorMsg: String, f: Option[Throwable]) = {
     db.markSyncError(id)
-    if(f.isDefined) {
-      logger.error(errorMsg, f.get)
-    } else {
-      logger.error(errorMsg)
-    }
-
+    if (f.isDefined) logger.error(errorMsg, f.get) else logger.error(errorMsg)
   }
 
   private def handleSyncExpired(id: Int, errorMsg: String, f: Option[Throwable]) = {
     db.markSyncExpired(id)
-    if(f.isDefined) {
-      logger.error(errorMsg, f.get)
-    } else {
-      logger.error(errorMsg)
-    }
-
+    if (f.isDefined) logger.error(errorMsg, f.get) else logger.error(errorMsg)
   }
-
 }
 
 object Synchronization {
