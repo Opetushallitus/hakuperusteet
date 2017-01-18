@@ -48,6 +48,11 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   }
 
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
+    val sync = row.hakuOid match {
+      case None => false
+      case _ => tarjonta.getApplicationSystem(row.hakuOid.get).sync
+    }
+
     val hakumaksukausi = hakumaksukausiService.getHakumaksukausiForHakemus(row.hakemusOid)
     val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments)
       .map(_.filter(payment => Some(payment.kausi).equals(hakumaksukausi))).getOrElse(Seq())).headOption
@@ -59,7 +64,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         logger.info(s"Synching row id ${row.id} with Haku-App, matching fake operation: " + createCurl(hakuAppClient.url(row.hakemusOid), write(PaymentUpdate(state))))
         hakuAppClient.updateHakemusWithPaymentState(row.hakemusOid, state) } match {
         case Success(r) => handleHakuAppPostSuccess(row, state, r)
-        case Failure(f) => handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f))
+        case Failure(f) => if (sync) { handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
       }
       case None =>
         // TODO: What to do when payment has no state that requires update?

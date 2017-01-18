@@ -187,7 +187,7 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
     }
   }
   private def convertHakuAppSyncRequest(row: SynchronizationRow) = row.hakemusOid match {
-      case Some(hakemusOid) => Some(HakuAppSyncRequest(row.id, row.henkiloOid,hakemusOid))
+      case Some(hakemusOid) => Some(HakuAppSyncRequest(row.id, row.henkiloOid, hakemusOid, row.hakuOid))
       case _ => None
     }
 
