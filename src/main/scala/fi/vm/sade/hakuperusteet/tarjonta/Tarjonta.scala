@@ -33,10 +33,11 @@ case class Tarjonta() {
   def enrichHakukohdeWithHaku(ao: ApplicationObject) = EnrichedApplicationObject(ao, hakuToApplicationSystem(read[Result2](urlKeyToString("tarjonta-service.haku", ao.hakuOid)).result))
 
   def syncKoulutus(hakukausiVuosi: Option[Int], hakukausiUri: Option[String]):Boolean = {
-    val hakuVuosi: Int = hakukausiVuosi.getOrElse(3000)
+    var hakuVuosi: Int = hakukausiVuosi.getOrElse(3000)
     val month = Calendar.getInstance().get(Calendar.MONTH)
-    val year = if ((month < 8)&&hakukausiUri.equals("kausi_s#1")) Calendar.getInstance().get(Calendar.YEAR) -1 else Calendar.getInstance().get(Calendar.YEAR)
-    (year == hakuVuosi)
+    val year = Calendar.getInstance().get(Calendar.YEAR)
+    if ((month < 8)&&hakukausiUri.equals("kausi_s#1")) hakuVuosi = hakuVuosi + 1
+    (year <= hakuVuosi)
   }
 
   private def tarjontaUrisToKoodis(tarjontaUri: List[String]) = tarjontaUri.map(_.split("_")(1))
