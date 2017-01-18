@@ -36,11 +36,7 @@ case class Tarjonta() {
     val hakuVuosi: Int = hakukausiVuosi.getOrElse(3000)
     val month = Calendar.getInstance().get(Calendar.MONTH)
     val year = if ((month < 8)&&hakukausiUri.equals("kausi_s#1")) Calendar.getInstance().get(Calendar.YEAR) -1 else Calendar.getInstance().get(Calendar.YEAR)
-
-    (year) match {
-      case year if year <= hakuVuosi => true
-      case other => false
-    }
+    (year == hakuVuosi)
   }
 
   private def tarjontaUrisToKoodis(tarjontaUri: List[String]) = tarjontaUri.map(_.split("_")(1))

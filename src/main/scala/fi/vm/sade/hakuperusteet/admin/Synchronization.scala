@@ -49,8 +49,8 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
     val sync = row.hakuOid match {
+      case Some(s) => tarjonta.getApplicationSystem(s).sync
       case None => false
-      case _ => tarjonta.getApplicationSystem(row.hakuOid.get).sync
     }
 
     val hakumaksukausi = hakumaksukausiService.getHakumaksukausiForHakemus(row.hakemusOid)
@@ -63,7 +63,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
       case Some(state) => Try {
         logger.info(s"Synching row id ${row.id} with Haku-App, matching fake operation: " + createCurl(hakuAppClient.url(row.hakemusOid), write(PaymentUpdate(state))))
         hakuAppClient.updateHakemusWithPaymentState(row.hakemusOid, state) } match {
-        case Success(r) => handleHakuAppPostSuccess(row, state, r)
+        case Success(r) => handleHakuAppPostSuccess(row, state, r, sync)
         case Failure(f) => if (sync) { handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
       }
       case None =>
@@ -80,7 +80,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     case _ => None
   }
 
-  private def handleHakuAppPostSuccess(row: HakuAppSyncRequest, state: PaymentState, response: http4s.Response): Unit = {
+  private def handleHakuAppPostSuccess(row: HakuAppSyncRequest, state: PaymentState, response: http4s.Response, sync: Boolean): Unit = {
     val statusCode = response.status.code
     statusCode match {
       case 200 | 204 =>
@@ -91,7 +91,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         db.markSyncDone(row.id)
       case _ =>
         logger.error(s"Synchronization error with statuscode $statusCode")
-        db.markSyncError(row.id)
+        if (sync) { db.markSyncError(row.id) } else { db.markSyncExpired(row.id) }
     }
   }
 
