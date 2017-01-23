@@ -11,4 +11,5 @@ object Hakumaksukausi extends Enumeration {
       case other => None
     }
   }
+
 }

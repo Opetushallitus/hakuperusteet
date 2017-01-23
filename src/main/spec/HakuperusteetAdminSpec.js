@@ -22,7 +22,7 @@ describe('Admin UI front', () => {
     })
 
     describe('Check that non maksumuuri application has not education for visible', () => {
-      it('should have 3 application option', assertElementsFound("label:contains(Hakukohde)", 3))
+      it('should have 2 application option', assertElementsFound("label:contains(Hakukohde)", 2))
       it('should have only 2 editable application options', assertElementsFound("[id^=educationForm]", 2))
     })
 

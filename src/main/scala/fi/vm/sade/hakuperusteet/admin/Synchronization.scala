@@ -25,9 +25,12 @@ import scala.util.control.Exception._
 import scala.util.{Failure, Success, Try}
 
 class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjonta, countries: Countries, signer: RSASigner, hakumaksukausiService: HakumaksukausiService) extends LazyLogging {
+
   import fi.vm.sade.hakuperusteet._
+
   val hakuAppClient = HakuAppClient.init(config)
   val scheduler = Executors.newScheduledThreadPool(1)
+
   def start = scheduler.scheduleWithFixedDelay(checkTodoSynchronizations, 1, config.getDuration("admin.synchronization.interval", SECONDS), SECONDS)
 
   def checkTodoSynchronizations = SynchronizationUtil.asSimpleRunnable { () =>
@@ -45,6 +48,11 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
   }
 
   private def synchronizePaymentRow(row: HakuAppSyncRequest) = {
+    val sync = row.hakuOid match {
+      case Some(s) => tarjonta.getApplicationSystem(s).sync
+      case None => logger.error("None found"); false
+    }
+
     val hakumaksukausi = hakumaksukausiService.getHakumaksukausiForHakemus(row.hakemusOid)
     val payments = PaymentUtil.sortPaymentsByStatus(db.findUserByOid(row.henkiloOid).map(db.findPayments)
       .map(_.filter(payment => Some(payment.kausi).equals(hakumaksukausi))).getOrElse(Seq())).headOption
@@ -55,8 +63,8 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
       case Some(state) => Try {
         logger.info(s"Synching row id ${row.id} with Haku-App, matching fake operation: " + createCurl(hakuAppClient.url(row.hakemusOid), write(PaymentUpdate(state))))
         hakuAppClient.updateHakemusWithPaymentState(row.hakemusOid, state) } match {
-        case Success(r) => handleHakuAppPostSuccess(row, state, r)
-        case Failure(f) => handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f))
+        case Success(r) => handleHakuAppPostSuccess(row, state, r, sync)
+        case Failure(f) => if (sync) { handleSyncError(row.id, s"Synchronization to Haku-App throws with $row", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
       }
       case None =>
         // TODO: What to do when payment has no state that requires update?
@@ -72,7 +80,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
     case _ => None
   }
 
-  private def handleHakuAppPostSuccess(row: HakuAppSyncRequest, state: PaymentState, response: http4s.Response): Unit = {
+  private def handleHakuAppPostSuccess(row: HakuAppSyncRequest, state: PaymentState, response: http4s.Response, sync: Boolean): Unit = {
     val statusCode = response.status.code
     statusCode match {
       case 200 | 204 =>
@@ -83,7 +91,7 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         db.markSyncDone(row.id)
       case _ =>
         logger.error(s"Synchronization error with statuscode $statusCode")
-        db.markSyncError(row.id)
+        if (sync) { db.markSyncError(row.id) } else { db.markSyncExpired(row.id) }
     }
   }
 
@@ -112,22 +120,22 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
         val body = generatePostBody(generateParamMap(signer, u, ao, shouldPay, hasPaid, admin = true))
         logger.info(s"Synching row id ${row.id}, matching fake operation: " + createCurl(formUrl, body))
         Try { doPost(formUrl, body) } match {
-          case Success(response) => handlePostSuccess(row, response)
-          case Failure(f) => handleSyncError(row.id, "Synchronization POST throws", Some(f))
+          case Success(response) => handlePostSuccess(row, response, as.sync)
+          case Failure(f) => if (as.sync) { handleSyncError(row.id, "Synchronization POST throws", Some(f)) } else { handleSyncExpired(row.id, "Synchronization expired", Some(f)) }
         }
       case None =>
-        handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None)
+        if (as.sync) { handleSyncError(row.id, "Synchronization failed because of missing form URL (hakulomake URI)", None) } else { handleSyncExpired(row.id, "Synchronization expired", None) }
     }
   }
 
-  private def handlePostSuccess(row: ApplicationObjectSyncRequest, response: Response): Unit = {
+  private def handlePostSuccess(row: ApplicationObjectSyncRequest, response: Response, sync: Boolean): Unit = {
     val statusCode = response.returnResponse().getStatusLine.getStatusCode
     if (statusCode == 200 || statusCode == 204) {
       logger.info(s"Synced row id ${row.id}, henkiloOid ${row.henkiloOid}, hakukohdeoid ${row.hakukohdeOid}")
       db.markSyncDone(row.id)
     } else {
       logger.error(s"Synchronization error with statuscode $statusCode, message was " + allCatch.opt(response.returnContent().asString()))
-      db.markSyncError(row.id)
+      if(sync) { db.markSyncError(row.id) } else { db.markSyncExpired(row.id) }
     }
   }
 
@@ -138,12 +146,12 @@ class Synchronization(config: Config, db: HakuperusteetDatabase, tarjonta: Tarjo
 
   private def handleSyncError(id: Int, errorMsg: String, f: Option[Throwable]) = {
     db.markSyncError(id)
-    if(f.isDefined) {
-      logger.error(errorMsg, f.get)
-    } else {
-      logger.error(errorMsg)
-    }
+    if (f.isDefined) logger.error(errorMsg, f.get) else logger.error(errorMsg)
+  }
 
+  private def handleSyncExpired(id: Int, errorMsg: String, f: Option[Throwable]) = {
+    db.markSyncExpired(id)
+    if (f.isDefined) logger.error(errorMsg, f.get) else logger.error(errorMsg)
   }
 }
 
@@ -153,7 +161,7 @@ object Synchronization {
 
 object SynchronizationStatus extends Enumeration {
   type SynchronizationStatus = Value
-  val todo, active, done, error = Value
+  val todo, active, done, error, expired = Value
 }
 
 object SynchronizationUtil extends LazyLogging {

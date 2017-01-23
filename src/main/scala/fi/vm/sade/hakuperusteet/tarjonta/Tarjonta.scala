@@ -1,6 +1,6 @@
 package fi.vm.sade.hakuperusteet.tarjonta
 
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import fi.vm.sade.hakuperusteet.domain.Hakumaksukausi._
 import fi.vm.sade.hakuperusteet.util.ServerException
@@ -10,7 +10,7 @@ import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.util.HttpUtil._
 
 case class ApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, hakuaikaId: String, status: String)
-case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], hakumaksukausi: Option[Hakumaksukausi])
+case class ApplicationSystem(hakuOid: String, formUrl: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], hakumaksukausi: Option[Hakumaksukausi], sync: Boolean)
 
 case class HakuAika(hakuaikaId: String, alkuPvm: Long, loppuPvm: Long)
 case class EnrichedApplicationObject(hakukohdeOid: String, hakuOid: String, name: Nimi2, providerName: Nimi2, baseEducations: List[String], description: Nimi2, julkaistu: Boolean, maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, startDate: Date, endDate: Date)
@@ -32,10 +32,18 @@ case class Tarjonta() {
 
   def enrichHakukohdeWithHaku(ao: ApplicationObject) = EnrichedApplicationObject(ao, hakuToApplicationSystem(read[Result2](urlKeyToString("tarjonta-service.haku", ao.hakuOid)).result))
 
+  def syncKoulutus(hakukausiVuosi: Option[Int], hakukausiUri: Option[String]):Boolean = {
+    var hakuVuosi: Int = hakukausiVuosi.getOrElse(3000)
+    val month = Calendar.getInstance().get(Calendar.MONTH)
+    val year = Calendar.getInstance().get(Calendar.YEAR)
+    if ((month < 8)&&hakukausiUri.equals("kausi_s#1")) hakuVuosi = hakuVuosi + 1
+    (year <= hakuVuosi)
+  }
+
   private def tarjontaUrisToKoodis(tarjontaUri: List[String]) = tarjontaUri.map(_.split("_")(1))
 
   private def hakukohdeToApplicationObject(r: Hakukohde) = ApplicationObject(r.oid, r.hakuOid, Nimi2(r.hakukohteenNimet), r.tarjoajaNimet, tarjontaUrisToKoodis(r.hakukelpoisuusvaatimusUris), Nimi2(r.lisatiedot), r.hakuaikaId, r.tila)
-  private def hakuToApplicationSystem(r: Haku) = ApplicationSystem(r.oid, r.hakulomakeUri, r.maksumuuriKaytossa, r.tunnistusKaytossa, r.hakuaikas, koulutuksenAlkamiskausiToHakumaksukausi(r.koulutuksenAlkamisVuosi, r.koulutuksenAlkamiskausiUri))
+  private def hakuToApplicationSystem(r: Haku) = ApplicationSystem(r.oid, r.hakulomakeUri, r.maksumuuriKaytossa, r.tunnistusKaytossa, r.hakuaikas, koulutuksenAlkamiskausiToHakumaksukausi(r.koulutuksenAlkamisVuosi, r.koulutuksenAlkamiskausiUri), syncKoulutus(r.hakukausiVuosi, r.hakukausiUri))
 }//1.2.246.562.29.82177631379
 
 object Tarjonta {
@@ -60,4 +68,4 @@ private object Nimi2 {
 }
 
 private case class Result2(result: Haku)
-private case class Haku(oid: String, hakulomakeUri: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], koulutuksenAlkamisVuosi: Option[Int], koulutuksenAlkamiskausiUri: Option[String])
+private case class Haku(oid: String, hakulomakeUri: Option[String], maksumuuriKaytossa: Boolean, tunnistusKaytossa: Boolean, hakuaikas: List[HakuAika], koulutuksenAlkamisVuosi: Option[Int], koulutuksenAlkamiskausiUri: Option[String], hakukausiVuosi: Option[Int], hakukausiUri: Option[String])

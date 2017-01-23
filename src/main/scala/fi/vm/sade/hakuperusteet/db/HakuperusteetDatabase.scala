@@ -170,6 +170,10 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
 
   def markSyncError(row: SynchronizationRow) = updateSyncRequest(row.copy(updated = Some(now), status = SynchronizationStatus.error.toString))
 
+  def markSyncExpired(id: Int): Unit = findSynchronizationRow(id).foreach(markSyncExpired)
+
+  def markSyncExpired(row: SynchronizationRow) = updateSyncRequest(row.copy(updated = Some(now), status = SynchronizationStatus.expired.toString))
+
   private def updateSyncRequest(row: SynchronizationRow) = (Tables.Synchronization returning Tables.Synchronization).insertOrUpdate(row).run
 
   def fetchNextSyncIds: Seq[Int] = sql"update synchronization set status = '#${SynchronizationStatus.active.toString}' where id in (select id from synchronization where status = '#${SynchronizationStatus.todo.toString}' or status = '#${SynchronizationStatus.error.toString}' order by status desc, created asc limit 1) returning ( id );".as[Int].run
@@ -183,7 +187,7 @@ class HakuperusteetDatabase(val db: DB, val timeout: Duration)(implicit val exec
     }
   }
   private def convertHakuAppSyncRequest(row: SynchronizationRow) = row.hakemusOid match {
-      case Some(hakemusOid) => Some(HakuAppSyncRequest(row.id, row.henkiloOid,hakemusOid))
+      case Some(hakemusOid) => Some(HakuAppSyncRequest(row.id, row.henkiloOid, hakemusOid, row.hakuOid))
       case _ => None
     }
 
