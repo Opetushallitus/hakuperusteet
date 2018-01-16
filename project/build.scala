@@ -92,7 +92,10 @@ object HakuperusteetBuild extends Build {
         "fi.vm.sade" %% "scala-ldap-client" % "1.0.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT",
-        "fi.vm.sade.oppijanumerorekisteri" % "oppijanumerorekisteri-api" % "0.1.1-SNAPSHOT",
+        "fi.vm.sade.oppijanumerorekisteri" % "oppijanumerorekisteri-api" % "0.1.1-SNAPSHOT" excludeAll(
+          ExclusionRule(organization = "org.springframework.boot"),
+          ExclusionRule(organization = "io.swagger")
+        ),
         "org.scalatest" %% "scalatest" % "2.2.4" % "test",
         "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
         "org.typelevel" %% "scalaz-scalatest" % "0.2.2" % "test",
