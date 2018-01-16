@@ -42,19 +42,19 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     //todo add google idp entitys if google idp
     val task: Task[HenkiloDto] = client.get[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email)) {
       case Successful(resp) => resp.as[HenkiloDto](json4sOf[HenkiloDto])
-      case resp =>
+      case _ =>
         user.personOid match {
           case Some(oid) =>
             client.get[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byoid", oid)) {
-              case Successful(r) => resp.as[HenkiloDto](json4sOf[HenkiloDto])
+              case Successful(r) => r.as[HenkiloDto](json4sOf[HenkiloDto])
               case _ =>
                 val dto = user2HenkiloDto(user)
-                val req = Request (
+                val postreq = Request (
                   method = Method.POST,
                   uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo"))
                 ).withBody(dto)(json4sEncoderOf[HenkiloDto])
-                client.fetch(req) {
-                  case Successful(postResponse) =>
+                client.fetch(postreq) {
+                  case Successful(_) =>
                     client.get[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byoid", oid)) {
                       case Successful(r) => r.as[HenkiloDto](decoder = json4sOf[HenkiloDto])
                       case _ => Task.fail(new IllegalArgumentException)
