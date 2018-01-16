@@ -5,7 +5,8 @@ import javax.servlet.ServletContext
 import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Synchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.email.EmailSender
-import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
+import fi.vm.sade.hakuperusteet.integration.henkilo.HenkiloClient
+import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Koodisto}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.rsa.RSASigner
@@ -21,7 +22,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
   implicit val swagger: Swagger = new AdminSwagger
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   val config = Configuration.props
-  val henkiloClient = HenkiloClient.init(config)
+  val onrClient = ONRClient.init(config)
   val database = HakuperusteetDatabase(config)
   val countries = Koodisto.initCountries(config)
   val oppijanTunnistus = OppijanTunnistus.init(config)
@@ -43,7 +44,7 @@ class ScalatraAdminBootstrap extends LifeCycle {
     context mount(new TarjontaServlet(tarjonta), "/api/v1/tarjonta")
     context mount(new PropertiesServlet(config, countries, languages, educations), "/api/v1/properties")
     context mount(new AdminServlet("/webapp-admin/index.html",config, userValidator, applicationObjectValidator,
-      UserService(executionContext, henkiloClient, database),
+      UserService(executionContext, onrClient, database),
       paymentService,
       ApplicationObjectService(executionContext, countries, database, oppijanTunnistus, paymentService, tarjonta)), "/")
     context mount(new SwaggerServlet, "/api-docs/*")

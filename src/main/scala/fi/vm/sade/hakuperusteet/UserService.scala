@@ -5,11 +5,13 @@ import java.util.NoSuchElementException
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil}
 import slick.dbio.DBIO
 import slick.driver.PostgresDriver.api._
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+import fi.vm.sade.hakuperusteet.integration.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
+import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
@@ -17,8 +19,8 @@ import scala.util.{Failure, Success, Try}
 trait UserService extends LazyLogging {
   implicit val executionContext: ExecutionContext
   val db: HakuperusteetDatabase
-  val henkiloClient: HenkiloClient
-  
+  val onrClient: ONRClient
+
   def searchUsers(searchTerm: String): Seq[AbstractUser] = {
     val lowerCaseSearchTerm = searchTerm.toLowerCase
     db.allUsers.filter(u => lowerCaseSearchTerm.isEmpty ||
@@ -104,7 +106,7 @@ trait UserService extends LazyLogging {
 
   private def saveUpdatedUserData(casSession: CasSession, updatedUserData: AbstractUser): AbstractUserData = updatedUserData match {
     case updatedUserData: User =>
-    Try(henkiloClient.upsertHenkilo(IfGoogleAddEmailIDP(updatedUserData))) match {
+    Try(onrClient.updateHenkilo(updatedUserData)) match {
       case Success(_) => upsertAndAudit(casSession, updatedUserData)
       case Failure(t: IllegalArgumentException) =>
         logger.error("error parsing user", t)
@@ -127,10 +129,10 @@ trait UserService extends LazyLogging {
 }
 
 object UserService {
-  def apply(ec: ExecutionContext, hc: HenkiloClient, database: HakuperusteetDatabase): UserService = new UserService {
+  def apply(ec: ExecutionContext, onrclient: ONRClient, database: HakuperusteetDatabase): UserService = new UserService {
     override implicit val executionContext: ExecutionContext = ec
-    override val henkiloClient: HenkiloClient = hc
     override val db: HakuperusteetDatabase = database
+    override val onrClient: ONRClient = onrclient
   }
 }
 
