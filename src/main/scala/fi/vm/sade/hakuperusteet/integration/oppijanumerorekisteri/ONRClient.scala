@@ -1,7 +1,7 @@
 package fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri
 
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import java.util.Date
 
 import com.typesafe.config.Config
@@ -51,13 +51,13 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       val postreq = Request (
         method = Method.POST,
         uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo"))
-      ).withBody(dto)(json4sEncoderOf[HenkiloCreateDto])
+      ).withBody(dto)(json4sEncoderOf[HenkiloDto])
       client.fetch(postreq) {
         case Successful(createresponse: Message) =>
-          val oid = createresponse.as[String].unsafePerformSyncFor(1000l * 10)
+          val oid = createresponse.as[String].unsafePerformSyncFor(1000l * 60)
           val dt = HenkiloDto(oidHenkilo = oid)
           Task.now(dt) // we can return half-empty dto since the function itself only returns Henkilo
-        case _ => Task.fail(new IllegalArgumentException)
+        case r@_ => Task.fail(new IllegalArgumentException(r.toString()))
       }
     }
 
@@ -77,23 +77,8 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
             create(user)
         }
     }
-    val response = task.unsafePerformSyncFor(1000l * 10)
+    val response = task.unsafePerformSyncFor(1000l * 60)
     Henkilo(response.oidHenkilo)
-  }
-
-  //returns person oid
-  private def createHenkilo(user: User): (Response => Task[String]) => Task[String] = {
-    val dto = user2HenkiloCreateDto(user)
-    val postreq = Request (
-      method = Method.POST,
-      uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo"))
-    ).withBody(dto)(json4sEncoderOf[HenkiloCreateDto])
-    client.fetch[String](postreq)
-  }
-
-  private def getOrError[T](user: User, fieldName: String, value: Option[T]) = value match {
-    case Some(v) => v
-    case None => throw new IllegalArgumentException(s"$fieldName is missing from user $user")
   }
 
   private def req(personOid: String, idp: IdentificationDto): Task[Request] = Request(
@@ -101,17 +86,12 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.idp", personOid))
   ).withBody(idp)(json4sEncoderOf[IdentificationDto])
 
-  private def user2HenkiloCreateDto(user: User): HenkiloCreateDto = {
-    import collection.JavaConverters._
-    var dto = new HenkiloCreateDto()
-    dto.setEtunimet(user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")))
-    dto.setKutsumanimi(dto.getEtunimet)
-    dto.setSukunimi(user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")))
-    dto.setOppijanumero(user.personOid.getOrElse(""))
-    val date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
+  private def user2HenkiloCreateDto(user: User): HenkiloDto = {
+    val date: java.util.Date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
     import java.time.ZoneId
-    val localdate = date.toInstant.atZone(ZoneId.systemDefault).toLocalDate
-    dto.setSyntymaaika(localdate)
+    val foo = ZoneId.systemDefault
+    val instant = Instant.ofEpochMilli(date.getTime)
+    val localdate = instant.atZone(foo).toLocalDate
 
     val nationalities: Set[String] = Set(user.nationality.orNull)
     val nationalitiesdto: Set[KansalaisuusDto] = nationalities.filter(p => p != null && !p.isEmpty).map(n => {
@@ -119,8 +99,14 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       k.setKansalaisuusKoodi(n)
       k
     })
-    dto.setKansalaisuus(nationalitiesdto.asJava)
 
+    val dto: HenkiloDto = new HenkiloDto(
+    etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+    kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+    sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
+    oppijanumero = user.personOid.getOrElse(""),
+    syntymaaika = localdate,
+    kansalaisuus = nationalitiesdto)
     dto
   }
 

@@ -144,6 +144,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   }
 
   //IfGoogleAddEmailIDP(userData)
+  //{"firstName":"John","lastName":"Doe","gender":"1","nativeLanguage":"FI","nationality":"246","personId":"011295-9693"}
   def upsertUserToHenkilo(userData: User) = Try(onrClient.updateHenkilo(userData)) match {
       case Success(u) => userData.copy(personOid = Some(u.personOid))
       case Failure(t) if t.isInstanceOf[ConflictException] =>
