@@ -80,10 +80,10 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     val response = task.unsafePerformSyncFor(1000l * 60)
     Henkilo(response.oidHenkilo)
   }
-
+  //adds and IDP for given person
   private def req(personOid: String, idp: IdentificationDto): Task[Request] = Request(
     method = Method.POST,
-    uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.idp", personOid))
+    uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.byoid.idp", personOid))
   ).withBody(idp)(json4sEncoderOf[IdentificationDto])
 
   private def user2HenkiloCreateDto(user: User): HenkiloDto = {
