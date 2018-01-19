@@ -11,6 +11,7 @@ import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import org.http4s._
 import org.http4s.client.Client
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
+import fi.vm.sade.hakuperusteet.integration.IDP
 import org.json4s.Formats
 
 import scalaz.concurrent.Task
@@ -23,8 +24,6 @@ object HenkiloClient {
 }
 
 case class IdpUpsertRequest(personOid: String, email: String, idpEntityId: String = OppijaToken.toString)
-
-case class IDP(idpEntityId: IDPEntityId, identifier: String)
 
 case class FindOrCreateUser(id: Option[Int], personOid: Option[String], email: String,
                             firstName: String, lastName: String, birthDate: Date, personId: Option[String],
@@ -44,7 +43,7 @@ object FindOrCreateUser {
     }
     FindOrCreateUser(user.id, user.personOid, user.email, getOrError("firstName", user.firstName),
       getOrError("lastName", user.lastName), getOrError("birthDate", user.birthDate), user.personId,
-      List(IDP(user.idpentityid, user.email)), getOrError("gender", user.gender),
+      List(IDP(user.idpentityid.toString, user.email)), getOrError("gender", user.gender),
       getOrError("nativeLanguage", user.nativeLanguage), getOrError("nationality", user.nationality))
   }
 }
@@ -53,7 +52,7 @@ object IfGoogleAddEmailIDP {
   def apply(user: User): FindOrCreateUser = {
     val u = FindOrCreateUser(user)
     u.copy(idpEntitys = user.idpentityid match {
-      case Google => IDP(OppijaToken, user.email) +: u.idpEntitys
+      case Google => IDP(OppijaToken.toString, user.email) +: u.idpEntitys
       case OppijaToken => u.idpEntitys
     })
   }

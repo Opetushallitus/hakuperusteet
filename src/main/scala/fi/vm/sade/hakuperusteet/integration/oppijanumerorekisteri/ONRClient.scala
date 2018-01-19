@@ -8,17 +8,16 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
-import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Google, Henkilo, OppijaToken}
-import fi.vm.sade.hakuperusteet.integration.henkilo.IDP
+import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Henkilo}
+import fi.vm.sade.hakuperusteet.integration.IDP
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import fi.vm.sade.oppijanumerorekisteri.dto._
 import org.http4s.Status.ResponseClass.Successful
 import org.http4s.client.Client
-import org.http4s.{Message, Method, Request, Response}
+import org.http4s.{Message, Method, Request}
 import org.json4s.Formats
 
 import scala.collection.immutable.HashSet
-import scala.collection.mutable
 import scalaz.concurrent.Task
 
 object ONRClient {
@@ -30,11 +29,11 @@ object ONRClient {
 class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
   private implicit val formats: Formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-  def addIdpForHenkilo(user: AbstractUser): Task[Iterable[IdentificationDto]] = {
+  def addIdpForHenkilo(user: AbstractUser): Task[List[IDP]] = {
     user.personOid match {
       case Some(oid) =>
-        val idp = IdentificationDto.of(user.idpentityid.toString, user.email)
-        client.fetchAs[Iterable[IdentificationDto]](req(oid, idp))(json4sOf[Iterable[IdentificationDto]])
+        val idp = IDP(idpEntityId = user.idpentityid.toString, identifier = user.email)
+        client.fetchAs[List[IDP]](req(oid, idp))(json4sOf[List[IDP]])
       case _ => Task.fail(new IllegalArgumentException)
     }
   }
@@ -81,10 +80,10 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     Henkilo(response.oidHenkilo)
   }
   //adds and IDP for given person
-  private def req(personOid: String, idp: IdentificationDto): Task[Request] = Request(
+  private def req(personOid: String, idp: IDP): Task[Request] = Request(
     method = Method.POST,
     uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.byoid.idp", personOid))
-  ).withBody(idp)(json4sEncoderOf[IdentificationDto])
+  ).withBody(idp)(json4sEncoderOf[IDP])
 
   private def user2HenkiloCreateDto(user: User): HenkiloDto = {
     val date: java.util.Date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))

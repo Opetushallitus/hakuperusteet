@@ -54,7 +54,7 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
   }
   
   def upsertIdpEntity(user: AbstractUser): Unit = {
-    Try(onrClient.addIdpForHenkilo(user).unsafePerformSync) match {
+    Try(onrClient.addIdpForHenkilo(user).unsafePerformSyncFor(1000l * 10)) match { //10 second timeout
       case Success(h) =>
       case Failure(f) =>
         logger.error("ONRClient.addIdpForHenkilo error inserting idp entity for user: " + user, f)
