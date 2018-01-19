@@ -1,10 +1,9 @@
-package fi.vm.sade.hakuperusteet.henkilo
+package fi.vm.sade.hakuperusteet.integration.henkilo
 
 import java.util.Date
 
 import fi.vm.sade.hakuperusteet.DBSupport
 import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Henkilo, OppijaToken}
-import fi.vm.sade.hakuperusteet.integration.henkilo.{FindOrCreateUser, HenkiloClient}
 import org.http4s.client.{Client, DisposableResponse}
 import org.http4s.dsl._
 import org.http4s.{Uri, _}
@@ -13,7 +12,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scalaz.concurrent.Task
 
 class HenkiloClientSpec extends FlatSpec with Matchers with DBSupport {
-  /*
+
   val virkailijaUrl = "https://localhost"
   val virkailijaUri: Uri = Uri(path = virkailijaUrl)
 
@@ -36,6 +35,5 @@ class HenkiloClientSpec extends FlatSpec with Matchers with DBSupport {
     val henkilo:Henkilo = henkiloClient.upsertHenkilo(FindOrCreateUser(emptyUser))
 
     henkilo.personOid shouldEqual "1.2.3.4"
-
-  }*/
+  }
 }

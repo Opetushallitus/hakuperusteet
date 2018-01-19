@@ -17,9 +17,9 @@ import scalaz.concurrent.Task
 
 @deprecated
 object HenkiloClient {
-  /*def init(c: Config) = {
+  def init(c: Config) = {
     new HenkiloClient(HttpUtil.casClient(c, "/authentication-service"))
-  }*/
+  }
 }
 
 case class IdpUpsertRequest(personOid: String, email: String, idpEntityId: String = OppijaToken.toString)
@@ -29,20 +29,6 @@ case class IDP(idpEntityId: IDPEntityId, identifier: String)
 case class FindOrCreateUser(id: Option[Int], personOid: Option[String], email: String,
                             firstName: String, lastName: String, birthDate: Date, personId: Option[String],
                             idpEntitys: List[IDP], gender: String, nativeLanguage: String, nationality: String)
-
-/*
-case class KielisyysDto (kieliKoodi: String = "", kieliTyyppi: String = "")
-
-case class HenkiloPerustietoDto (oidHenkilo: String = "", externalIds: List[String] = List.empty,
-                                 identifications: List[IDP] = List.empty, etunimet: String = "",
-                                 kutsumanimi: String = "", sukunimi: String = "",
-                                  //optionals below
-                                 hetu: Option[String] = None, syntymaaika: Option[LocalDate] = None,
-                                 aidinkieli: Option[KielisyysDto] = None, asiointiKieli: Option[KielisyysDto] = None,
-                                 kansalaisuus: Option[Set[String]] = None, henkiloTyyppi: Option[HenkiloTyyppi] = None,
-                                 sukupuoli: Option[String] = None, modified: Option[Date] = None)
-*/
-
 
 class HenkiloTyyppi extends Enumeration {
   val OPPIJA, VIRKAILIJA, PALVELU = Value
@@ -76,8 +62,8 @@ object IfGoogleAddEmailIDP {
 class HenkiloClient(client: Client) extends LazyLogging with CasClientUtils {
   private implicit val formats: Formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-  //def upsertHenkilo(user: FindOrCreateUser): Henkilo = client.fetchAs[Henkilo](req(user))(json4sOf[Henkilo]).unsafePerformSync
-/*
+  def upsertHenkilo(user: FindOrCreateUser): Henkilo = client.fetchAs[Henkilo](req(user))(json4sOf[Henkilo]).unsafePerformSync
+
   def upsertIdpEntity(user: AbstractUser): Task[Iterable[IDP]] = {
     user.personOid match {
       case Some(oid) => client.fetchAs[Iterable[IDP]](req(IdpUpsertRequest(oid, user.email)))(json4sOf[Iterable[IDP]]) //hakee tai lisää henkilon idp tokenin ja palauttaa sen, email == identifier
@@ -85,25 +71,13 @@ class HenkiloClient(client: Client) extends LazyLogging with CasClientUtils {
     }
   }
 
-  def findOrCreateUser2HenkiloPerustietoDto(foc: FindOrCreateUser): HenkiloPerustietoDto = {
-    val asiointikieli = KielisyysDto(kieliKoodi = foc.nativeLanguage, kieliTyyppi = foc.nativeLanguage)
-    import java.time.ZoneId
-    val input: Date = new Date()
-    val date: LocalDate = input.toInstant.atZone(ZoneId.systemDefault).toLocalDate
-    HenkiloPerustietoDto(
-      etunimet = foc.firstName,
-      sukunimi = foc.lastName,
-      oidHenkilo = foc.personId.orNull,
-      identifications = foc.idpEntitys,
-      sukupuoli = Option(foc.gender),
-      asiointiKieli = Option(asiointikieli),
-      syntymaaika = Option(date)
-
-    )
-  }
-*/
   private def req(user: FindOrCreateUser): Task[Request] = Request(
     method = Method.POST,
     uri = urlToUri(Urls.urls.url("authentication-service.findOrCreateUser")) // POST ONR /s2s/findOrCreateHenkiloPerustieto
   ).withBody(user)(json4sEncoderOf[FindOrCreateUser])
+
+  private def req(idpUpsert: IdpUpsertRequest) = Request(
+    method = Method.POST,
+    uri = urlToUri(Urls.urls.url("authentication-service.idpUpsert"))
+  ).withBody(idpUpsert)(json4sEncoderOf[IdpUpsertRequest])
 }
