@@ -79,7 +79,7 @@ app.post('/ryhmasahkoposti-service/email', function(req, res){
 // Authentication-Service
 app.post('/oppijanumerorekisteri-service/henkilo', function(req, res){
   if (req.body.firstName == "Error409") {
-    res.sendStatus(409)u
+    res.sendStatus(409)
   } else if (req.body.firstName == "Error500") {
     res.sendStatus(500)
   } else {
