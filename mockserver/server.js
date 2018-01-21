@@ -92,7 +92,7 @@ app.post('/oppijanumerorekisteri-service/henkilo/:oid/identification', function(
   } else if (req.body.firstName == "Error500") {
     res.sendStatus(500)
   } else {
-    res.send({ "oidHenkilo": "1.2.246.562.24.11523238937" });
+    res.send([{ "identifier": "foobar@foobar.com", "idpEntityId": "oppijaToken" }]);
   }
 });
 // Oppijan-tunnistus
