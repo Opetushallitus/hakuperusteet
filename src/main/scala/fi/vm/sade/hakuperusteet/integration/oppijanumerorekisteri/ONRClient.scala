@@ -8,16 +8,17 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
-import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Henkilo}
+import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Google, Henkilo, OppijaToken}
 import fi.vm.sade.hakuperusteet.integration.IDP
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import fi.vm.sade.oppijanumerorekisteri.dto._
 import org.http4s.Status.ResponseClass.Successful
 import org.http4s.client.Client
-import org.http4s.{Message, Method, Request}
+import org.http4s.{Message, Method, Request, Response}
 import org.json4s.Formats
 
 import scala.collection.immutable.HashSet
+import scalaz.{-\/, \/, \/-}
 import scalaz.concurrent.Task
 
 object ONRClient {
@@ -53,31 +54,44 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       ).withBody(dto)(json4sEncoderOf[HenkiloDto])
       client.fetch(postreq) {
         case Successful(createresponse: Message) =>
-          val oid = createresponse.as[String].unsafePerformSyncFor(1000l * 60)
+          val oid = createresponse.as[String].run
           val dt = HenkiloDto(oidHenkilo = oid)
           Task.now(dt) // we can return half-empty dto since the function itself only returns Henkilo
         case r@_ => Task.fail(new IllegalArgumentException(r.toString()))
       }
     }
 
-    val task: Task[HenkiloDto] = client.get[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email)) {
-      case Successful(resp) => resp.as[HenkiloDto](json4sOf[HenkiloDto])
-      case _ =>
-        user.personOid match {
-          case Some(oid) =>
-            val url = Urls.urls.url("oppijanumerorekisteri.henkilo.byoid", oid)
-            client.get[HenkiloDto](url) {
-              case Successful(r) =>
-                r.as[HenkiloDto](json4sOf[HenkiloDto])
-              case _ =>
-                create(user)
-            }
-          case _ => //just try adding and fetching
-            create(user)
-        }
+    //if is google IDP we also need to query by oppija token
+    val idpQueryTask: Task[HenkiloDto] = user.idpentityid match {
+      case Google => client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email))(json4sOf[HenkiloDto])
+                    .or(client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", OppijaToken.toString(), user.email))(json4sOf[HenkiloDto]))
+      case OppijaToken => client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email))(json4sOf[HenkiloDto])
     }
-    val response = task.unsafePerformSyncFor(1000l * 60)
-    Henkilo(response.oidHenkilo)
+
+    val oidQueryOrCreateTask: Task[HenkiloDto] = {
+      user.personOid match {
+        case Some(oid) =>
+          val url = Urls.urls.url("oppijanumerorekisteri.henkilo.byoid", oid)
+          client.get[HenkiloDto](url) {
+            case Successful(r) =>
+              r.as[HenkiloDto](json4sOf[HenkiloDto])
+            case _ =>
+              create(user)
+          }
+        case _ => //just try adding and fetching
+          create(user)
+      }
+    }
+    val response: \/[Throwable, HenkiloDto] = idpQueryTask.or(oidQueryOrCreateTask).unsafePerformSyncAttemptFor(1000l * 30l) //30 second timeout
+    response match {
+      case -\/(exception) => {
+        logger.error("Error querying or creating user", exception)
+        throw exception
+      }
+      case \/-(henkilo) => Henkilo(henkilo.oidHenkilo)
+    }
+
+
   }
   //adds and IDP for given person
   private def req(personOid: String, idp: IDP): Task[Request] = Request(
