@@ -76,14 +76,14 @@ app.post('/ryhmasahkoposti-service/email', function(req, res){
   res.send({});
 });
 
-// Authentication-Service
+// oppijanumerorekisteri-Service
 app.post('/oppijanumerorekisteri-service/henkilo', function(req, res){
   if (req.body.firstName == "Error409") {
     res.sendStatus(409)
   } else if (req.body.firstName == "Error500") {
     res.sendStatus(500)
   } else {
-    res.send({ "oidHenkilo": "1.2.246.562.24.11523238937" });
+    res.send("1.2.246.562.24.11523238937");
   }
 });
 app.post('/oppijanumerorekisteri-service/henkilo/:oid/identification', function(req, res){
