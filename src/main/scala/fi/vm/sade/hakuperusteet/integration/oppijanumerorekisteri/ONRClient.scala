@@ -45,7 +45,6 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     * 3. If fails, add henkilo and then fetch that
     */
   def updateHenkilo(user: User): Henkilo = {
-
     val create: User => Task[HenkiloDto] = (user: User) => {
       val dto = user2HenkiloCreateDto(user)
       val postreq = Request (
@@ -82,7 +81,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
           create(user)
       }
     }
-    val response: \/[Throwable, HenkiloDto] = idpQueryTask.or(oidQueryOrCreateTask).unsafePerformSyncAttemptFor(1000l * 30l) //30 second timeout
+    val response: \/[Throwable, HenkiloDto] = idpQueryTask.or(oidQueryOrCreateTask).unsafePerformSyncAttemptFor(1000l * 1l) //30 second timeout
     response match {
       case -\/(exception) => {
         logger.error("Error querying or creating user", exception)
@@ -113,13 +112,14 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       k
     })
 
-    val dto: HenkiloDto = new HenkiloDto(
-    etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
-    kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
-    sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
-    oppijanumero = user.personOid.getOrElse(""),
-    syntymaaika = localdate,
-    kansalaisuus = nationalitiesdto)
+    val dto: HenkiloDto = HenkiloDto(
+      etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+      kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+      sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
+      oppijanumero = user.personOid.getOrElse(""),
+      syntymaaika = localdate,
+      kansalaisuus = nationalitiesdto,
+      sukupuoli = user.gender.getOrElse(""))
     dto
   }
 
