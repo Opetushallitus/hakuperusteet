@@ -8,7 +8,7 @@
             <pattern>%d{ISO8601} %-5p { %X{user}} [%t] %-5p %c: %m%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/logs/hakuperusteet-console-%d{yyyy_MM_dd}-%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/logs/hakuperusteet-console-%d{yyyy_MM_dd}-%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -23,7 +23,7 @@
             <pattern>%d{ISO8601} %-5p { %X{user}} [%t] %-5p %c: %m%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/logs/oph-hakuperusteet-%d{yyyy_MM_dd}-%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/logs/oph-hakuperusteet-%d{yyyy_MM_dd}-%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
