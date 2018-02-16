@@ -10,9 +10,9 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
 import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Google, Henkilo, OppijaToken}
-import fi.vm.sade.hakuperusteet.integration.IDP
+import fi.vm.sade.hakuperusteet.integration.{IDP, oppijanumerorekisteri}
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
-import fi.vm.sade.oppijanumerorekisteri.dto._
+import fi.vm.sade.oppijanumerorekisteri.dto.{KansalaisuusDto, KielisyysDto, YhteystiedotRyhmaDto}
 import org.http4s.Status.ResponseClass.Successful
 import org.http4s.client.Client
 import org.http4s._
@@ -114,15 +114,14 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       k.setKansalaisuusKoodi(n)
       k
     })
-
-
-    val dto: HenkiloDto = HenkiloDto(
+    val dto: HenkiloDto  = HenkiloDto (
       etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
       oppijanumero = user.personOid.getOrElse(""),
       syntymaaika = localdate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       kansalaisuus = nationalitiesdto,
+      henkiloTyyppi = "OPPIJA",
       sukupuoli = user.gender.getOrElse(""))
     dto
   }
@@ -164,7 +163,7 @@ case class HenkiloDto (
   oidHenkilo: String = null,
   hetu: String = null,
   passivoitu: Boolean = false,
-  henkiloTyyppi: HenkiloTyyppi = null,
+  henkiloTyyppi: String = null,
   etunimet: String = null,
   kutsumanimi: String = null,
   sukunimi: String = null,
