@@ -48,7 +48,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
   def updateHenkilo(user: User): Henkilo = {
 
     val create: User => Task[HenkiloDto] = (user: User) => {
-      val dto = user2HenkiloCreateDto(user)
+      val dto = user2HenkiloDto(user)
       val postreq = Request (
         method = Method.POST,
         uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo"))
@@ -91,8 +91,6 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       }
       case \/-(henkilo) => Henkilo(henkilo.oidHenkilo)
     }
-
-
   }
   //adds and IDP for given person
   private def req(personOid: String, idp: IDP): Task[Request] = Request(
@@ -101,52 +99,27 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.byoid.idp", personOid))
   ).withBody(idp)(json4sEncoderOf[IDP])
 
-  def user2HenkiloCreateDto(user: User): HenkiloDto = {
-    val date: java.util.Date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
-    import java.time.ZoneId
-    val foo = ZoneId.systemDefault
-    val instant = Instant.ofEpochMilli(date.getTime)
-    val localdate = instant.atZone(foo).toLocalDate
-
-    val nationalities: Set[String] = Set(user.nationality.orNull)
-    val nationalitiesdto: Set[KansalaisuusDto] = nationalities.filter(p => p != null && !p.isEmpty).map(n => {
-      KansalaisuusDto(n)
-    })
-    val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
-    val dto: HenkiloDto  = HenkiloDto (
-      etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
-      kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
-      sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
-      oppijanumero = user.personOid.getOrElse(""),
-      syntymaaika = localdate.format(DateTimeFormatter.ISO_LOCAL_DATE),
-      kansalaisuus = nationalitiesdto,
-      henkiloTyyppi = "OPPIJA",
-      aidinkieli = KielisyysDto(language, language),
-      sukupuoli = user.gender.getOrElse(""))
-    dto
-  }
-
-  def user2HenkiloDto(user: User): HenkiloDto = {
+  private def user2HenkiloDto(user: User): HenkiloDto = {
     val date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
     import java.time.ZoneId
     val foo = ZoneId.systemDefault
     val instant = Instant.ofEpochMilli(date.getTime)
     val localdate = instant.atZone(foo).toLocalDate
 
-    val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
     val nationalities = Set(user.nationality.getOrElse(throw new IllegalArgumentException("Nationality is required")))
     val nationalitiesdto: Set[KansalaisuusDto] = nationalities.map(n => {
       KansalaisuusDto(n)
     })
-
+    val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
     HenkiloDto(
-      oidHenkilo = user.personOid.getOrElse(""),
+      oidHenkilo = user.personOid.orNull,
       etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+      kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
       syntymaaika = localdate.format(DateTimeFormatter.ISO_DATE),
       kansalaisuus = nationalitiesdto,
-      aidinkieli = KielisyysDto(language, language),
       henkiloTyyppi = "OPPIJA",
+      aidinkieli = KielisyysDto(kieliKoodi = language.toLowerCase),
       sukupuoli = user.gender.getOrElse(throw new IllegalArgumentException("Gender is required"))
 
     )
