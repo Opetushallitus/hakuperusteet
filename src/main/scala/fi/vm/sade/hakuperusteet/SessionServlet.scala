@@ -14,10 +14,8 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
-import fi.vm.sade.hakuperusteet.integration.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 
-import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalaz._
 

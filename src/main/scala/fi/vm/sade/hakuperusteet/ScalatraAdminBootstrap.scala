@@ -5,7 +5,6 @@ import javax.servlet.ServletContext
 import fi.vm.sade.hakuperusteet.admin.{AdminServlet, PaymentSynchronization, Synchronization}
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.email.EmailSender
-import fi.vm.sade.hakuperusteet.integration.henkilo.HenkiloClient
 import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 import fi.vm.sade.hakuperusteet.koodisto.{Countries, Koodisto}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus

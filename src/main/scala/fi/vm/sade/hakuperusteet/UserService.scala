@@ -9,11 +9,9 @@ import fi.vm.sade.hakuperusteet.util.{AuditLog, PaymentUtil}
 import slick.dbio.DBIO
 import slick.driver.PostgresDriver.api._
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
-import fi.vm.sade.hakuperusteet.integration.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 trait UserService extends LazyLogging {

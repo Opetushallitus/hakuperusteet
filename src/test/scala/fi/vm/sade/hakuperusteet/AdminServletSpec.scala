@@ -7,7 +7,6 @@ import fi.vm.sade.hakuperusteet
 import fi.vm.sade.hakuperusteet.admin.AdminServlet
 import fi.vm.sade.hakuperusteet.admin.auth.CasBasicAuthStrategy
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.integration.henkilo.HenkiloClient
 import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.swagger.AdminSwagger
