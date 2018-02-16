@@ -1,26 +1,25 @@
 package fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri
 
 
+import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate}
 import java.util.Date
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.domain.AbstractUser.User
-import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Google, Henkilo, OppijaToken}
-import fi.vm.sade.hakuperusteet.integration.{IDP, oppijanumerorekisteri}
+import fi.vm.sade.hakuperusteet.domain._
+import fi.vm.sade.hakuperusteet.integration.IDP
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
-import fi.vm.sade.oppijanumerorekisteri.dto.{KansalaisuusDto, KielisyysDto, YhteystiedotRyhmaDto}
 import org.http4s.Status.ResponseClass.Successful
-import org.http4s.client.Client
 import org.http4s._
+import org.http4s.client.Client
 import org.json4s.Formats
 
 import scala.collection.immutable.HashSet
-import scalaz.{-\/, \/, \/-}
 import scalaz.concurrent.Task
+import scalaz.{-\/, \/, \/-}
 
 object ONRClient {
   def init(c: Config) = {
@@ -47,6 +46,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     * 3. If fails, add henkilo and then fetch that
     */
   def updateHenkilo(user: User): Henkilo = {
+
     val create: User => Task[HenkiloDto] = (user: User) => {
       val dto = user2HenkiloCreateDto(user)
       val postreq = Request (
@@ -55,8 +55,8 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       ).withBody(dto)(json4sEncoderOf[HenkiloDto])
       client.fetch(postreq) {
         case Successful(createresponse: Message) =>
-          val oid = createresponse.as[String].run
-          val dt = HenkiloDto(oidHenkilo = oid)
+          val oid: \/[Throwable, String] = createresponse.as[String].unsafePerformSyncAttemptFor(1000 * 10L)
+          val dt = HenkiloDto(oidHenkilo = oid.getOrElse(""))
           Task.now(dt) // we can return half-empty dto since the function itself only returns Henkilo
         case r@_ => Task.fail(new IllegalArgumentException(r.toString()))
       }
@@ -101,7 +101,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.byoid.idp", personOid))
   ).withBody(idp)(json4sEncoderOf[IDP])
 
-  private def user2HenkiloCreateDto(user: User): HenkiloDto = {
+  def user2HenkiloCreateDto(user: User): HenkiloDto = {
     val date: java.util.Date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
     import java.time.ZoneId
     val foo = ZoneId.systemDefault
@@ -110,10 +110,9 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
 
     val nationalities: Set[String] = Set(user.nationality.orNull)
     val nationalitiesdto: Set[KansalaisuusDto] = nationalities.filter(p => p != null && !p.isEmpty).map(n => {
-      val k= new KansalaisuusDto()
-      k.setKansalaisuusKoodi(n)
-      k
+      KansalaisuusDto(n)
     })
+    val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
     val dto: HenkiloDto  = HenkiloDto (
       etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
@@ -122,36 +121,35 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       syntymaaika = localdate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       kansalaisuus = nationalitiesdto,
       henkiloTyyppi = "OPPIJA",
+      aidinkieli = KielisyysDto(language, language),
       sukupuoli = user.gender.getOrElse(""))
     dto
   }
 
-  private def user2HenkiloDto(user: User): fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto = {
-    import collection.JavaConverters._
-
-    var dto = new fi.vm.sade.oppijanumerorekisteri.dto.HenkiloDto()
-    dto.setOidHenkilo(user.personOid.getOrElse(""))
-
-    dto.setEtunimet(user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")))
-    dto.setSukunimi(user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")))
+  def user2HenkiloDto(user: User): HenkiloDto = {
     val date = user.birthDate.getOrElse(throw new IllegalArgumentException("Birth date is required"))
     import java.time.ZoneId
-    val localdate = date.toInstant.atZone(ZoneId.systemDefault).toLocalDate
-    dto.setSyntymaaika(localdate)
-
-    dto.setSukupuoli(user.gender.getOrElse(throw new IllegalArgumentException("Gender is required")))
+    val foo = ZoneId.systemDefault
+    val instant = Instant.ofEpochMilli(date.getTime)
+    val localdate = instant.atZone(foo).toLocalDate
 
     val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
-    dto.setAidinkieli(new KielisyysDto(language, language))
-
     val nationalities = Set(user.nationality.getOrElse(throw new IllegalArgumentException("Nationality is required")))
     val nationalitiesdto: Set[KansalaisuusDto] = nationalities.map(n => {
-      val k= new KansalaisuusDto()
-      k.setKansalaisuusKoodi(n)
-      k
+      KansalaisuusDto(n)
     })
-    dto.setKansalaisuus(nationalitiesdto.asJava)
-    dto
+
+    HenkiloDto(
+      oidHenkilo = user.personOid.getOrElse(""),
+      etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
+      sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
+      syntymaaika = localdate.format(DateTimeFormatter.ISO_DATE),
+      kansalaisuus = nationalitiesdto,
+      aidinkieli = KielisyysDto(language, language),
+      henkiloTyyppi = "OPPIJA",
+      sukupuoli = user.gender.getOrElse(throw new IllegalArgumentException("Gender is required"))
+
+    )
   }
 }
 
@@ -187,3 +185,18 @@ case class HenkiloDto (
   huoltaja: HenkiloDto = null,
   yhteystiedotRyhma: Set[YhteystiedotRyhmaDto] = new HashSet[YhteystiedotRyhmaDto]
 )
+case class KielisyysDto(kieliKoodi: String = null, kieliTyyppi: String = null)
+case class KansalaisuusDto(kansalaisuusKoodi: String = null)
+case class YhteystiedotRyhmaDto(ryhmaAlkuperaTieto: String = null, readOnly: Boolean = false, yhteystieto: Set[YhteystietoDto] = Set.empty)
+case class YhteystietoDto(yhteystietoArvo: String, yhteystietoTyyppi: YhteystietoTyyppi)
+
+sealed trait YhteystietoTyyppi
+
+case object YHTEYSTIETO_SAHKOPOSTI extends YhteystietoTyyppi
+case object YHTEYSTIETO_PUHELINNUMERO extends YhteystietoTyyppi
+case object YHTEYSTIETO_MATKAPUHELINNUMERO extends YhteystietoTyyppi
+case object YHTEYSTIETO_KATUOSOITE extends YhteystietoTyyppi
+case object YHTEYSTIETO_KUNTA extends YhteystietoTyyppi
+case object YHTEYSTIETO_POSTINUMERO extends YhteystietoTyyppi
+case object YHTEYSTIETO_KAUPUNKI extends YhteystietoTyyppi
+case object YHTEYSTIETO_MAA extends YhteystietoTyyppi

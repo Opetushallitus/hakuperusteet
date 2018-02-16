@@ -9,7 +9,7 @@ import fi.vm.sade.hakuperusteet.util.CasClientUtils
 import org.http4s.client.{Client, DisposableResponse}
 import org.http4s.dsl._
 import org.http4s.{Uri, _}
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.Formats
 import org.scalatest.{FlatSpec, Matchers}
 
 import scalaz.concurrent.Task
@@ -80,8 +80,12 @@ class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClient
       }
     )
     val onrClient = new ONRClient(mock)
-
-    val emptyUser = AbstractUser.user(None, None,"", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en")
+//{"firstName":"jonitesti","lastName":"mäkelätesti","gender":"1","nativeLanguage":"FI","nationality":"246","birthDate":"07041989"}
+    val bday = new Date()
+    bday.setYear(1989)
+    bday.setMonth(4)
+    bday.setDate(7)
+    val emptyUser = AbstractUser.user(None, None,"test@test.com", Some("Joni"), Some("Mäkelä"), Some(bday), None, OppijaToken, Some("1"), Some("FI"), Some("246"), "FI")
     val henkilo:Henkilo = onrClient.updateHenkilo(emptyUser)
 
     henkilo.personOid shouldEqual "1.2.3.4"
