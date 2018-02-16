@@ -1,6 +1,7 @@
 package fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri
 
 
+import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
 import java.util.Date
 
@@ -14,7 +15,7 @@ import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
 import fi.vm.sade.oppijanumerorekisteri.dto._
 import org.http4s.Status.ResponseClass.Successful
 import org.http4s.client.Client
-import org.http4s.{Message, Method, Request, Response}
+import org.http4s._
 import org.json4s.Formats
 
 import scala.collection.immutable.HashSet
@@ -23,7 +24,8 @@ import scalaz.concurrent.Task
 
 object ONRClient {
   def init(c: Config) = {
-    new ONRClient(HttpUtil.casClient(c, "/oppijanumerorekisteri-service"))
+    val casClient = HttpUtil.casClient(c, "/oppijanumerorekisteri-service")
+    new ONRClient(casClient)
   }
 }
 
@@ -95,6 +97,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
   //adds and IDP for given person
   private def req(personOid: String, idp: IDP): Task[Request] = Request(
     method = Method.POST,
+    headers = Headers(Header("caller-id", "hakuperusteet")),
     uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo.byoid.idp", personOid))
   ).withBody(idp)(json4sEncoderOf[IDP])
 
@@ -112,12 +115,13 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
       k
     })
 
+
     val dto: HenkiloDto = HenkiloDto(
       etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
       oppijanumero = user.personOid.getOrElse(""),
-      syntymaaika = localdate,
+      syntymaaika = localdate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       kansalaisuus = nationalitiesdto,
       sukupuoli = user.gender.getOrElse(""))
     dto
@@ -169,7 +173,7 @@ case class HenkiloDto (
   kielisyys: Set[KielisyysDto] = new HashSet[KielisyysDto],
   kansalaisuus: Set[KansalaisuusDto] = new HashSet[KansalaisuusDto],
   kasittelijaOid: String = null,
-  syntymaaika: LocalDate = null,
+  syntymaaika: String = null,
   sukupuoli: String = null,
   oppijanumero: String = null,
   turvakielto: Boolean = false,
