@@ -7,7 +7,7 @@ import fi.vm.sade.hakuperusteet
 import fi.vm.sade.hakuperusteet.admin.AdminServlet
 import fi.vm.sade.hakuperusteet.admin.auth.CasBasicAuthStrategy
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
+import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.swagger.AdminSwagger
 import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
@@ -34,7 +34,7 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
   val oppijanTunnistusMock = Mockito.mock(classOf[OppijanTunnistus])
   val dbSpy = Mockito.spy(database)
   val tarjontaMock = Mockito.mock(classOf[Tarjonta])
-  val userServiceMock = UserService(testExecutionContext, HenkiloClient.init(config), dbSpy)
+  val userServiceMock = UserService(testExecutionContext, ONRClient.init(config), dbSpy)
   val paymentServiceMock = PaymentService(dbSpy)
   val applicationObjectServiceMock = ApplicationObjectService(testExecutionContext, countries, dbSpy, oppijanTunnistusMock, paymentServiceMock, tarjontaMock)
 

@@ -1,12 +1,13 @@
 package fi.vm.sade.hakuperusteet.auth
 
 import javax.servlet.http.HttpServletRequest
+
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
-import fi.vm.sade.hakuperusteet.henkilo.HenkiloClient
+import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.util.PaymentUtil
 import org.json4s.jackson.JsonMethods._
@@ -17,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 
 class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunnistus: OppijanTunnistus) extends SimpleAuth with LazyLogging with Control {
   import fi.vm.sade.hakuperusteet._
-  val henkiloClient = HenkiloClient.init(config)
+  private val onrClient = ONRClient.init(config)
 
   def authenticate(request: HttpServletRequest): Option[Session] = {
     val json = parse(RichRequest(request).body)
@@ -52,10 +53,10 @@ class TokenAuthStrategy (config: Config, db: HakuperusteetDatabase, oppijanTunni
   }
   
   def upsertIdpEntity(user: AbstractUser): Unit = {
-    Try(henkiloClient.upsertIdpEntity(user).run) match {
+    Try(onrClient.addIdpForHenkilo(user).unsafePerformSyncFor(1000l * 10)) match { //10 second timeout
       case Success(h) =>
       case Failure(f) =>
-        logger.error("henkiloClient.upsertIdpEntity error inserting idp entity for user: " + user, f)
+        logger.error("ONRClient.addIdpForHenkilo error inserting idp entity for user: " + user, f)
         halt(500)
     }
   }

@@ -76,23 +76,23 @@ app.post('/ryhmasahkoposti-service/email', function(req, res){
   res.send({});
 });
 
-// Authentication-Service
-app.post('/authentication-service/resources/s2s/hakuperusteet', function(req, res){
+// oppijanumerorekisteri-Service
+app.post('/oppijanumerorekisteri-service/henkilo', function(req, res){
   if (req.body.firstName == "Error409") {
     res.sendStatus(409)
   } else if (req.body.firstName == "Error500") {
     res.sendStatus(500)
   } else {
-    res.send({ "personOid": "1.2.246.562.24.11523238937" });
+    res.send("1.2.246.562.24.11523238937");
   }
 });
-app.post('/authentication-service/resources/s2s/hakuperusteet/idp', function(req, res){
+app.post('/oppijanumerorekisteri-service/henkilo/:oid/identification', function(req, res){
   if (req.body.firstName == "Error409") {
     res.sendStatus(409)
   } else if (req.body.firstName == "Error500") {
     res.sendStatus(500)
   } else {
-    res.send({ "personOid": "1.2.246.562.24.11523238937" });
+    res.send([{ "identifier": "foobar@foobar.com", "idpEntityId": "oppijaToken" }]);
   }
 });
 // Oppijan-tunnistus
@@ -199,7 +199,7 @@ app.post('/cas/v1/tickets', function(req, res){
 app.post('/cas/v1/tickets/TGT-123', function(req, res){
   res.send("ST-123");
 });
-app.get('/authentication-service/j_spring_cas_security_check', function(req, res){
+app.get('/oppijanumerorekisteri-service/j_spring_cas_security_check', function(req, res){
   res.append('Set-Cookie', 'JSESSIONID=foobar-123');
   res.send({});
 });

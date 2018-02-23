@@ -22,7 +22,7 @@ object Translate {
 
   def loadMap: Map[String, Any] = {
     implicit val formats = org.json4s.DefaultFormats
-    val file = io.Source.fromInputStream(getClass.getResourceAsStream("/web-translations.json")).mkString
+    val file = scala.io.Source.fromInputStream(getClass.getResourceAsStream("/web-translations.json")).mkString
     parse(file).extract[Map[String, Any]]
   }
 }

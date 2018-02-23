@@ -42,7 +42,7 @@ object EmailTemplate {
   }
 
   private def compileMustache(templateUrl: String) = {
-    val templateString = io.Source.fromInputStream(getClass.getResourceAsStream(templateUrl)).mkString
+    val templateString = scala.io.Source.fromInputStream(getClass.getResourceAsStream(templateUrl)).mkString
     new DefaultMustacheFactory().compile(new StringReader(templateString), templateUrl)
   }
 }

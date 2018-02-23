@@ -6,7 +6,6 @@ import fi.vm.sade.hakuperusteet.db.HakuperusteetDatabase
 import fi.vm.sade.hakuperusteet.domain._
 import fi.vm.sade.hakuperusteet.email.{EmailSender, EmailTemplate, WelcomeValues}
 import fi.vm.sade.hakuperusteet.google.GoogleVerifier
-import fi.vm.sade.hakuperusteet.henkilo.{HenkiloClient, IfGoogleAddEmailIDP}
 import fi.vm.sade.hakuperusteet.oppijantunnistus.OppijanTunnistus
 import fi.vm.sade.hakuperusteet.util.{AuditLog, ConflictException, Translate, ValidationUtil}
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
@@ -15,7 +14,8 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization._
 import fi.vm.sade.hakuperusteet.domain.AbstractUser._
-import scala.concurrent.duration._
+import fi.vm.sade.hakuperusteet.integration.oppijanumerorekisteri.ONRClient
+
 import scala.util.{Failure, Success, Try}
 import scalaz._
 
@@ -24,7 +24,7 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
   extends HakuperusteetServlet(config, db, oppijanTunnistus, verifier) with ValidationUtil {
   case class UserDataResponse(field: String, value: SessionData)
 
-  val henkiloClient = HenkiloClient.init(config)
+  private val onrClient = ONRClient.init(config)
   post("/authenticate") {
     if(!isAuthenticated || TokenAuthStrategy.hasTokenInRequest(request)) {
       authenticate()
@@ -141,7 +141,9 @@ class SessionServlet(config: Config, db: HakuperusteetDatabase, oppijanTunnistus
     emailSender.send(newUser.email, Translate("email.welcome",newUser.lang,"title"), EmailTemplate.renderWelcome(p, newUser.lang))
   }
 
-  def upsertUserToHenkilo(userData: User) = Try(henkiloClient.upsertHenkilo(IfGoogleAddEmailIDP(userData))) match {
+  //IfGoogleAddEmailIDP(userData)
+  //{"firstName":"John","lastName":"Doe","gender":"1","nativeLanguage":"FI","nationality":"246","personId":"011295-9693"}
+  def upsertUserToHenkilo(userData: User) = Try(onrClient.updateHenkilo(userData)) match {
       case Success(u) => userData.copy(personOid = Some(u.personOid))
       case Failure(t) if t.isInstanceOf[ConflictException] =>
         val msg = t.getMessage
