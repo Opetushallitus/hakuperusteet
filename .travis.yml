@@ -1,0 +1,44 @@
+sudo: required
+
+language: scala
+
+jdk:
+- oraclejdk8
+
+cache:
+  directories:
+  - $HOME/.ivy2
+
+env:
+  global:
+  # AWS_ACCESS_KEY_ID
+  - secure: "G1IPsdGFltZL58bvICFnp7c6XBmTVrfj5xURNl5mG74rymXN1wcWRbT72SyuEPy6LNG5XiMRojiLg7bOlGxyayqIwtOuMsPLOd3cVxNXonPdxHpFrmPqTqlPMsr5N+5nT5B68BgtdnQ7oOaoL4xn7cpAXRBdjl9p7nkIyr9dlGZB2sO+rypPxRuIgz1CecPsG5sPbzoPiBGG8hz9LHcbkhbUtrKYE7no3wkeWPqdlHZMiq1YF7Oit7LI+pu+/s75Y5Dq5YY4gz0J9c3iUxDAH6qoXJgIHR0ebnSn7OFOTjOCfB/6YfCkfvo6vERvpcpk5JLjKRY9IP64s0rhLDkAl29XZWZihD9cv7Lh+99fkSMkW/AlSLbmhA4eOlctPRePKDt/WOZhdmZ6DxKf1uWbQYpCq6OZ+S9xTUTrlPuflEUgrttpgaFzc8MVXA7NMbYNcvYYzP2vrI2ykUA43JilelznGV/hFoC1qPQz39fOaQBN4IXRgF2UO7Tkn+5bzNzKgKVaElPOflg1jEFHmCDiAppc6DAcoeORFezGY+rRuRjJ8AVjInnDroAPRAqDblfTi189J+ib8l+ftkSciZWIOwKQGWYbwmzBH0Vio8fgLNRkLBEjNYhOFfM604hwBAN8Ql66IA2lUqMC89lE1PzdDMnkqJhbf70VHzBOXjPMjYo="
+  # AWS_SECRET_ACCESS_KEY
+  - secure: "WqGjcCcVGDVLI4EvEK9sdi1uY5eGtDaAoKHZRB2ueIOUi9wM65CJ6sbuP/6diBCpTRsBzHpwevc2H55qcMlBFd5V572GCaGfu+RwzPdTDkj0ohfXM6Vv6MwFBpi411Rkl9IKGs1lOx4BQYE7YaQdR6562IAiRCjhoke13NTAsZrC9adqBeNq9zB9VLBxuELV7iuFB1IH3OoGcSsdvGXQwiidTDit8XQxto2OWhtZhqfQDmrjtVhH6rm4+58NP6/Za5zY1oCQJB3etsmWmDGZnyNwJvbBpm1czMFgB1RUKFaqTYG/FXTsJkSec8irLthVlKAT72PSnRY0g4u0EQxb5u37PGU1RXYujoGa8brw0Kes7cnT0pvMZyP1IbC6qUX3MfXdD4kPi/Yl0hdiJyE4fVZ4H99XI8jJComo3Gg6uK5x7wI/tWZ01bOL2FW6qnuG2qSm3DHEgtuGf6KAAUv4uym5eEGXiSfr/ituyL9/Bu0yHGX+5pDZGCnXFdZbmO80n8NDkkTviHIezSCdUvwtVpNN6aWqNfJ3HNhN3WMOFgfziw5nFHrBXVe2HJeF6LeGWjcoWkFziukQp1g5Snrj30WrN+lE3JYetSv3kHkwAbpZBO3nB9EqdCvm4OEzQNbAE919oES9Cj3xGsn/i6bIbTbWYFPwU/c75r5Cv5yDdM4="
+
+install:
+- git clone https://github.com/Opetushallitus/ci-tools.git
+- source ci-tools/common/setup-tools.sh
+
+script:
+- ./run_all_tests.sh
+- sbt -no-colors -batch buildversion assembly admin:assembly -DbranchName=${TRAVIS_BRANCH} -DrevisionNumber=${TRAVIS_COMMIT} -DbuildNumber=${TRAVIS_BUILD_NUMBER}
+
+- cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
+
+- cp -v target/scala-2.11/hakuperusteetadmin-*-assembly.jar $DOCKER_BUILD_DIR/artifact/hakuperusteetadmin.jar
+- export BASE_IMAGE="base-legacy:0.1"
+- ./ci-tools/common/pull-image.sh
+- ./ci-tools/build/build-fatjar.sh hakuperusteetadmin
+
+- rm $DOCKER_BUILD_DIR/artifact/hakuperusteetadmin.jar
+- cp -v target/scala-2.11/hakuperusteet-*-assembly.jar $DOCKER_BUILD_DIR/artifact/hakuperusteet.jar
+- export BASE_IMAGE="base-legacy:0.1"
+- ./ci-tools/common/pull-image.sh
+- ./ci-tools/build/build-fatjar.sh hakuperusteet
+
+deploy:
+- provider: script
+  script: ./ci-tools/build/upload-image.sh hakuperusteet && ./ci-tools/build/upload-image.sh hakuperusteetadmin
+  on:
+    all_branches: true
