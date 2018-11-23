@@ -46,8 +46,8 @@ object HakuperusteetTestServer {
   }
 
   def startMockServer() {
-    logger.info("Starting mockserver (http: 3001 ldap: 1390)")
-    val pb = Process(Seq("node", "server.js"), new File("./mockserver/"), "PORT" -> "3001", "LDAP_PORT" -> "1390")
+    logger.info("Starting mockserver (http: 3001)")
+    val pb = Process(Seq("node", "server.js"), new File("./mockserver/"), "PORT" -> "3001")
     val started = pb.run()
     sys addShutdownHook {
       started.destroy()
