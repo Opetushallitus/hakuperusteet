@@ -18,6 +18,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
 
   val adminhost = cfg.getString("hakuperusteetadmin.url.base")
   val casClient = new CasClient(cfg.getString("hakuperusteet.cas.url"), org.http4s.client.blaze.defaultClient)
+  logger.info("Using cas url:" + cfg.getString("hakuperusteet.cas.url"))
   val userDetailsService = new KayttooikeusUserDetailsService(Urls.urls)
 
   def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {
@@ -38,7 +39,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
                 None
             }
           case Failure(t) =>
-            logger.warn("Cas ticket rejected", t)
+            logger.warn("Cas ticket rejected. " + ticket, t)
             None
         }
       case _ =>
