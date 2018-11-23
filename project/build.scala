@@ -91,7 +91,9 @@ object HakuperusteetBuild extends Build {
         "fi.vm.sade" %% "scala-utils-validator" % "0.4.0-SNAPSHOT",
         "fi.vm.sade" % "auditlogger" % "5.0.0-SNAPSHOT",
         "fi.vm.sade" %% "scala-properties" % "0.0.1-SNAPSHOT",
-        "fi.vm.sade" %% "scala-user-details" % "0.0.1-SNAPSHOT",
+        "fi.vm.sade" %% "scala-user-details" % "0.0.1-SNAPSHOT" excludeAll(
+          ExclusionRule(organization = "org.slf4j")
+        ),
         "fi.vm.sade.oppijanumerorekisteri" % "oppijanumerorekisteri-api" % "0.1.1-SNAPSHOT" excludeAll(
           ExclusionRule(organization = "org.springframework.boot"),
           ExclusionRule(organization = "io.swagger")
