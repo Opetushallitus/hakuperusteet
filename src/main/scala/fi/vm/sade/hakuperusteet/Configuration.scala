@@ -25,5 +25,6 @@ object Urls {
       .addFiles("/hakuperusteet-oph.properties")
       .addOptionalFiles(Paths.get(sys.props.getOrElse("user.home", ""), "/oph-configuration/common.properties").toString)
       .addDefault("baseUrl", Configuration.props.getString("host.lb"))
+      .addDefault("host.alb", Configuration.props.getString("host.alb"))
   }
 }

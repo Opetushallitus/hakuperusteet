@@ -1,11 +1,7 @@
 host.url.base=https://{{host_oppija}}/hakuperusteet/
 hakuperusteetadmin.url.base=https://{{host_virkailija}}/hakuperusteetadmin/
 host.lb=https://{{host_virkailija}}
-
-cas.ldap.host={{host_ldap}}
-cas.ldap.userDn={{ldap_manager_userdn}}
-cas.ldap.password={{ldap_manager_password}}
-cas.ldap.port=389
+host.alb={{host_alb}}
 
 hakuperusteet.port.http={{palvelu_portti}}
 hakuperusteet.port.https={{palvelu_portti_https}}

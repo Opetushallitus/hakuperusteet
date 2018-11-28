@@ -16,12 +16,14 @@ object HttpUtil {
     .useExpectContinue()
     .version(HttpVersion.HTTP_1_1)
     .addHeader("clientSubSystemCode", id)
+    .addHeader("Caller-Id", id)
     .execute().returnContent().asString(StandardCharsets.UTF_8)
 
   def addHeaders(request: Request) = request
     .useExpectContinue()
     .version(HttpVersion.HTTP_1_1)
     .setHeader("clientSubSystemCode", id)
+    .setHeader("Caller-Id", id)
     .setHeader("CSRF",id)
     .setHeader("Cookie", "CSRF="+id)
 

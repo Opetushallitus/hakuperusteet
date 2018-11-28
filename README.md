@@ -29,12 +29,14 @@ To start docker again (e.g. after boot), run the following commands:
 
 To start hakuperusteet after Postgres is up, run the following commands:
 
-1. `npm install`
-2. `./sbt run`
-3. Access hakuperusteet at [https://localhost:18080/hakuperusteet/](https://localhost:18080/hakuperusteet/)
-4. `npm run watch` on separate console to enable front auto compile
+1. create local conf file. containing line: hakuperusteet.password="addpwd"
+2. `npm install`
+3. `npm run dev-build`
+4. `./sbt -v -Dhakuperusteet.properties=pathtolocalconf run`
+5. Access hakuperusteet at [https://localhost:18080/hakuperusteet/](https://localhost:18080/hakuperusteet/)
+6. `npm run watch` on separate console to enable front auto compile
 
-By default hakuperusteet uses services from Luokka-environment.
+By default hakuperusteet uses services from QA-environment.
 
 You can proceed to the form page by signing in with Google (the blue button).
 
@@ -50,7 +52,7 @@ This setup needs a running mock server, which should be installed with following
 
 To run hakuperusteet or hakuperusteet-admin, run the following commands:
 
-`./sbt "test:run-main fi.vm.sade.hakuperusteet.HakuperusteetTestServer"`
+    `./sbt "test:run-main fi.vm.sade.hakuperusteet.HakuperusteetTestServer"`
 
 Test servers can be accessed from urls:
 
@@ -63,13 +65,16 @@ Docker database is empty at start, if needed, create test users by running at pr
 
 `npm run admin:test-ui`
 
+Mac users may have to install phantomjs locally and point the scripts use local phantom:
+`mocha-phantomjs -p /usr/local/bin/phantomjs --ignore-resource-errors --setting webSecurityEnabled=false http://localhost:8091/hakuperusteetadmin/spec/testRunner.html`
+
 ## Configuration
 
 This project has multiple configuration files, which are used for following purposes.
 
 ### src/main/resources/reference.conf
 
- - Development time configuration file, which uses luokka-environment
+ - Development time configuration file, which uses QA-environment
 
 ### src/main/resources/oph-configuration/hakuperusteet.properties.template
 
