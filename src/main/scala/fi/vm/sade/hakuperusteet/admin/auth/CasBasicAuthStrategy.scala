@@ -18,8 +18,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
 
   val adminhost = cfg.getString("hakuperusteetadmin.url.base")
   val casClient = new CasClient(cfg.getString("hakuperusteet.cas.url"), org.http4s.client.blaze.defaultClient)
-  logger.info("Using cas url:" + cfg.getString("hakuperusteet.cas.url"))
-  val userDetailsService = new KayttooikeusUserDetailsService(Urls.urls)
+  val userDetailsService = new KayttooikeusUserDetailsService
 
   def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {
     Option(request.getParameter("ticket")) match {
@@ -28,7 +27,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
         Try(casClient.validateServiceTicket(adminhost)(ticket).run) match {
           case Success(uid) =>
             logger.info(s"User $uid found")
-            userDetailsService.getUserByUsername(uid, "hakuperusteet") match {
+            userDetailsService.getUserByUsername(uid, "hakuperusteet", Urls.urls) match {
               case Right(user) =>
                 logger.info(s"User $uid is authenticated")
                 val userSession = CasSession(None, user.oid, uid, user.roles, ticket, user.roles.contains("APP_HAKUPERUSTEETADMIN_REKISTERINPITAJA"))
