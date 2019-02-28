@@ -27,13 +27,13 @@ script:
 - cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
 
 - cp -v target/scala-2.11/hakuperusteetadmin-*-assembly.jar $DOCKER_BUILD_DIR/artifact/hakuperusteetadmin.jar
-- export BASE_IMAGE="base-legacy:0.1"
+- export BASE_IMAGE="baseimage-fatjar:master"
 - ./ci-tools/common/pull-image.sh
 - ./ci-tools/build/build-fatjar.sh hakuperusteetadmin
 
 - rm $DOCKER_BUILD_DIR/artifact/hakuperusteetadmin.jar
 - cp -v target/scala-2.11/hakuperusteet-*-assembly.jar $DOCKER_BUILD_DIR/artifact/hakuperusteet.jar
-- export BASE_IMAGE="base-legacy:0.1"
+- export BASE_IMAGE="baseimage-fatjar:master"
 - ./ci-tools/common/pull-image.sh
 - ./ci-tools/build/build-fatjar.sh hakuperusteet
 
