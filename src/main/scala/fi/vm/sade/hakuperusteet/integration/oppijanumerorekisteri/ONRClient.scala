@@ -114,10 +114,10 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
     val hetu = user.personId match {
       case Some(x) =>
-        logger.info(s"user2HenkiloDto: Found hetu for HenkiloDto with oid $oid", exception)
+        logger.info(s"user2HenkiloDto: Found hetu for HenkiloDto with oid $oid")
         x
       case None =>
-        logger.warn(s"user2HenkiloDto: Creating HenkiloDto with oid $oid with null hetu", exception)
+        logger.warn(s"user2HenkiloDto: Creating HenkiloDto with oid $oid with null hetu")
         null
     }
     HenkiloDto(
