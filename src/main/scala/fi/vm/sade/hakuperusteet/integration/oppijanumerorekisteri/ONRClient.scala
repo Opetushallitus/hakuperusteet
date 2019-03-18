@@ -106,13 +106,23 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     val instant = Instant.ofEpochMilli(date.getTime)
     val localdate = instant.atZone(foo).toLocalDate
 
+    val oid = user.personOid.orNull
     val nationalities = Set(user.nationality.getOrElse(throw new IllegalArgumentException("Nationality is required")))
     val nationalitiesdto: Set[KansalaisuusDto] = nationalities.map(n => {
       KansalaisuusDto(n)
     })
     val language = user.nativeLanguage.getOrElse(throw new IllegalArgumentException("Native language is required"))
+    val hetu = user.personId match {
+      case Some(x) =>
+        logger.info(s"user2HenkiloDto: Found hetu for HenkiloDto with oid $oid", exception)
+        x
+      case None =>
+        logger.warn(s"user2HenkiloDto: Creating HenkiloDto with oid $oid with null hetu", exception)
+        null
+    }
     HenkiloDto(
-      oidHenkilo = user.personOid.orNull,
+      oidHenkilo = oid,
+      hetu = hetu,
       etunimet = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       kutsumanimi = user.firstName.getOrElse(throw new IllegalArgumentException("First name is required")),
       sukunimi = user.lastName.getOrElse(throw new IllegalArgumentException("Last name is required")),
