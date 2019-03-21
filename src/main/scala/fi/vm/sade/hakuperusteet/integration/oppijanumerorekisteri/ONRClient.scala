@@ -42,51 +42,8 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
     }
   }
 
-    /*
-    * 1. Attempt to get henkilo by IDP (if not, add)
-    * 2. Attempt finding by this user OID
-    * 3. If fails, add henkilo and then fetch that
-    */
   def updateHenkilo(user: User): Henkilo = {
-
-    val create: User => Task[HenkiloDto] = (user: User) => {
-      val dto = user2HenkiloDto(user)
-      val postreq = Request (
-        method = Method.POST,
-        uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.henkilo"))
-      ).withBody(dto)(json4sEncoderOf[HenkiloDto])
-      client.fetch(postreq) {
-        case Successful(createresponse: Message) =>
-          val oid: \/[Throwable, String] = createresponse.as[String].unsafePerformSyncAttemptFor(1000 * 10L)
-          val dt = HenkiloDto(oidHenkilo = oid.getOrElse(""))
-          Task.now(dt) // we can return half-empty dto since the function itself only returns Henkilo
-        case r@_ => Task.fail(new IllegalArgumentException(r.toString()))
-      }
-    }
-
-    //if is google IDP we also need to query by oppija token
-    val idpQueryTask: Task[HenkiloDto] = user.idpentityid match {
-      case Google => client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email))(json4sOf[HenkiloDto])
-                    .or(client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", OppijaToken.toString(), user.email))(json4sOf[HenkiloDto]))
-      case OppijaToken => client.getAs[HenkiloDto](Urls.urls.url("oppijanumerorekisteri.henkilo.byidp", user.idpentityid.toString, user.email))(json4sOf[HenkiloDto])
-    }
-
-    val oidQueryOrCreateTask: Task[HenkiloDto] = {
-      user.personOid match {
-        case Some(oid) =>
-          val url = Urls.urls.url("oppijanumerorekisteri.henkilo.byoid", oid)
-          client.get[HenkiloDto](url) {
-            case Successful(r) =>
-              r.as[HenkiloDto](json4sOf[HenkiloDto])
-            case _ =>
-              create(user)
-          }
-        case _ => //just try adding and fetching
-          create(user)
-      }
-    }
-
-    val findOrCreateUser: User => Task[HenkiloDto] = (user: User) => {
+    def findOrCreateUser(user: User): Task[HenkiloDto] = {
       val dto: HenkiloPerustietoDto = userToPerustietoDto(user)
       val postreq = Request (
         method = Method.POST,
