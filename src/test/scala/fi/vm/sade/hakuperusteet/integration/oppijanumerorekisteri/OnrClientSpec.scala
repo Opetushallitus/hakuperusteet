@@ -73,6 +73,8 @@ class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClient
       open = Service.lift {
         case req@GET -> Root / "oppijanumerorekisteri-service" / "henkilo" / "1.2.3.4" =>
           Ok(createdJson).map(DisposableResponse(_, nop))
+        case req@ POST -> Root / "oppijanumerorekisteri-service" / "s2s" / "findOrCreateHenkiloPerustieto" =>
+          Ok(createdJson).map(DisposableResponse(_, nop))
         case req@ POST -> Root / "oppijanumerorekisteri-service" / "henkilo" =>
           Ok(createdOid).map(DisposableResponse(_, nop))
         case _ =>
@@ -98,6 +100,8 @@ class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClient
       shutdown = nop,
       open = Service.lift {
         case req@GET -> Root / "oppijanumerorekisteri-service" / "henkilo" / "1.2.3.4" =>
+          Ok(createdJson).map(DisposableResponse(_, nop))
+        case req@ POST -> Root / "oppijanumerorekisteri-service" / "s2s" / "findOrCreateHenkiloPerustieto" =>
           Ok(createdJson).map(DisposableResponse(_, nop))
         case _ =>
           NotFound().map(DisposableResponse(_, nop))
