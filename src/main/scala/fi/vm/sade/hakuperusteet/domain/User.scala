@@ -36,16 +36,32 @@ sealed trait AbstractUser {
 
 object AbstractUser {
 
-  case class PartialUser private[AbstractUser](id: Option[Int], personOid: Option[String], email: String, idpentityid: IDPEntityId, uiLang:String, partialUser: Boolean = true) extends AbstractUser {
-    def fullName = email
+  case class PartialUser private[AbstractUser](id: Option[Int],
+                                               personOid: Option[String],
+                                               email: String,
+                                               idpentityid: IDPEntityId,
+                                               uiLang:String,
+                                               partialUser: Boolean = true)
+    extends AbstractUser {
+      def fullName: String = email
   }
 
-  case class User private[AbstractUser](id: Option[Int], personOid: Option[String], email: String, firstName: Option[String], lastName: Option[String], birthDate: Option[Date],
-                                        personId: Option[String], idpentityid: IDPEntityId, gender: Option[String], nativeLanguage: Option[String], nationality: Option[String],
-                                        uiLang: String) extends AbstractUser {
-    def fullName = (firstName, lastName) match {
-      case (Some(firstName), Some(lastName)) => s"$firstName $lastName"
-      case _ => "<no name>"
+  case class User private[AbstractUser](id: Option[Int],
+                                        personOid: Option[String],
+                                        email: String,
+                                        firstName: Option[String],
+                                        lastName: Option[String],
+                                        birthDate: Option[Date],
+                                        personId: Option[String],
+                                        idpentityid: IDPEntityId,
+                                        gender: Option[String],
+                                        nativeLanguage: Option[String],
+                                        nationality: Option[String],
+                                        uiLang: String)
+    extends AbstractUser {
+      def fullName: String = (firstName, lastName) match {
+        case (Some(firstName), Some(lastName)) => s"$firstName $lastName"
+        case _ => "<no name>"
     }
   }
 
