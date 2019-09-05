@@ -18,7 +18,7 @@ object HakuperusteetBuild extends Build {
   val jettyVersion = "9.3.6.v20151106"
   val slickVersion = "3.1.0"
 
-  val artifactory = "https://artifactory.oph.ware.fi/artifactory/"
+  val artifactory = "https://artifactory.opintopolku.fi/artifactory/"
 
   lazy val buildversion = taskKey[Unit]("start buildversion.txt generator")
 
@@ -52,7 +52,7 @@ object HakuperusteetBuild extends Build {
       scalacOptions := Seq("-Xmax-classfile-name", "100"),
       resolvers += Resolver.mavenLocal,
       resolvers += "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases",
-      resolvers += "OPH snapshots" at "https://artifactory.oph.ware.fi/artifactory/oph-sade-snapshot-local",
+      resolvers += "OPH snapshots" at "https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local",
       resolvers += Classpaths.typesafeReleases,
       libraryDependencies ++= Seq(
         "com.netaporter" %% "scala-uri" % "0.4.11",
