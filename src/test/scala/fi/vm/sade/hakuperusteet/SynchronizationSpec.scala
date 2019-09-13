@@ -14,7 +14,7 @@ import org.http4s.Status
 import org.json4s.jackson.JsonMethods._
 import org.junit.runner.RunWith
 import org.mockito.{Mockito, Mock}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatra.test.scalatest.ScalatraSuite
@@ -46,7 +46,7 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
     Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Some(Hakumaksukausi.s2016))
     synchronization.publicCheckForId(sync.id)
-    Mockito.verify(hakuAppMock, Mockito.times(1)).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
+    Mockito.verify(hakuAppMock, Mockito.times(1)).updateHakemusWithPaymentState(org.mockito.ArgumentMatchers.eq(hakemusOid), any[PaymentState])
   }
 
   test("haku-app synchronization - conflicting hakumaksukausi") {
@@ -59,6 +59,6 @@ class SynchronizationSpec extends FunSuite with ScalatraSuite with ServletTestDe
     Mockito.when(hakuAppMock.updateHakemusWithPaymentState(anyString(), any[PaymentState])).thenReturn(http4s.Response(Status.Forbidden))
     Mockito.when(hakumaksukausiServiceMock.getHakumaksukausiForHakemus(hakemusOid)).thenReturn(Some(Hakumaksukausi.s2016))
     synchronization.publicCheckForId(sync.id)
-    Mockito.verify(hakuAppMock, Mockito.never()).updateHakemusWithPaymentState(org.mockito.Matchers.eq(hakemusOid), any[PaymentState])
+    Mockito.verify(hakuAppMock, Mockito.never()).updateHakemusWithPaymentState(org.mockito.ArgumentMatchers.eq(hakemusOid), any[PaymentState])
   }
 }
