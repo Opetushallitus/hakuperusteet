@@ -30,7 +30,7 @@ comment on column payment_event.created is 'Maksutapahtuman luonnin aikaleima';
 comment on column payment_event.timestamp is 'Maksutapahtuman aikaleima';
 comment on column payment_event.payment_status is 'Maksutapahtuman tila';
 comment on column payment_event.check_succeeded is 'Maksutapahtuman tarkistuksen tilatieto';
-comment on column payment_event.new_status is 'Uusi maksutapahtuman tila';
+comment on column payment_event.new_status is 'Maksutapahtuman tila';
 comment on column payment_event.old_status is 'Vanha maksutapahtuman tila';
 
 -- synchronization
