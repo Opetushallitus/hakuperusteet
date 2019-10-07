@@ -99,7 +99,9 @@ object HakuperusteetBuild extends Build {
           ExclusionRule(organization = "io.swagger")
         ),
         "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-        "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test",
+        "org.scalatra" %% "scalatra-scalatest" % ScalatraVersion % "test" excludeAll(
+          ExclusionRule(organization = "org.eclipse.jetty")
+          ),
         "org.typelevel" %% "scalaz-scalatest" % "0.2.2" % "test",
         "ru.yandex.qatools.embed" % "postgresql-embedded" % "1.10" % "test"
       ),
