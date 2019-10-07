@@ -1,5 +1,4 @@
 comment on database hakuperusteet is 'Tietokanta hakemuksen käsittelymaksutiedoille';
-comment on schema hakuperusteet.public is 'Tietokantaskeema hakemuksen käsittelymaksutiedoille';
 
 -- application_object
 comment on table application_object is 'Hakijan hakukohteen tiedot';
@@ -45,12 +44,13 @@ comment on column synchronization.updated is 'Rivin päivityksen aikaleima';
 comment on column synchronization.hakemus_oid is 'Hakemuksen OID';
 
 -- user
-comment on table user is 'Hakijan tiedot';
-comment on column user.id is 'Taulun rivin id-tunniste';
-comment on column user.henkilo_oid is 'Hakijan OID';
-comment on column user.email is 'Hakijan sähköpostiosoite';
-comment on column user.idpentityid is 'Tunnistustietojen tarjoajan id';
-comment on column user.uilang is 'Hakijan käyttöliittymän kieli';
+comment on table "user" is 'Hakijan tiedot';
+comment on column "user".id is 'Taulun rivin id-tunniste';
+comment on column "user".henkilo_oid is 'Hakijan OID';
+comment on column "user".email is 'Hakijan sähköpostiosoite';
+comment on column "user".idpentityid is 'Tunnistustietojen tarjoajan id';
+comment on column "user".uilang is 'Hakijan käyttöliittymän kieli';
+
 -- user_details
 comment on table user_details is 'Hakijan henkilötiedot';
 comment on column user_details.id is 'Taulun rivin id-tunniste';
