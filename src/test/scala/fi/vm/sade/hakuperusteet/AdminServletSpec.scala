@@ -1,8 +1,8 @@
 package fi.vm.sade.hakuperusteet
 
 import java.util.Date
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import fi.vm.sade.hakuperusteet
 import fi.vm.sade.hakuperusteet.admin.AdminServlet
 import fi.vm.sade.hakuperusteet.admin.auth.CasBasicAuthStrategy
@@ -14,8 +14,8 @@ import fi.vm.sade.hakuperusteet.tarjonta.Tarjonta
 import fi.vm.sade.hakuperusteet.validation.{ApplicationObjectValidator, UserValidator}
 import org.json4s.jackson.Serialization.{write, _}
 import org.junit.runner.RunWith
-import org.mockito.Matchers.any
-import org.mockito.{AdditionalMatchers, Matchers, Mockito}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.{AdditionalMatchers, ArgumentMatchers, Matchers, Mockito}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatra.test.scalatest.ScalatraSuite
@@ -113,13 +113,13 @@ class AdminServletSpec extends FunSuite with ScalatraSuite with ServletTestDepen
       val ao = dbSpy.run(dbSpy.findApplicationObjectByHakukohdeOid(user, aoCountryArgentina.hakukohdeOid))
       ao.get.educationCountry should equal(aoCountryArgentina.educationCountry)
       Mockito.verify(oppijanTunnistusMock).sendToken(
-        Matchers.eq[String](aoCountryArgentina.hakukohdeOid),
-        Matchers.eq[String](user.email),
-        Matchers.contains("Opintopolku - täydennyspyyntö"),
+        ArgumentMatchers.eq[String](aoCountryArgentina.hakukohdeOid),
+        ArgumentMatchers.eq[String](user.email),
+        ArgumentMatchers.contains("Opintopolku - täydennyspyyntö"),
         AdditionalMatchers.and(
-          Matchers.contains("{{verification-link}}"),
-          Matchers.contains("hakukohteen nimi")),
-        Matchers.eq[String](user.lang),
+          ArgumentMatchers.contains("{{verification-link}}"),
+          ArgumentMatchers.contains("hakukohteen nimi")),
+        ArgumentMatchers.eq[String](user.lang),
         any[Long])
     }
   }
