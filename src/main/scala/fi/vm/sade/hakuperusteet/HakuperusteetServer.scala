@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory
 
 class HakuperusteetServer {
   def portHttp = props.getInt("hakuperusteet.port.http")
-  def portHttps = Option(props.getInt("hakuperusteet.port.https")).find(_ != -1)
   def secureSessionCookie = true
 
   def runServer() {
@@ -21,10 +20,10 @@ class HakuperusteetServer {
     val password = props.getString("hakuperusteet.db.password")
     HakuperusteetDatabase(props)
     val context: WebAppContext = createContext
-    val server = JettyUtil.createServerWithContext(portHttp, portHttps, context, dbUrl, user, password, secureSessionCookie)
+    val server = JettyUtil.createServerWithContext(portHttp, context, dbUrl, user, password, secureSessionCookie)
     server.start()
     server.join()
-    logger.info(s"Using ports $portHttp and $portHttps")
+    logger.info(s"Using ports $portHttp")
   }
 
   def createContext = {
