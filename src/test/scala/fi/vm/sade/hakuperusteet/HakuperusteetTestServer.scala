@@ -37,11 +37,11 @@ object HakuperusteetTestServer {
     new Thread() {
       override def run() = {
         Thread.sleep(2500) // Jetty's JDBC Session creates its database tables automatically. This wait prevents race condition between the two servers
-        logger.info("Starting HakuperusteetAdminServer (http: " + adminServer.portHttp + " https: " + adminServer.portHttps + ")")
+        logger.info("Starting HakuperusteetAdminServer (http: " + adminServer.portHttp + ")")
         adminServer.runServer()
       }
     }.start()
-    logger.info("Starting HakuperusteetServer (http: " + server.portHttp + " https: " + server.portHttps + ")")
+    logger.info("Starting HakuperusteetServer (http: " + server.portHttp  + ")")
     server.runServer()
   }
 
