@@ -30,7 +30,7 @@
     "chai": "^3.0.0",
     "css-loader": "^0.15.6",
     "file-loader": "^0.8.4",
-    "jquery": "^2.1.4",
+    "jquery": "^3.5.0",
     "json-loader": "^0.5.2",
     "less": "^2.5.1",
     "less-loader": "^2.2.0",
