@@ -17,7 +17,7 @@
     "factor-bundle": "^2.5.0",
     "lodash": "^3.9.3",
     "query-string": "2.2.0",
-    "react": "^0.13.2",
+    "react": "^16.13.1",
     "seamless-immutable": "^2.4.2",
     "traverse": "0.6.6",
     "route-parser": "^0.0.4",
