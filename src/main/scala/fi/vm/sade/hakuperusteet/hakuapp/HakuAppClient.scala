@@ -13,6 +13,8 @@ import org.json4s.JsonAST.JValue
 import org.json4s.NoTypeHints
 import org.json4s.jackson.Serialization
 import org.json4s.Reader
+import scalaz.{-\/, \/, \/-}
+import scalaz.concurrent.Task
 
 object HakuAppClient {
   def init(c: Config) = {
@@ -28,7 +30,16 @@ class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasC
     Urls.urls.url("haku-app.updatePaymentStatus", hakemusOid)
   }
 
-  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = client.prepare(updateRequest(hakemusOid, status)).runFor(timeoutInMillis = timeout)
+  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = {
+    val tasks = client.fetchAs[Any](updateRequest(hakemusOid, status))(json4sOf[Any])
+    val response: \/[Throwable, Any] = tasks.unsafePerformSyncAttemptFor(1000l * 1l)
+    response match {
+      case -\/(exception) => {
+        logger.error("Error updating payment state of hakemus", exception)
+        throw exception
+      }
+    }
+  }
   def getApplicationSystemId(hakemusOid:String) = {
 
     implicit val formats = Serialization.formats(NoTypeHints)
@@ -41,10 +52,14 @@ class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasC
 
     implicit val applicationDecored = org.http4s.json4s.native.jsonOf[Application]
 
-    client.prepare(readRequest(hakemusOid)).flatMap{
-      case r if 200 == r.status.code => r.as[Application]
-    }.run match {
-      case a:Application => a.applicationSystemId
+    val tasks: Task[Application] = client.fetchAs(readRequest(hakemusOid))
+    val response: \/[Throwable, Application] = tasks.unsafePerformSyncAttemptFor(1000l * 1l)
+    response match {
+      case -\/(exception) => {
+        logger.error(s"Error fetching application: ${hakemusOid}", exception)
+        throw exception
+      }
+      case \/-(application) => application.applicationSystemId
     }
   }
 
