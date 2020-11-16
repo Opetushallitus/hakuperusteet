@@ -46,7 +46,7 @@ case class EmailData(email: EmailMessage, recipient: List[EmailRecipient])
 class EmailClient(client: Client) extends LazyLogging with CasClientUtils {
   implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-  def send(email: EmailData): Task[Response] = client.fetchAs(req(email))
+  def send(email: EmailData): Task[Response] = client.fetch(req(email))
 
   private def req(email: EmailData) = Request(
     method = Method.POST,
