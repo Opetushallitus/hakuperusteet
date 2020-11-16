@@ -31,7 +31,7 @@ class EmailSender(emailClient: EmailClient, c: Config) extends LazyLogging {
     val recipients = List(EmailRecipient(to))
     val data = EmailData(email, recipients)
     logger.info(s"Sending email ($subject) to $to")
-    Try { emailClient.send(data).run } match {
+    Try { emailClient.send(data).unsafePerformSync } match {
       case Success(r) if r.status.code == 200 =>
       case Success(r) => logger.error(s"Email sending to $to failed with statusCode ${r.status.code}, body ${EntityDecoder.decodeString(r).attemptRun}")
       case Failure(f) => logger.error(s"Email sending to $to throws", f)
@@ -46,7 +46,7 @@ case class EmailData(email: EmailMessage, recipient: List[EmailRecipient])
 class EmailClient(client: Client) extends LazyLogging with CasClientUtils {
   implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-  def send(email: EmailData): Task[Response] = client.fetch(req(email))
+  def send(email: EmailData): Task[Response] = (client.toHttpService =<< req(email)).map(_.orNotFound)
 
   private def req(email: EmailData) = Request(
     method = Method.POST,
