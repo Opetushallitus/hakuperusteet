@@ -49,7 +49,7 @@ class ONRClient(client: Client) extends LazyLogging with CasClientUtils{
         method = Method.POST,
         uri = urlToUri(Urls.urls.url("oppijanumerorekisteri.findorcreate"))
         ).withBody(dto)(json4sEncoderOf[HenkiloPerustietoDto])
-      client.fetch(postreq) {
+      (client.toHttpService =<< postreq).map(_.orNotFound).unsafePerformSync match {
         case Successful(findOrCreateResponse: Message) => // 200 = exists, 201 = created
           implicit val jsonFormats: Formats = formats
           val oid: \/[Throwable, String] = findOrCreateResponse.as[String](jsonOf[String](new Reader[String] {
