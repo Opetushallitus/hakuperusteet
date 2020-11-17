@@ -30,16 +30,9 @@ class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasC
     Urls.urls.url("haku-app.updatePaymentStatus", hakemusOid)
   }
 
-  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState) = {
-    val tasks = client.fetchAs[Any](updateRequest(hakemusOid, status))(json4sOf[Any])
-    val response: \/[Throwable, Any] = tasks.unsafePerformSyncAttemptFor(1000l * 1l)
-    response match {
-      case -\/(exception) => {
-        logger.error("Error updating payment state of hakemus", exception)
-        throw exception
-      }
-    }
-  }
+  def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState)
+  = (client.toHttpService =<< updateRequest(hakemusOid, status)).map(_.orNotFound).unsafePerformSyncFor(1000L)
+
   def getApplicationSystemId(hakemusOid:String) = {
 
     implicit val formats = Serialization.formats(NoTypeHints)
