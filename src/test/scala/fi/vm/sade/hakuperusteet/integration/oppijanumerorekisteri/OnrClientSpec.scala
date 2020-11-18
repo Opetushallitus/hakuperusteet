@@ -5,13 +5,12 @@ import java.util.Date
 import fi.vm.sade.hakuperusteet.DBSupport
 import fi.vm.sade.hakuperusteet.domain.{AbstractUser, Google, Henkilo, OppijaToken}
 import fi.vm.sade.hakuperusteet.integration.IDP
-import fi.vm.sade.hakuperusteet.util.CasClientUtils
+import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils}
 import org.http4s.client.{Client, DisposableResponse}
 import org.http4s.dsl._
 import org.http4s.{Uri, _}
 import org.json4s.Formats
 import org.scalatest.{FlatSpec, Matchers}
-
 import scalaz.concurrent.Task
 
 class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClientUtils{
@@ -96,7 +95,7 @@ class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClient
   it should "return an user with with a given oid" in {
 
     val nop: Task[Unit] = Task.now[Unit] {}
-    val mock = Client(
+    val mock = CallerIdMiddleware(Client(
       shutdown = nop,
       open = Service.lift {
         case req@GET -> Root / "oppijanumerorekisteri-service" / "henkilo" / "1.2.3.4" =>
@@ -106,7 +105,7 @@ class OnrClientSpec extends FlatSpec with Matchers with DBSupport with CasClient
         case _ =>
           NotFound().map(DisposableResponse(_, nop))
       }
-    )
+    ))
     val onrClient = new ONRClient(mock)
 
     val user = AbstractUser.user(None, Some("1.2.3.4"),"", Some(""), Some(""), Some(new Date()), None, OppijaToken, Some(""), Some(""), Some(""), "en")

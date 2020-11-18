@@ -33,9 +33,10 @@ object HttpUtil {
     val host = c.getString("hakuperusteet.cas.url")
     val username = c.getString("hakuperusteet.user")
     val password = c.getString("hakuperusteet.password")
-    val casClient = new CasClient(host, org.http4s.client.blaze.defaultClient)
+
+    val casClient = new CasClient(host, CallerIdMiddleware(org.http4s.client.blaze.defaultClient))
     val casParams = CasParams(service, username, password)
-    CasAuthenticatingClient(casClient, casParams, org.http4s.client.blaze.defaultClient, id)
+    CasAuthenticatingClient(casClient, casParams, CallerIdMiddleware(org.http4s.client.blaze.defaultClient), id)
   }
 
 }
