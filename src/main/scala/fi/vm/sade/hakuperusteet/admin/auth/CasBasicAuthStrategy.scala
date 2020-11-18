@@ -19,7 +19,7 @@ class CasBasicAuthStrategy(protected override val app: ScalatraBase, cfg: Config
   private def request = app.enrichRequest(app.request)
 
   val adminhost = cfg.getString("hakuperusteetadmin.url.base")
-  val casClient = new CasClient(cfg.getString("hakuperusteet.cas.url"), org.http4s.client.blaze.defaultClient, HttpUtil.id)
+  val casClient = new CasClient(cfg.getString("hakuperusteet.cas.url"), org.http4s.client.blaze.defaultClient)
   val userDetailsService = new KayttooikeusUserDetailsService
 
   def authenticate()(implicit request: HttpServletRequest, response: HttpServletResponse): Option[CasSession] = {

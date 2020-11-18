@@ -31,7 +31,7 @@ class HakuAppClient(timeout: Long, client: Client) extends LazyLogging with CasC
   }
 
   def updateHakemusWithPaymentState(hakemusOid: String, status: PaymentState)
-  = (client.toHttpService =<< updateRequest(hakemusOid, status)).map(_.orNotFound).unsafePerformSyncFor(1000L)
+  = client.prepare(updateRequest(hakemusOid, status)).runFor(timeoutInMillis = timeout)
 
   def getApplicationSystemId(hakemusOid:String) = {
 
