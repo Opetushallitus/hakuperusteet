@@ -10,7 +10,7 @@ hakuperusteetadmin.port.https={{palvelu_portti_https}}
 rsa.sign.key.hakuperusteet={{hakuperusteet_rsa_sign_key_file | default("/data00/oph/hakuperusteet/oph-configuration/rsaSignKey.der") }}
 rsa.sign.key.hakuperusteetadmin={{hakuperusteet_rsa_sign_key_file | default("/data00/oph/hakuperusteetadmin/oph-configuration/rsaSignKey.der") }}
 
-hakuperusteet.cas.url=https://{{host_cas}}
+hakuperusteet.cas.url=https://{{host_cas}}/cas
 hakuperusteet.user={{hakuperusteet_cas_user}}
 hakuperusteet.password={{hakuperusteet_cas_password}}
 
