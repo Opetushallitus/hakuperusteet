@@ -34,7 +34,7 @@ trait CasAuthenticationSupport extends ScentrySupport[CasSession] with BasicAuth
     scentry.register("CAS", app => new CasBasicAuthStrategy(app, cfg))
   }
 
-  val redirectUrl = cfg.getString("hakuperusteet.cas.url") + "/cas/login?service=" + URLEncoder.encode(cfg.getString("hakuperusteetadmin.url.base"), "UTF-8")
+  val redirectUrl = cfg.getString("hakuperusteet.cas.url") + "/login?service=" + URLEncoder.encode(cfg.getString("hakuperusteetadmin.url.base"), "UTF-8")
 
   def failUnlessAuthenticated() = if (!isAuthenticated) redirect(redirectUrl)
 }
