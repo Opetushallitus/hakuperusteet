@@ -43,6 +43,7 @@ package object hakuperusteet {
     { case idpEntityId: IDPEntityId => JString(idpEntityId.toString) })
   )
 
+  val formatsOppijanTunnistus = Serialization.formats(org.json4s.NoTypeHints) + DateSerializer + IDPEntityIdSerializer
   val formatsHenkilo = Serialization.formats(org.json4s.NoTypeHints) + DateSerializer + IDPEntityIdSerializer
 
   val formatsUI = new DefaultFormats {
