@@ -83,7 +83,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 
 object OppijanTunnistus {
   def init(c: Config) = {
-    Uri.fromString("/oppijant-tunnistus/auth/cas").fold(
+    Uri.fromString("/oppijan-tunnistus/auth/cas").fold(
       (e: ParseFailure) => throw new IllegalArgumentException(e),
       (service: Uri) =>
         OppijanTunnistus(HttpUtil.casClient(c, CasService(service)), c))
