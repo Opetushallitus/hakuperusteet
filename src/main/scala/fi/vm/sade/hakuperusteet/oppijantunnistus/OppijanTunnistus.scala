@@ -3,14 +3,15 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
+import fi.vm.sade.hakuperusteet.util.HttpUtil.id
 import org.http4s
 import org.http4s.{Method, ParseFailure, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.http4s.client.Client
-import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
-import fi.vm.sade.utils.cas.{CasService}
+import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils, HttpUtil}
+import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams, CasService, CasUser}
 import org.json4s.jackson.Serialization.write
 
 import scala.util.{Success, Try}
@@ -83,9 +84,19 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 
 object OppijanTunnistus {
   def init(c: Config) = {
+
     Uri.fromString("/oppijan-tunnistus/auth/cas").fold(
       (e: ParseFailure) => throw new IllegalArgumentException(e),
-      (service: Uri) =>
-        OppijanTunnistus(HttpUtil.casClient(c, CasService(service)), c))
+      (service: Uri) => {
+        val host = c.getString("hakuperusteet.cas.url")
+        val username = c.getString("hakuperusteet.user")
+        val password = c.getString("hakuperusteet.password")
+
+        val casClient = new RingCasClient(host, CallerIdMiddleware(org.http4s.client.blaze.defaultClient))
+        val casParams = CasParams(CasService(service), CasUser(username, password))
+
+        OppijanTunnistus(
+          RingCasAuthenticatingClient(casClient, casParams, CallerIdMiddleware(org.http4s.client.blaze.defaultClient), id), c)
+      })
   }
 }

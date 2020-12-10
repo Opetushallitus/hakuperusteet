@@ -30,15 +30,6 @@ object HttpUtil {
 
   def post(key: String, args: AnyRef*) = addHeaders(Request.Post(Urls.urls.url(key, args:_*)))
 
-  def casClient(c: Config, service: CasService): Client = {
-    val host = c.getString("hakuperusteet.cas.url")
-    val username = c.getString("hakuperusteet.user")
-    val password = c.getString("hakuperusteet.password")
-
-    val casClient = new CasClient(host, CallerIdMiddleware(org.http4s.client.blaze.defaultClient))
-    val casParams = CasParams(service, CasUser(username, password))
-    CasAuthenticatingClient(casClient, casParams, CallerIdMiddleware(org.http4s.client.blaze.defaultClient), id)
-  }
   def casClient(c: Config, service: String): Client = {
     val host = c.getString("hakuperusteet.cas.url")
     val username = c.getString("hakuperusteet.user")
