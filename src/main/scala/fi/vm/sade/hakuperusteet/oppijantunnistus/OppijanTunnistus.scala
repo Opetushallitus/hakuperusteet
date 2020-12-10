@@ -4,12 +4,13 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import org.http4s
-import org.http4s.{Method}
+import org.http4s.{Method, ParseFailure, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.http4s.client.Client
 import fi.vm.sade.hakuperusteet.util.{CasClientUtils, HttpUtil}
+import fi.vm.sade.utils.cas.{CasService}
 import org.json4s.jackson.Serialization.write
 
 import scala.util.{Success, Try}
@@ -81,5 +82,10 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 }
 
 object OppijanTunnistus {
-  def init(c: Config) = OppijanTunnistus(HttpUtil.casClient(c, "/oppijant-tunnistus/auth/cas"), c)
+  def init(c: Config) = {
+    Uri.fromString("/oppijant-tunnistus/auth/cas").fold(
+      (e: ParseFailure) => throw new IllegalArgumentException(e),
+      (service: Uri) =>
+        OppijanTunnistus(HttpUtil.casClient(c, CasService(service)), c))
+  }
 }

@@ -4,10 +4,11 @@ import java.nio.charset.StandardCharsets
 
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.Urls
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
+import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams, CasService, CasUser}
 import org.apache.http.HttpVersion
 import org.apache.http.client.fluent.Request
 import org.http4s.client.Client
+import org.http4s.dsl.{resolve, uri}
 
 object HttpUtil {
   val id = "1.2.246.562.10.00000000001.hakuperusteet"
@@ -29,6 +30,15 @@ object HttpUtil {
 
   def post(key: String, args: AnyRef*) = addHeaders(Request.Post(Urls.urls.url(key, args:_*)))
 
+  def casClient(c: Config, service: CasService): Client = {
+    val host = c.getString("hakuperusteet.cas.url")
+    val username = c.getString("hakuperusteet.user")
+    val password = c.getString("hakuperusteet.password")
+
+    val casClient = new CasClient(host, CallerIdMiddleware(org.http4s.client.blaze.defaultClient))
+    val casParams = CasParams(service, CasUser(username, password))
+    CasAuthenticatingClient(casClient, casParams, CallerIdMiddleware(org.http4s.client.blaze.defaultClient), id)
+  }
   def casClient(c: Config, service: String): Client = {
     val host = c.getString("hakuperusteet.cas.url")
     val username = c.getString("hakuperusteet.user")
