@@ -10,8 +10,8 @@ import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.http4s.client.Client
-import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils, HttpUtil}
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams, CasService, CasUser}
+import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils}
+import fi.vm.sade.utils.cas.{CasParams, CasService, CasUser}
 import org.json4s.jackson.Serialization.write
 
 import scala.util.{Success, Try}
@@ -49,6 +49,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
     val siteUrlBase = if (hakukohdeOid.length > 0) s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/" else s"${c.getString("host.url.base")}#/token/"
     val data: Map[String, String] = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
 
+    logger.error(s"Calling create token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
     callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"), write(compact(render(data))))
   }
 
@@ -61,12 +62,14 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
       ("expires" -> expires) ~
       ("template" -> template)
 
+    logger.error(s"Calling send token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
     Try(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"), write(compact(render(data)))))
   }
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
     logger.info(s"Validating token $token")
 
+    logger.error(s"Validating token with CAS URL: ${Urls.urls.url("oppijan-tunnistus.verify")}")
     val verificationWithCapitalCaseEmail =
       parse(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.verify", token), "")).extract[OppijanTunnistusVerification]
     val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))
