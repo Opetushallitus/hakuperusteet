@@ -70,16 +70,12 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 
   def createToken(email: String, hakukohdeOid: String, uiLang: String) = {
     val siteUrlBase = if (hakukohdeOid.length > 0) s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/" else s"${c.getString("host.url.base")}#/token/"
-    val data: Map[String, String] = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
-
-    logger.error(s"Calling create token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
     callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
       Some(Data(email=email, url = siteUrlBase, lang =uiLang)))
   }
 
   def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
     val callbackUrl = s"${c.getString("host.url.base")}#/token/"
-    logger.error(s"Calling send token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
     Try(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
       Some(Data(email = email, url=callbackUrl, lang=lang, subject=Some(subject), expires=Some(expires),template=Some(template))
     )))
@@ -87,8 +83,6 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
     logger.info(s"Validating token $token")
-
-    logger.error(s"Validating token with CAS URL: ${Urls.urls.url("oppijan-tunnistus.verify")}")
     val verificationWithCapitalCaseEmail =
       parse(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.verify", token), None)).extract[OppijanTunnistusVerification]
     val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))

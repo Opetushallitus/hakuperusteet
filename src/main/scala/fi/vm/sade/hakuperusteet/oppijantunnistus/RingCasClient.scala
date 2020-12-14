@@ -147,7 +147,6 @@ private object JSessionIdClient extends Logging {
   }
 
   private val jsessionDecoder = EntityDecoder.decodeBy[JSessionId](MediaRange.`*/*`) { (msg) =>
-    logger.error(s"Getting session header from headers: ${msg.headers.map(h => h.name.toString()).mkString(",")}")
     msg.headers.collectFirst {
       case `Set-Cookie`(`Set-Cookie`(cookie)) if cookie.name.toLowerCase() == "ring-session" => DecodeResult.success(cookie.content)
     }.getOrElse(DecodeResult.failure(InvalidMessageBodyFailure(s"Decoding ring-session failed: no cookie found for ring-session")))
