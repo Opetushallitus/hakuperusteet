@@ -37,7 +37,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
         uri = urlToUri(url))
         .withBody[String](body))
 
-    Try { req.run } match {
+    Try { req.unsafePerformSync } match {
       case Success(r) if r.status.code == 200 =>
         r.as[String].unsafePerformSync
       case Success(r) if r.status.code != 200 =>
