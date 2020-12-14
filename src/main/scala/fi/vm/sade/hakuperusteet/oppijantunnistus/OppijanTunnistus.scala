@@ -3,6 +3,7 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
+import fi.vm.sade.hakuperusteet.email.EmailData
 import fi.vm.sade.hakuperusteet.util.HttpUtil.id
 import org.http4s
 import org.http4s.{Header, Headers, Method, ParseFailure, Response, Uri}
@@ -31,14 +32,15 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
     }
   }
   private def callOppijanTunnistus(url: String, body: String): String = {
+    implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
+
     val req = client.prepare(
       http4s.Request(
         method = Method.POST,
-        uri = urlToUri(url),
-        headers=Headers(Header("Content-Type","application/json; utf-8")))
-        .withBody[String](body))
+        uri = urlToUri(url))
+        .withBody(body)(json4sEncoderOf[String]))
 
-    Try { req.unsafePerformSync } match {
+    Try { req.run } match {
       case Success(r) if r.status.code == 200 =>
         r.as[String].unsafePerformSync
       case Success(r) if r.status.code != 200 =>
