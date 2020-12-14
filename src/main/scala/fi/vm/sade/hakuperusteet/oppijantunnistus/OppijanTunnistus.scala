@@ -43,7 +43,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
   private def callOppijanTunnistus(url: String, body: Option[Data]): String = {
     implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-    var r: Task[Request] = body match {
+    val r: Task[Request] = body match {
       case Some(body) =>
         http4s.Request(
           method = Method.POST,
@@ -51,7 +51,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
       case None =>
         http4s.Request(
           method = Method.POST,
-          uri = urlToUri(url)).withBody(null)
+          uri = urlToUri(url)).withBody("")
     }
 
     val req = client.prepare(r)
