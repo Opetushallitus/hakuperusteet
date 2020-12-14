@@ -3,10 +3,10 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
-import fi.vm.sade.hakuperusteet.email.EmailData
+import fi.vm.sade.hakuperusteet.email.{EmailData, EmailMessage, EmailRecipient}
 import fi.vm.sade.hakuperusteet.util.HttpUtil.id
 import org.http4s
-import org.http4s.{Header, Headers, Method, ParseFailure, Response, Uri}
+import org.http4s.{Header, Headers, Method, ParseFailure, Request, Response, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
@@ -14,6 +14,7 @@ import org.http4s.client.Client
 import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils}
 import fi.vm.sade.utils.cas.{CasParams, CasService, CasUser}
 import org.json4s.jackson.Serialization.write
+import scalaz.concurrent.Task
 
 import scala.util.{Failure, Success, Try}
 
@@ -31,14 +32,29 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
       case _ => None
     }
   }
-  private def callOppijanTunnistus(url: String, body: String): String = {
+
+  trait OppijanTunnistusData
+
+  case class Data(email: String, url: String, lang: String,
+                  subject: Option[String] = None,
+                  expires: Option[Long] = None,
+                  template: Option[String] = None) extends OppijanTunnistusData
+
+  private def callOppijanTunnistus(url: String, body: Option[Data]): String = {
     implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
 
-    val req = client.prepare(
-      http4s.Request(
-        method = Method.POST,
-        uri = urlToUri(url))
-        .withBody(body)(json4sEncoderOf[String]))
+    var r: Task[Request] = body match {
+      case Some(body) =>
+        http4s.Request(
+          method = Method.POST,
+          uri = urlToUri(url)).withBody(body)(json4sEncoderOf[Data])
+      case None =>
+        http4s.Request(
+          method = Method.POST,
+          uri = urlToUri(url)).withBody(null)
+    }
+
+    val req = client.prepare(r)
 
     Try { req.run } match {
       case Success(r) if r.status.code == 200 =>
@@ -57,20 +73,16 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
     val data: Map[String, String] = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
 
     logger.error(s"Calling create token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
-    callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"), write(compact(render(data))))
+    callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
+      Some(Data(email=email, url = siteUrlBase, lang =uiLang)))
   }
 
   def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
     val callbackUrl = s"${c.getString("host.url.base")}#/token/"
-    val data = ("email" -> email) ~
-      ("url" -> callbackUrl) ~
-      ("lang" -> lang) ~
-      ("subject" -> subject) ~
-      ("expires" -> expires) ~
-      ("template" -> template)
-
     logger.error(s"Calling send token CAS URL: ${Urls.urls.url("oppijan-tunnistus.create")}")
-    Try(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"), write(compact(render(data)))))
+    Try(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
+      Some(Data(email = email, url=callbackUrl, lang=lang, subject=Some(subject), expires=Some(expires),template=Some(template))
+    )))
   }
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
@@ -78,7 +90,7 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
 
     logger.error(s"Validating token with CAS URL: ${Urls.urls.url("oppijan-tunnistus.verify")}")
     val verificationWithCapitalCaseEmail =
-      parse(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.verify", token), "")).extract[OppijanTunnistusVerification]
+      parse(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.verify", token), None)).extract[OppijanTunnistusVerification]
     val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))
     if(verification.valid) {
       verification.email match {
