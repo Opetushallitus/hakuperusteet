@@ -66,16 +66,17 @@ class RingCasAuthenticatingClient(casClient: RingCasClient, casParams: CasParams
   private def getCasSession(params: CasParams): Task[JSessionId] = {
     synchronized(sessions.get(params)) match {
       case None =>
-        logger.debug("No existing ring-session found for " + params + ", creating new")
+        logger.error("No existing ring-session found for " + params + ", creating new")
         refreshSession(params)
       case Some(session) =>
+        logger.error("Using existing ring-session for " + params + ": " + session)
         Task.now(session)
     }
   }
 
   private def refreshSession(params: CasParams): Task[JSessionId] = {
     casClient.fetchCasSession(params).map { session =>
-      logger.debug("Storing new ring-session for " + params)
+      logger.error("Storing new ring-session for " + params)
       synchronized(sessions.put(params, session))
       session
     }
