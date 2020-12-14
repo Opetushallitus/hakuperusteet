@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.util.HttpUtil.id
 import org.http4s
-import org.http4s.{Method, ParseFailure, Uri}
+import org.http4s.{Method, ParseFailure, Response, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
@@ -14,7 +14,7 @@ import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils}
 import fi.vm.sade.utils.cas.{CasParams, CasService, CasUser}
 import org.json4s.jackson.Serialization.write
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 case class OppijanTunnistusVerification(email: Option[String], valid: Boolean, metadata: Option[Map[String,String]], lang: Option[String])
 case class HakuAppMetadata(hakemusOid: String, personOid: String)
@@ -40,7 +40,11 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
     Try { req.run } match {
       case Success(r) if r.status.code == 200 =>
         r.as[String].unsafePerformSync
-      case _ =>
+      case Success(r) if r.status.code != 200 =>
+        logger.error(s"Failed to call url $url: Status ${r.status.code}")
+        throw new RuntimeException(s"Failed to call OppijanTunnistus: $url")
+      case Failure(e) =>
+        logger.error(s"Failed to call url $url: $e")
         throw new RuntimeException(s"Failed to call OppijanTunnistus: $url")
     }
   }
