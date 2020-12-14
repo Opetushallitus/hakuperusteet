@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fi.vm.sade.hakuperusteet.Urls
 import fi.vm.sade.hakuperusteet.util.HttpUtil.id
 import org.http4s
-import org.http4s.{Method, ParseFailure, Response, Uri}
+import org.http4s.{Header, Headers, Method, ParseFailure, Response, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
@@ -34,7 +34,8 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
     val req = client.prepare(
       http4s.Request(
         method = Method.POST,
-        uri = urlToUri(url))
+        uri = urlToUri(url),
+        headers=Headers(Header("Content-Type","application/json; utf-8")))
         .withBody[String](body))
 
     Try { req.unsafePerformSync } match {
