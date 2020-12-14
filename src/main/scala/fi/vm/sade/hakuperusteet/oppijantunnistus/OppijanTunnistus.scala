@@ -49,9 +49,9 @@ case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with 
           method = Method.POST,
           uri = urlToUri(url)).withBody(body)(json4sEncoderOf[Data])
       case None =>
-        http4s.Request(
-          method = Method.POST,
-          uri = urlToUri(url)).withBody("")
+        Task.now(http4s.Request(
+          method = Method.GET,
+          uri = urlToUri(url)))
     }
 
     val req = client.prepare(r)
