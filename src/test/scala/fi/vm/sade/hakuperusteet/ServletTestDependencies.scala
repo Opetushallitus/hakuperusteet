@@ -51,7 +51,7 @@ class DummyVerifier() extends GoogleVerifier("", "") {
   override def verify(token: String) = true
 }
 
-class DummyOppijanTunnistus(c: Config) extends OppijanTunnistus(c) {
+class DummyOppijanTunnistus(c: Config) extends OppijanTunnistus(null, c) {
   override def createToken(email: String, hakukohdeOid: String, uiLang: String) = "dummyLoginToken"
 }
 

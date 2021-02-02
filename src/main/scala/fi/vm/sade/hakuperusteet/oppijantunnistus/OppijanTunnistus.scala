@@ -2,19 +2,27 @@ package fi.vm.sade.hakuperusteet.oppijantunnistus
 
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
-import fi.vm.sade.hakuperusteet.util.HttpUtil
-import org.apache.http.entity.ContentType
+import fi.vm.sade.hakuperusteet.Urls
+import fi.vm.sade.hakuperusteet.email.{EmailData, EmailMessage, EmailRecipient}
+import fi.vm.sade.hakuperusteet.util.HttpUtil.id
+import org.http4s
+import org.http4s.{Header, Headers, Method, ParseFailure, Request, Response, Uri}
 import org.json4s.jackson.JsonMethods._
 import org.json4s._
 import org.json4s.JsonDSL._
+import org.http4s.client.Client
+import fi.vm.sade.hakuperusteet.util.{CallerIdMiddleware, CasClientUtils}
+import fi.vm.sade.utils.cas.{CasParams, CasService, CasUser}
+import org.json4s.jackson.Serialization.write
+import scalaz.concurrent.Task
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 
 case class OppijanTunnistusVerification(email: Option[String], valid: Boolean, metadata: Option[Map[String,String]], lang: Option[String])
 case class HakuAppMetadata(hakemusOid: String, personOid: String)
 
-case class OppijanTunnistus(c: Config) extends LazyLogging {
-  import fi.vm.sade.hakuperusteet._
+case class OppijanTunnistus(client: Client, c: Config) extends LazyLogging with CasClientUtils {
+  implicit val formats = fi.vm.sade.hakuperusteet.formatsOppijanTunnistus
 
   def parseHakuAppMetadata(metadata: Map[String, String]): Option[HakuAppMetadata] = {
     val hakemusOid = metadata.get("hakemusOid")
@@ -25,37 +33,58 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
     }
   }
 
+  trait OppijanTunnistusData
+
+  case class Data(email: String, url: String, lang: String,
+                  subject: Option[String] = None,
+                  expires: Option[Long] = None,
+                  template: Option[String] = None) extends OppijanTunnistusData
+
+  private def callOppijanTunnistus(url: String, body: Option[Data]): String = {
+    implicit val formats = fi.vm.sade.hakuperusteet.formatsHenkilo
+
+    val r: Task[Request] = body match {
+      case Some(body) =>
+        http4s.Request(
+          method = Method.POST,
+          uri = urlToUri(url)).withBody(body)(json4sEncoderOf[Data])
+      case None =>
+        Task.now(http4s.Request(
+          method = Method.GET,
+          uri = urlToUri(url)))
+    }
+
+    val req = client.prepare(r)
+
+    Try { req.run } match {
+      case Success(r) if r.status.code == 200 =>
+        r.as[String].unsafePerformSync
+      case Success(r) if r.status.code != 200 =>
+        logger.error(s"Failed to call url $url: Status ${r.status.code}")
+        throw new RuntimeException(s"Failed to call OppijanTunnistus: $url")
+      case Failure(e) =>
+        logger.error(s"Failed to call url $url: $e")
+        throw new RuntimeException(s"Failed to call OppijanTunnistus: $url")
+    }
+  }
+
   def createToken(email: String, hakukohdeOid: String, uiLang: String) = {
     val siteUrlBase = if (hakukohdeOid.length > 0) s"${c.getString("host.url.base")}ao/$hakukohdeOid/#/token/" else s"${c.getString("host.url.base")}#/token/"
-    val data = Map("email" -> email, "url" -> siteUrlBase, "lang" -> uiLang)
-
-    HttpUtil.post("oppijan-tunnistus.create")
-      .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
-      .execute().returnContent().asString()
+    callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
+      Some(Data(email=email, url = siteUrlBase, lang =uiLang)))
   }
 
   def sendToken(hakukohdeOid: String, email: String, subject: String, template: String, lang: String, expires: Long): Try[Unit] = {
     val callbackUrl = s"${c.getString("host.url.base")}#/token/"
-    val data = ("email" -> email) ~
-      ("url" -> callbackUrl) ~
-      ("lang" -> lang) ~
-      ("subject" -> subject) ~
-      ("expires" -> expires) ~
-      ("template" -> template)
-    Try(HttpUtil.post("oppijan-tunnistus.create")
-      .bodyString(compact(render(data)), ContentType.APPLICATION_JSON)
-      .execute().returnResponse()) match {
-      case Success(r) if 200 == r.getStatusLine.getStatusCode => Success(())
-      case Success(_) => Failure(new RuntimeException(s"Failed to send authentication email to $email"))
-      case Failure(e) => Failure(new RuntimeException(s"Failed to send authentication email to $email", e))
-    }
+    Try(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.create"),
+      Some(Data(email = email, url=callbackUrl, lang=lang, subject=Some(subject), expires=Some(expires),template=Some(template))
+    )))
   }
 
   def validateToken(token: String): Option[(String, String, Option[HakuAppMetadata])] = {
     logger.info(s"Validating token $token")
-
-    val verifyResult = HttpUtil.urlKeyToString("oppijan-tunnistus.verify", token)
-    val verificationWithCapitalCaseEmail = parse(verifyResult).extract[OppijanTunnistusVerification]
+    val verificationWithCapitalCaseEmail =
+      parse(callOppijanTunnistus(Urls.urls.url("oppijan-tunnistus.verify", token), None)).extract[OppijanTunnistusVerification]
     val verification = verificationWithCapitalCaseEmail.copy(email = verificationWithCapitalCaseEmail.email.map(_.toLowerCase))
     if(verification.valid) {
       verification.email match {
@@ -65,9 +94,24 @@ case class OppijanTunnistus(c: Config) extends LazyLogging {
     } else {
       None
     }
+
   }
 }
 
 object OppijanTunnistus {
-  def init(c: Config) = OppijanTunnistus(c)
+  def init(c: Config) = {
+    Uri.fromString("/oppijan-tunnistus/auth/cas").fold(
+      (e: ParseFailure) => throw new IllegalArgumentException(e),
+      (service: Uri) => {
+        val host = c.getString("hakuperusteet.cas.url")
+        val username = c.getString("hakuperusteet.user")
+        val password = c.getString("hakuperusteet.password")
+
+        val casClient = new RingCasClient(host, CallerIdMiddleware(org.http4s.client.blaze.defaultClient))
+        val casParams = CasParams(CasService(service), CasUser(username, password))
+
+        OppijanTunnistus(
+          RingCasAuthenticatingClient(casClient, casParams, CallerIdMiddleware(org.http4s.client.blaze.defaultClient), id), c)
+      })
+  }
 }

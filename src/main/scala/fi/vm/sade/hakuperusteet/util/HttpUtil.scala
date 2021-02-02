@@ -4,10 +4,11 @@ import java.nio.charset.StandardCharsets
 
 import com.typesafe.config.Config
 import fi.vm.sade.hakuperusteet.Urls
-import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams}
+import fi.vm.sade.utils.cas.{CasAuthenticatingClient, CasClient, CasParams, CasService, CasUser}
 import org.apache.http.HttpVersion
 import org.apache.http.client.fluent.Request
 import org.http4s.client.Client
+import org.http4s.dsl.{resolve, uri}
 
 object HttpUtil {
   val id = "1.2.246.562.10.00000000001.hakuperusteet"
